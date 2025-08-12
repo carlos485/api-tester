@@ -29,14 +29,20 @@ function App() {
       const fetchOptions: RequestInit = {
         method: request.method,
         headers: request.headers,
+        mode: 'cors', // Explicitly set CORS mode
       };
 
       if (request.method !== 'GET' && request.method !== 'HEAD' && request.body) {
         fetchOptions.body = request.body;
       }
 
+      console.log('Making request to:', request.url);
+      console.log('Request options:', fetchOptions);
+
       const response = await fetch(request.url, fetchOptions);
       const endTime = Date.now();
+      
+      console.log('Response received:', response.status, response.statusText);
       
       let data;
       const contentType = response.headers.get('content-type');
@@ -61,11 +67,37 @@ function App() {
       });
     } catch (error) {
       const endTime = Date.now();
+      console.error('Request failed:', error);
+      
+      let errorMessage = 'Unknown error';
+      let errorDetails = {};
+      
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        errorMessage = 'Connection failed - Server may be unreachable, CORS blocked, or SSL certificate invalid';
+        errorDetails = {
+          type: 'Connection Error',
+          possibleCauses: [
+            'Server is down or unreachable',
+            'CORS policy blocking the request',
+            'Invalid SSL certificate',
+            'Network/firewall blocking the connection'
+          ],
+          suggestion: 'Try the URL in your browser first to check if it\'s accessible'
+        };
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+        errorDetails = { originalError: error.name };
+      }
+
       setResponse({
         status: 0,
         statusText: 'Network Error',
         headers: {},
-        data: { error: error instanceof Error ? error.message : 'Unknown error' },
+        data: { 
+          error: errorMessage,
+          details: errorDetails,
+          timestamp: new Date().toISOString()
+        },
         time: endTime - startTime,
       });
     } finally {

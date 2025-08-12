@@ -1,4 +1,3 @@
-import { Card, Badge } from 'flowbite-react';
 
 interface ResponseViewerProps {
   response: ApiResponse | null;
@@ -31,37 +30,47 @@ const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, loading }) =>
 
   if (loading) {
     return (
-      <Card className="w-full">
+      <div className="w-full bg-white rounded-lg border border-gray-200 shadow-md p-6">
         <div className="flex items-center justify-center p-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Sending request...</p>
           </div>
         </div>
-      </Card>
+      </div>
     );
   }
 
   if (!response) {
     return (
-      <Card className="w-full">
+      <div className="w-full bg-white rounded-lg border border-gray-200 shadow-md p-6">
         <div className="text-center p-8 text-gray-500">
           <p>No response yet. Send a request to see the response here.</p>
         </div>
-      </Card>
+      </div>
     );
   }
 
+  const getStatusBadgeClasses = (status: number) => {
+    const baseClasses = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
+    if (status >= 200 && status < 300) return `${baseClasses} bg-green-100 text-green-800`;
+    if (status >= 300 && status < 400) return `${baseClasses} bg-yellow-100 text-yellow-800`;
+    if (status >= 400) return `${baseClasses} bg-red-100 text-red-800`;
+    return `${baseClasses} bg-gray-100 text-gray-800`;
+  };
+
   return (
-    <Card className="w-full">
+    <div className="w-full bg-white rounded-lg border border-gray-200 shadow-md p-6">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Response</h3>
           <div className="flex items-center gap-2">
-            <Badge color={getStatusColor(response.status)}>
+            <span className={getStatusBadgeClasses(response.status)}>
               {response.status} {response.statusText}
-            </Badge>
-            <Badge color="gray">{response.time}ms</Badge>
+            </span>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+              {response.time}ms
+            </span>
           </div>
         </div>
 
@@ -83,7 +92,7 @@ const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, loading }) =>
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 
