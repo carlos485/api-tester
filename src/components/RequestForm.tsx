@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Icon } from "@iconify/react";
 
 interface RequestFormProps {
   onSendRequest: (request: ApiRequest) => void;
@@ -25,13 +26,16 @@ const RequestForm: React.FC<RequestFormProps> = ({ onSendRequest }) => {
     try {
       parsedHeaders = JSON.parse(headers);
     } catch (error) {
-      console.error("Invalid JSON in headers");
+      console.error("Invalid JSON in headers", error);
       return;
     }
 
     let finalUrl = url;
-    if (useProxy && url.includes('solucionesdigitalfps.com')) {
-      finalUrl = url.replace('https://uat-loyalty-fps-bus-ms-loyalty-gamification-ws.solucionesdigitalfps.com', '/api');
+    if (useProxy && url.includes("solucionesdigitalfps.com")) {
+      finalUrl = url.replace(
+        "https://uat-loyalty-fps-bus-ms-loyalty-gamification-ws.solucionesdigitalfps.com",
+        "/api"
+      );
     }
 
     const request: ApiRequest = {
@@ -49,9 +53,6 @@ const RequestForm: React.FC<RequestFormProps> = ({ onSendRequest }) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex gap-4">
           <div className="flex-shrink-0">
-            <label htmlFor="method" className="block text-sm font-medium text-gray-700 mb-2">
-              Method
-            </label>
             <select
               id="method"
               value={method}
@@ -68,9 +69,6 @@ const RequestForm: React.FC<RequestFormProps> = ({ onSendRequest }) => {
             </select>
           </div>
           <div className="flex-grow">
-            <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-2">
-              URL
-            </label>
             <input
               id="url"
               type="url"
@@ -81,6 +79,11 @@ const RequestForm: React.FC<RequestFormProps> = ({ onSendRequest }) => {
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             />
           </div>
+          <div className="flex items-end">
+            <button className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded cursor-pointer transition-all duration-300">
+              <Icon icon="mynaui:send" />
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center">
@@ -88,7 +91,7 @@ const RequestForm: React.FC<RequestFormProps> = ({ onSendRequest }) => {
             id="use-proxy"
             type="checkbox"
             checked={useProxy}
-            onChange={(e) => setUseProxy(e.target.checked)}
+            onChange={e => setUseProxy(e.target.checked)}
             className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
           />
           <label htmlFor="use-proxy" className="ml-2 text-sm text-gray-700">
@@ -97,7 +100,10 @@ const RequestForm: React.FC<RequestFormProps> = ({ onSendRequest }) => {
         </div>
 
         <div>
-          <label htmlFor="headers" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="headers"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Headers (JSON)
           </label>
           <textarea
@@ -112,7 +118,10 @@ const RequestForm: React.FC<RequestFormProps> = ({ onSendRequest }) => {
 
         {(method === "POST" || method === "PUT" || method === "PATCH") && (
           <div>
-            <label htmlFor="body" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="body"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Body
             </label>
             <textarea

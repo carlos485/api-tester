@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import RequestForm from './components/RequestForm';
-import ResponseViewer from './components/ResponseViewer';
+import { useState } from "react";
+import { Icon } from "@iconify/react/dist/iconify.js";
+import RequestForm from "./components/RequestForm";
+import ResponseViewer from "./components/ResponseViewer";
+import QuickRequestBar from "./components/QuickRequestBar";
 
 interface ApiRequest {
   method: string;
@@ -29,25 +31,29 @@ function App() {
       const fetchOptions: RequestInit = {
         method: request.method,
         headers: request.headers,
-        mode: 'cors', // Explicitly set CORS mode
+        mode: "cors", // Explicitly set CORS mode
       };
 
-      if (request.method !== 'GET' && request.method !== 'HEAD' && request.body) {
+      if (
+        request.method !== "GET" &&
+        request.method !== "HEAD" &&
+        request.body
+      ) {
         fetchOptions.body = request.body;
       }
 
-      console.log('Making request to:', request.url);
-      console.log('Request options:', fetchOptions);
+      console.log("Making request to:", request.url);
+      console.log("Request options:", fetchOptions);
 
       const response = await fetch(request.url, fetchOptions);
       const endTime = Date.now();
-      
-      console.log('Response received:', response.status, response.statusText);
-      
+
+      console.log("Response received:", response.status, response.statusText);
+
       let data;
-      const contentType = response.headers.get('content-type');
-      
-      if (contentType && contentType.includes('application/json')) {
+      const contentType = response.headers.get("content-type");
+
+      if (contentType && contentType.includes("application/json")) {
         data = await response.json();
       } else {
         data = await response.text();
@@ -67,22 +73,27 @@ function App() {
       });
     } catch (error) {
       const endTime = Date.now();
-      console.error('Request failed:', error);
-      
-      let errorMessage = 'Unknown error';
+      console.error("Request failed:", error);
+
+      let errorMessage = "Unknown error";
       let errorDetails = {};
-      
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        errorMessage = 'Connection failed - Server may be unreachable, CORS blocked, or SSL certificate invalid';
+
+      if (
+        error instanceof TypeError &&
+        error.message.includes("Failed to fetch")
+      ) {
+        errorMessage =
+          "Connection failed - Server may be unreachable, CORS blocked, or SSL certificate invalid";
         errorDetails = {
-          type: 'Connection Error',
+          type: "Connection Error",
           possibleCauses: [
-            'Server is down or unreachable',
-            'CORS policy blocking the request',
-            'Invalid SSL certificate',
-            'Network/firewall blocking the connection'
+            "Server is down or unreachable",
+            "CORS policy blocking the request",
+            "Invalid SSL certificate",
+            "Network/firewall blocking the connection",
           ],
-          suggestion: 'Try the URL in your browser first to check if it\'s accessible'
+          suggestion:
+            "Try the URL in your browser first to check if it's accessible",
         };
       } else if (error instanceof Error) {
         errorMessage = error.message;
@@ -91,12 +102,12 @@ function App() {
 
       setResponse({
         status: 0,
-        statusText: 'Network Error',
+        statusText: "Network Error",
         headers: {},
-        data: { 
+        data: {
           error: errorMessage,
           details: errorDetails,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         time: endTime - startTime,
       });
@@ -105,20 +116,38 @@ function App() {
     }
   };
 
+  const handleQuickRequest = (quickRequest: {
+    method: string;
+    url: string;
+  }) => {
+    const request: ApiRequest = {
+      method: quickRequest.method,
+      url: quickRequest.url,
+      headers: {},
+      body: "",
+    };
+    handleSendRequest(request);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
+      <header className="border-b border-border bg-card">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-around">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">API Tester</h1>
-          <p className="text-gray-600">Test your REST APIs with ease</p>
+          <button className="cursor-pointer p-2 border-2 rounded-lg">
+            <Icon icon="material-symbols:settings" />
+          </button>
         </div>
-        
+      </header>
+      <div className="max-w-7xl my-6 mx-auto px-4 sm:px-6 lg:px-8">
+        <QuickRequestBar onSendRequest={handleQuickRequest} />
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
             <h2 className="text-xl font-semibold mb-4">Request</h2>
             <RequestForm onSendRequest={handleSendRequest} />
           </div>
-          
+
           <div>
             <h2 className="text-xl font-semibold mb-4">Response</h2>
             <ResponseViewer response={response} loading={loading} />
