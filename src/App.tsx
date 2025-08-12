@@ -1,0 +1,100 @@
+import { useState } from 'react';
+import RequestForm from './components/RequestForm';
+import ResponseViewer from './components/ResponseViewer';
+
+interface ApiRequest {
+  method: string;
+  url: string;
+  headers: Record<string, string>;
+  body: string;
+}
+
+interface ApiResponse {
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
+  data: any;
+  time: number;
+}
+
+function App() {
+  const [response, setResponse] = useState<ApiResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSendRequest = async (request: ApiRequest) => {
+    setLoading(true);
+    const startTime = Date.now();
+
+    try {
+      const fetchOptions: RequestInit = {
+        method: request.method,
+        headers: request.headers,
+      };
+
+      if (request.method !== 'GET' && request.method !== 'HEAD' && request.body) {
+        fetchOptions.body = request.body;
+      }
+
+      const response = await fetch(request.url, fetchOptions);
+      const endTime = Date.now();
+      
+      let data;
+      const contentType = response.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = await response.text();
+      }
+
+      const headers: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+
+      setResponse({
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+        data,
+        time: endTime - startTime,
+      });
+    } catch (error) {
+      const endTime = Date.now();
+      setResponse({
+        status: 0,
+        statusText: 'Network Error',
+        headers: {},
+        data: { error: error instanceof Error ? error.message : 'Unknown error' },
+        time: endTime - startTime,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">API Tester</h1>
+          <p className="text-gray-600">Test your REST APIs with ease</p>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Request</h2>
+            <RequestForm onSendRequest={handleSendRequest} />
+          </div>
+          
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Response</h2>
+            <ResponseViewer response={response} loading={loading} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
