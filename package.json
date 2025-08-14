@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@iconify/react": "^6.0.0",
+    "flowbite": "^3.1.2",
+    "flowbite-react": "^0.12.7",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
