@@ -19,11 +19,11 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
   return (
     <div className="mb-6">
       <form onSubmit={handleSubmit}>
-        <div className="flex rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm">
+        <div className="flex gap-2 items-center bg-white rounded-lg border border-gray-300 shadow-sm p-1">
           <select
             value={method}
-            onChange={(e) => setMethod(e.target.value)}
-            className="px-4 py-3 cursor-pointer bg-gray-50 border-r border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+            onChange={e => setMethod(e.target.value)}
+            className="px-4 py-3 cursor-pointer bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
           >
             <option value="GET">GET</option>
             <option value="POST">POST</option>
@@ -36,14 +36,14 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
           <input
             type="url"
             value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            onChange={e => setUrl(e.target.value)}
             placeholder="https://api.example.com/endpoint"
-            className="flex-1 px-4 py-3 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+            className="flex-1 px-4 py-3 text-gray-900 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
             required
           />
           <button
             type="submit"
-            className="px-4 py-3 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white focus:ring-4 focus:ring-blue-300 focus:outline-none transition-colors"
+            className="px-4 py-3 cursor-pointer border-2 rounded-lg border-gray-600 hover:bg-gray-600 hover:text-white text-gray-600 focus:ring-4 focus:ring-blue-300 focus:outline-none transition-colors"
           >
             <Icon icon="mynaui:send" className="w-5 h-5" />
           </button>

@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react/dist/iconify.js";
-import RequestForm from "./components/RequestForm";
-import ResponseViewer from "./components/ResponseViewer";
 import QuickRequestBar from "./components/QuickRequestBar";
 
 interface ApiRequest {
@@ -142,17 +140,7 @@ function App() {
       <div className="max-w-7xl my-6 mx-auto px-4 sm:px-6 lg:px-8">
         <QuickRequestBar onSendRequest={handleQuickRequest} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Request</h2>
-            <RequestForm onSendRequest={handleSendRequest} />
-          </div>
-
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Response</h2>
-            <ResponseViewer response={response} loading={loading} />
-          </div>
-        </div>
+        {/* Request and Response components will be redesigned here */}
       </div>
     </div>
   );
