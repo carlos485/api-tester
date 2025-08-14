@@ -21,8 +21,9 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2 items-center bg-white rounded-lg border border-gray-300 shadow-sm p-1">
           <select
-            id="countries"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            value={method}
+            onChange={e => setMethod(e.target.value)}
+            className="transition-all bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
           >
             <option value="GET" selected>
               GET
@@ -34,32 +35,27 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
             <option value="HEAD">HEAD</option>
             <option value="OPTIONS">OPTIONS</option>
           </select>
-          <select
-            value={method}
-            onChange={e => setMethod(e.target.value)}
-            className="px-4 py-3 cursor-pointer bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
-          >
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-            <option value="DELETE">DELETE</option>
-            <option value="PATCH">PATCH</option>
-            <option value="HEAD">HEAD</option>
-            <option value="OPTIONS">OPTIONS</option>
-          </select>
-          <input
+          {/* <input
             type="url"
             value={url}
             onChange={e => setUrl(e.target.value)}
             placeholder="https://api.example.com/endpoint"
             className="flex-1 px-4 py-3 text-gray-900 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
             required
+          /> */}
+          <input
+            type="url"
+            value={url}
+            onChange={e => setUrl(e.target.value)}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+            placeholder="Enter URL"
+            required
           />
           <button
             type="submit"
-            className="px-4 py-3 cursor-pointer border-2 rounded-lg border-gray-600 hover:bg-gray-600 hover:text-white text-gray-600 focus:ring-4 focus:ring-blue-300 focus:outline-none transition-colors"
+            className="cursor-pointer mt-2 transition-all duration-300 text-gray-500 hover:text-white border border-gray-500 hover:bg-gray-500 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
           >
-            <Icon icon="mynaui:send" className="w-5 h-5" />
+            <Icon icon="mynaui:send" className="h-4.5 w-4.5" />
           </button>
         </div>
       </form>
