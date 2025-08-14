@@ -53,7 +53,7 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
           />
           <button
             type="submit"
-            className="cursor-pointer mt-2 transition-all duration-300 text-gray-500 hover:text-white border border-gray-500 hover:bg-gray-500 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+            className="cursor-pointer mt-2 transition-all duration-300 text-white border border-gray-500 bg-gray-500 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
           >
             <Icon icon="mynaui:send" className="h-4.5 w-4.5" />
           </button>
