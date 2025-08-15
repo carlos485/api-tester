@@ -2,7 +2,7 @@ interface ApiResponse {
   status: number;
   statusText: string;
   headers: Record<string, string>;
-  data: any;
+  data: unknown;
   time: number;
 }
 
@@ -59,7 +59,7 @@ const ResponseViewer: React.FC<ResponseViewerProps> = ({ response, loading }) =>
                 <pre className="text-sm text-gray-600 font-mono whitespace-pre-wrap">
                   {typeof response.data === 'object' 
                     ? JSON.stringify(response.data, null, 2)
-                    : response.data
+                    : String(response.data)
                   }
                 </pre>
               </div>

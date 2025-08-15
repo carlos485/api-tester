@@ -1,5 +1,12 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
+import EnvironmentSelector from "./EnvironmentSelector";
+
+interface Environment {
+  id: string;
+  name: string;
+  baseUrl: string;
+}
 
 interface QuickRequestBarProps {
   onSendRequest: (request: { method: string; url: string }) => void;
@@ -8,11 +15,19 @@ interface QuickRequestBarProps {
 const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
   const [method, setMethod] = useState("GET");
   const [url, setUrl] = useState("");
+  const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (url.trim()) {
-      onSendRequest({ method, url: url.trim() });
+      let finalUrl = url.trim();
+      
+      // If environment is selected and URL is relative, prepend base URL
+      if (selectedEnvironment && !finalUrl.startsWith('http')) {
+        finalUrl = selectedEnvironment.baseUrl.replace(/\/$/, '') + '/' + finalUrl.replace(/^\//, '');
+      }
+      
+      onSendRequest({ method, url: finalUrl });
     }
   };
 
@@ -20,6 +35,10 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
     <div className="mb-6">
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2 items-center bg-white rounded-lg border border-gray-300 shadow-sm p-1">
+          <EnvironmentSelector
+            selectedEnvironment={selectedEnvironment}
+            onEnvironmentChange={setSelectedEnvironment}
+          />
           <select
             value={method}
             onChange={e => setMethod(e.target.value)}
@@ -44,11 +63,11 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
             required
           /> */}
           <input
-            type="url"
+            type="text"
             value={url}
             onChange={e => setUrl(e.target.value)}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-            placeholder="Enter URL"
+            placeholder={selectedEnvironment ? "/api/endpoint or full URL" : "https://api.example.com/endpoint"}
             required
           />
           <button

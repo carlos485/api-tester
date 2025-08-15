@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface RequestTabsProps {
   // Props will be added when needed
 }
