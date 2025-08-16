@@ -1,18 +1,14 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import EnvironmentSelector from "./EnvironmentSelector";
-
-interface Environment {
-  id: string;
-  name: string;
-  baseUrl: string;
-}
+import type { Environment } from "../types/project";
 
 interface QuickRequestBarProps {
   onSendRequest: (request: { method: string; url: string }) => void;
+  environments?: Environment[];
 }
 
-const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
+const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest, environments = [] }) => {
   const [method, setMethod] = useState("GET");
   const [url, setUrl] = useState("");
   const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
@@ -38,6 +34,7 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
           <EnvironmentSelector
             selectedEnvironment={selectedEnvironment}
             onEnvironmentChange={setSelectedEnvironment}
+            environments={environments}
           />
           <select
             value={method}

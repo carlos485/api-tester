@@ -1,15 +1,11 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
-
-interface Environment {
-  id: string;
-  name: string;
-  baseUrl: string;
-}
+import type { Environment } from "../types/project";
 
 interface EnvironmentSelectorProps {
   selectedEnvironment: Environment | null;
   onEnvironmentChange: (environment: Environment | null) => void;
+  environments?: Environment[];
 }
 
 const defaultEnvironments: Environment[] = [
@@ -21,8 +17,11 @@ const defaultEnvironments: Environment[] = [
 const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
   selectedEnvironment,
   onEnvironmentChange,
+  environments: projectEnvironments = [],
 }) => {
-  const [environments, setEnvironments] = useState<Environment[]>(defaultEnvironments);
+  const [environments, setEnvironments] = useState<Environment[]>(
+    projectEnvironments.length > 0 ? projectEnvironments : defaultEnvironments
+  );
   const [showManager, setShowManager] = useState(false);
   const [newEnv, setNewEnv] = useState({ name: "", baseUrl: "" });
 

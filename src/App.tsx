@@ -1,152 +1,83 @@
 import { useState } from "react";
-import { Icon } from "@iconify/react/dist/iconify.js";
-import QuickRequestBar from "./components/QuickRequestBar";
-import RequestTabs from "./components/RequestTabs";
-import ResponseViewer from "./components/ResponseViewer";
+import type { Project } from "./types/project";
+import ProjectsHome from "./components/ProjectsHome";
+import ProjectView from "./components/ProjectView";
 
-interface ApiRequest {
-  method: string;
-  url: string;
-  headers: Record<string, string>;
-  body: string;
-}
-
-interface ApiResponse {
-  status: number;
-  statusText: string;
-  headers: Record<string, string>;
-  data: unknown;
-  time: number;
-}
+// Sample projects data - in a real app this would come from a backend or local storage
+const initialProjects: Project[] = [
+  {
+    id: "1",
+    name: "E-commerce API",
+    description: "Testing API endpoints for the online store",
+    icon: "material-symbols:shopping-cart",
+    color: "bg-blue-100",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    environments: [
+      { id: "dev", name: "Development", baseUrl: "http://localhost:3000" },
+      { id: "prod", name: "Production", baseUrl: "https://api.mystore.com" },
+    ],
+  },
+  {
+    id: "2",
+    name: "User Management",
+    description: "User authentication and profile management",
+    icon: "material-symbols:person",
+    color: "bg-green-100",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    environments: [
+      { id: "dev", name: "Development", baseUrl: "http://localhost:8080" },
+      { id: "staging", name: "Staging", baseUrl: "https://staging-auth.example.com" },
+    ],
+  },
+];
 
 function App() {
-  const [response, setResponse] = useState<ApiResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  const handleSendRequest = async (request: ApiRequest) => {
-    setLoading(true);
-    const startTime = Date.now();
+  const handleProjectSelect = (project: Project) => {
+    setSelectedProject(project);
+  };
 
-    try {
-      const fetchOptions: RequestInit = {
-        method: request.method,
-        headers: request.headers,
-        mode: "cors", // Explicitly set CORS mode
-      };
+  const handleBackToHome = () => {
+    setSelectedProject(null);
+  };
 
-      if (
-        request.method !== "GET" &&
-        request.method !== "HEAD" &&
-        request.body
-      ) {
-        fetchOptions.body = request.body;
-      }
+  const handleProjectCreate = (projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newProject: Project = {
+      ...projectData,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setProjects([...projects, newProject]);
+  };
 
-      console.log("Making request to:", request.url);
-      console.log("Request options:", fetchOptions);
-
-      const response = await fetch(request.url, fetchOptions);
-      const endTime = Date.now();
-
-      console.log("Response received:", response.status, response.statusText);
-
-      let data;
-      const contentType = response.headers.get("content-type");
-
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        data = await response.text();
-      }
-
-      const headers: Record<string, string> = {};
-      response.headers.forEach((value, key) => {
-        headers[key] = value;
-      });
-
-      setResponse({
-        status: response.status,
-        statusText: response.statusText,
-        headers,
-        data,
-        time: endTime - startTime,
-      });
-    } catch (error) {
-      const endTime = Date.now();
-      console.error("Request failed:", error);
-
-      let errorMessage = "Unknown error";
-      let errorDetails = {};
-
-      if (
-        error instanceof TypeError &&
-        error.message.includes("Failed to fetch")
-      ) {
-        errorMessage =
-          "Connection failed - Server may be unreachable, CORS blocked, or SSL certificate invalid";
-        errorDetails = {
-          type: "Connection Error",
-          possibleCauses: [
-            "Server is down or unreachable",
-            "CORS policy blocking the request",
-            "Invalid SSL certificate",
-            "Network/firewall blocking the connection",
-          ],
-          suggestion:
-            "Try the URL in your browser first to check if it's accessible",
-        };
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-        errorDetails = { originalError: error.name };
-      }
-
-      setResponse({
-        status: 0,
-        statusText: "Network Error",
-        headers: {},
-        data: {
-          error: errorMessage,
-          details: errorDetails,
-          timestamp: new Date().toISOString(),
-        },
-        time: endTime - startTime,
-      });
-    } finally {
-      setLoading(false);
+  const handleProjectDelete = (projectId: string) => {
+    setProjects(projects.filter(p => p.id !== projectId));
+    if (selectedProject?.id === projectId) {
+      setSelectedProject(null);
     }
   };
 
-  const handleQuickRequest = (quickRequest: {
-    method: string;
-    url: string;
-  }) => {
-    const request: ApiRequest = {
-      method: quickRequest.method,
-      url: quickRequest.url,
-      headers: {},
-      body: "",
-    };
-    handleSendRequest(request);
-  };
+  if (selectedProject) {
+    return (
+      <ProjectView
+        project={selectedProject}
+        onBackToHome={handleBackToHome}
+      />
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-around">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">API Tester</h1>
-          <button className="cursor-pointer p-2 border-2 rounded-lg">
-            <Icon icon="material-symbols:settings" />
-          </button>
-        </div>
-      </header>
-      <div className="max-w-7xl my-6 mx-auto px-4 sm:px-6 lg:px-8">
-        <QuickRequestBar onSendRequest={handleQuickRequest} />
-        <RequestTabs />
-        <div className="mt-6">
-          <ResponseViewer response={response} loading={loading} />
-        </div>
-      </div>
-    </div>
+    <ProjectsHome
+      projects={projects}
+      onProjectSelect={handleProjectSelect}
+      onProjectCreate={handleProjectCreate}
+      onProjectDelete={handleProjectDelete}
+    />
   );
 }
 
