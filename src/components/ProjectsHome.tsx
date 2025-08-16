@@ -49,6 +49,7 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
   onProjectDelete,
 }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [newProject, setNewProject] = useState<NewProjectForm>({
     name: "",
     description: "",
@@ -78,8 +79,16 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
         icon: "material-symbols:api",
         color: "bg-blue-100",
       });
-      setShowCreateModal(false);
+      handleCloseModal();
     }
+  };
+
+  const handleCloseModal = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setShowCreateModal(false);
+      setIsClosing(false);
+    }, 300); // Duration matches CSS animation
   };
 
   return (
@@ -145,13 +154,19 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
 
       {/* Create Project Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4">Create New Project</h2>
+        <div 
+          className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 modal-overlay ${isClosing ? 'closing' : ''}`}
+          onClick={handleCloseModal}
+        >
+          <div 
+            className={`bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md modal-content ${isClosing ? 'closing' : ''}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-semibold mb-4 dark:text-white">Create New Project</h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Project Name *
                 </label>
                 <input
@@ -160,13 +175,13 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
                   onChange={e =>
                     setNewProject({ ...newProject, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-gray-500 focus:border-gray-500"
                   placeholder="My API Project"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Description
                 </label>
                 <textarea
@@ -177,14 +192,14 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
                       description: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-gray-500 focus:border-gray-500"
                   placeholder="Optional project description"
                   rows={3}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Icon
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -205,7 +220,7 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Color
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -234,7 +249,7 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
                 Create Project
               </Button>
               <Button
-                onClick={() => setShowCreateModal(false)}
+                onClick={handleCloseModal}
                 variant="secondary"
                 className="flex-1"
               >
