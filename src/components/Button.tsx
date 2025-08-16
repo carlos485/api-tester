@@ -23,13 +23,18 @@ const Button: React.FC<ButtonProps> = ({
   type = "button",
   className = "",
 }) => {
-  const baseClasses = "inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
-  
+  const baseClasses =
+    "transition-colors duration-300 inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
+
   const variantClasses = {
-    primary: "bg-gray-500 hover:bg-gray-800 text-white focus:ring-gray-500 disabled:bg-gray-300",
-    secondary: "bg-gray-200 hover:bg-gray-300 text-gray-700 focus:ring-gray-300 disabled:bg-gray-100 disabled:text-gray-400",
-    danger: "bg-red-500 hover:bg-red-600 text-white focus:ring-red-500 disabled:bg-red-300",
-    ghost: "bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-gray-300 disabled:text-gray-400",
+    primary:
+      "bg-[#3b434b] hover:bg-[#4e5964]/90 text-white focus:ring-[#24292F]/50 dark:hover:bg-[#5d6976]/90 dark:focus:ring-[#050708]/30",
+    secondary:
+      "bg-gray-200 hover:bg-gray-300 text-gray-700 focus:ring-gray-300 disabled:bg-gray-100 disabled:text-gray-400",
+    danger:
+      "bg-red-500 hover:bg-red-600 text-white focus:ring-red-500 disabled:bg-red-300",
+    ghost:
+      "bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-gray-300 disabled:text-gray-400",
   };
 
   const sizeClasses = {
@@ -40,7 +45,7 @@ const Button: React.FC<ButtonProps> = ({
 
   const iconSize = {
     sm: "h-4 w-4",
-    md: "h-5 w-5", 
+    md: "h-5 w-5",
     lg: "h-6 w-6",
   };
 
@@ -50,11 +55,11 @@ const Button: React.FC<ButtonProps> = ({
     ${sizeClasses[size]}
     ${disabled ? "cursor-not-allowed" : "cursor-pointer"}
     ${className}
-  `.trim().replace(/\s+/g, ' ');
+  `
+    .trim()
+    .replace(/\s+/g, " ");
 
-  const iconElement = icon && (
-    <Icon icon={icon} className={iconSize[size]} />
-  );
+  const iconElement = icon && <Icon icon={icon} className={iconSize[size]} />;
 
   return (
     <button
