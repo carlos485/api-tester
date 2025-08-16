@@ -2,11 +2,14 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import type { Project } from "../types/project";
 import ProjectCard from "./ProjectCard";
+import Button from "./Button";
 
 interface ProjectsHomeProps {
   projects: Project[];
   onProjectSelect: (project: Project) => void;
-  onProjectCreate: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onProjectCreate: (
+    project: Omit<Project, "id" | "createdAt" | "updatedAt">
+  ) => void;
   onProjectDelete: (projectId: string) => void;
 }
 
@@ -30,7 +33,7 @@ const availableIcons = [
 
 const availableColors = [
   "bg-blue-100",
-  "bg-green-100", 
+  "bg-green-100",
   "bg-purple-100",
   "bg-yellow-100",
   "bg-pink-100",
@@ -65,10 +68,10 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
             id: "default",
             name: "Development",
             baseUrl: "http://localhost:3000",
-          }
+          },
         ],
       });
-      
+
       setNewProject({
         name: "",
         description: "",
@@ -82,20 +85,24 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-white border-b border-gray-200 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">API Tester</h1>
-              <p className="text-gray-600 mt-1">Manage your API testing projects</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                API Tester
+              </h1>
+              <p className="text-gray-600 mt-1 dark:text-gray-400">
+                Manage your API testing projects
+              </p>
             </div>
-            <button
+            <Button
               onClick={() => setShowCreateModal(true)}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              icon="material-symbols:add"
+              variant="primary"
             >
-              <Icon icon="material-symbols:add" className="h-5 w-5" />
               New Project
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -104,19 +111,27 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {projects.length === 0 ? (
           <div className="text-center py-12">
-            <Icon icon="material-symbols:folder-open" className="h-24 w-24 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No projects yet</h3>
-            <p className="text-gray-600 mb-6">Create your first project to start testing APIs</p>
-            <button
+            <Icon
+              icon="material-symbols:folder-open"
+              className="h-24 w-24 text-gray-400 mx-auto mb-4"
+            />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No projects yet
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Create your first project to start testing APIs
+            </p>
+            <Button
               onClick={() => setShowCreateModal(true)}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors"
+              variant="primary"
+              size="lg"
             >
               Create Project
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {projects.map((project) => (
+            {projects.map(project => (
               <ProjectCard
                 key={project.id}
                 project={project}
@@ -133,7 +148,7 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">Create New Project</h2>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -142,7 +157,9 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
                 <input
                   type="text"
                   value={newProject.name}
-                  onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+                  onChange={e =>
+                    setNewProject({ ...newProject, name: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500"
                   placeholder="My API Project"
                 />
@@ -154,7 +171,12 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
                 </label>
                 <textarea
                   value={newProject.description}
-                  onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                  onChange={e =>
+                    setNewProject({
+                      ...newProject,
+                      description: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-gray-500 focus:border-gray-500"
                   placeholder="Optional project description"
                   rows={3}
@@ -166,7 +188,7 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
                   Icon
                 </label>
                 <div className="grid grid-cols-4 gap-2">
-                  {availableIcons.map((icon) => (
+                  {availableIcons.map(icon => (
                     <button
                       key={icon}
                       onClick={() => setNewProject({ ...newProject, icon })}
@@ -187,7 +209,7 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
                   Color
                 </label>
                 <div className="grid grid-cols-4 gap-2">
-                  {availableColors.map((color) => (
+                  {availableColors.map(color => (
                     <button
                       key={color}
                       onClick={() => setNewProject({ ...newProject, color })}
@@ -203,19 +225,21 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button
+              <Button
                 onClick={handleCreateProject}
                 disabled={!newProject.name.trim()}
-                className="flex-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-300 text-white py-2 rounded-lg transition-colors"
+                variant="primary"
+                className="flex-1"
               >
                 Create Project
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setShowCreateModal(false)}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg transition-colors"
+                variant="secondary"
+                className="flex-1"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         </div>
