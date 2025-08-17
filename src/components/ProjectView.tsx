@@ -135,7 +135,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
                 <Icon icon="material-symbols:arrow-back" className="h-5 w-5" />
               </button>
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${project.color || 'bg-gray-100'}`}>
+                <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
                   <Icon icon={project.icon} className="h-6 w-6 text-gray-700" />
                 </div>
                 <div>

@@ -7,7 +7,7 @@ import {
   getDocs,
   query,
   where,
-  orderBy,
+  // orderBy, // Comentado temporalmente
   onSnapshot,
   serverTimestamp,
   Timestamp,
@@ -24,16 +24,18 @@ interface FirestoreProject extends Omit<Project, 'id' | 'createdAt' | 'updatedAt
 }
 
 // Conversión entre Project y FirestoreProject
-const convertFromFirestore = (doc: { id: string; data: () => Record<string, unknown> }): Project => ({
-  id: doc.id,
-  name: doc.data().name,
-  description: doc.data().description,
-  icon: doc.data().icon,
-  color: doc.data().color,
-  environments: doc.data().environments || [],
-  createdAt: doc.data().createdAt?.toDate() || new Date(),
-  updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-});
+const convertFromFirestore = (doc: { id: string; data: () => Record<string, unknown> }): Project => {
+  const data = doc.data();
+  return {
+    id: doc.id,
+    name: data.name as string,
+    description: data.description as string | undefined,
+    icon: data.icon as string,
+    environments: (data.environments as Project['environments']) || [],
+    createdAt: (data.createdAt as Timestamp)?.toDate() || new Date(),
+    updatedAt: (data.updatedAt as Timestamp)?.toDate() || new Date(),
+  };
+};
 
 const convertToFirestore = (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>, userId: string): Omit<FirestoreProject, 'id'> => ({
   ...project,

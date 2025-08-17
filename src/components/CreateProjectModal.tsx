@@ -16,7 +16,6 @@ interface NewProjectForm {
   name: string;
   description: string;
   icon: string;
-  color: string;
 }
 
 const availableIcons = [
@@ -41,16 +40,6 @@ const availableIcons = [
   "mdi:cloud",
 ];
 
-const availableColors = [
-  "bg-blue-100",
-  "bg-green-100",
-  "bg-purple-100",
-  "bg-yellow-100",
-  "bg-pink-100",
-  "bg-indigo-100",
-  "bg-red-100",
-  "bg-orange-100",
-];
 
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   isOpen,
@@ -61,7 +50,6 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     name: "",
     description: "",
     icon: "material-symbols:api",
-    color: "bg-blue-100",
   });
 
   const handleCreateProject = () => {
@@ -70,7 +58,6 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         name: newProject.name.trim(),
         description: newProject.description.trim(),
         icon: newProject.icon,
-        color: newProject.color,
         environments: [
           {
             id: "default",
@@ -85,7 +72,6 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         name: "",
         description: "",
         icon: "material-symbols:api",
-        color: "bg-blue-100",
       });
 
       onClose();
@@ -98,7 +84,6 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       name: "",
       description: "",
       icon: "material-symbols:api",
-      color: "bg-blue-100",
     });
     onClose();
   };
@@ -166,24 +151,6 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Color
-          </label>
-          <div className="grid grid-cols-4 gap-2">
-            {availableColors.map(color => (
-              <button
-                key={color}
-                onClick={() => setNewProject({ ...newProject, color })}
-                className={`h-10 rounded-lg border-2 transition-colors ${color} ${
-                  newProject.color === color
-                    ? "border-gray-500"
-                    : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
       </div>
 
       <div className="flex gap-3 mt-6">

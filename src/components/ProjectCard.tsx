@@ -12,7 +12,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onProjectSelect, 
   onProjectDelete 
 }) => {
-  const cardColor = project.color || "bg-gray-100";
+  const cardColor = "bg-gray-100 dark:bg-gray-800";
   
   const handleCardClick = () => {
     onProjectSelect(project);

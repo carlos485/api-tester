@@ -3,7 +3,6 @@ export interface Project {
   name: string;
   description?: string;
   icon: string; // Icon identifier from iconify
-  color?: string; // Background color for the card
   createdAt: Date;
   updatedAt: Date;
   environments: Environment[];
