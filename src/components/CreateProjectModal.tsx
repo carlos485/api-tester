@@ -80,20 +80,20 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     }
   };
 
-  const handleClose = () => {
-    // Reset form when closing
+  const handleClosing = () => {
+    // Reset form when inicia la animación de cierre
     setNewProject({
       name: "",
       description: "",
       icon: "material-symbols:api",
     });
-    onClose();
   };
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose}
+      onClosing={handleClosing}
       title="Create New Project"
       maxWidth="max-w-md"
     >
@@ -150,7 +150,12 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         >
           Create Project
         </Button>
-        <Button onClick={handleClose} variant="secondary" className="flex-1">
+        <Button onClick={() => {
+          handleClosing();
+          // Simular Escape para activar la animación del Modal
+          const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+          document.dispatchEvent(escapeEvent);
+        }} variant="secondary" className="flex-1">
           Cancel
         </Button>
       </div>

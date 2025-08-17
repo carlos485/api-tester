@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onClosing?: () => void; // Se ejecuta cuando inicia la animación de cierre
   title?: string;
   children: React.ReactNode;
   maxWidth?: string;
@@ -12,6 +13,7 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
+  onClosing,
   title,
   children,
   maxWidth = "max-w-md",
@@ -21,11 +23,12 @@ const Modal: React.FC<ModalProps> = ({
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
+    onClosing?.(); // Ejecutar función de limpieza inmediatamente
     setTimeout(() => {
       setIsClosing(false);
       onClose();
     }, 300); // Duration matches CSS animation
-  }, [onClose]);
+  }, [onClose, onClosing]);
 
   const handleOverlayClick = () => {
     if (closeOnOverlayClick) {
