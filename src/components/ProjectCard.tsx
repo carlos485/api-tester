@@ -54,13 +54,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         {project.name}
       </h3>
 
-      {/* Project Description */}
-      {project.description && (
-        <p className="text-sm text-gray-600 text-center line-clamp-2">
-          {project.description}
-        </p>
-      )}
-
       {/* Environment count */}
       <div className="mt-auto pt-2">
         <span className="text-xs text-gray-400">
