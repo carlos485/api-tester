@@ -120,20 +120,22 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Icon
           </label>
-          <div className="grid grid-cols-4 gap-2">
-            {availableIcons.map(icon => (
-              <button
-                key={icon}
-                onClick={() => setNewProject({ ...newProject, icon })}
-                className={`p-3 rounded-lg border-2 transition-colors ${
-                  newProject.icon === icon
-                    ? "border-gray-500 bg-gray-100 dark:bg-gray-600"
-                    : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-                }`}
-              >
-                <Icon icon={icon} className="h-6 w-6 mx-auto dark:text-white" />
-              </button>
-            ))}
+          <div className="max-h-[15rem] overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-2 custom-scrollbar">
+            <div className="grid grid-cols-4 gap-2">
+              {availableIcons.map(icon => (
+                <button
+                  key={icon}
+                  onClick={() => setNewProject({ ...newProject, icon })}
+                  className={`p-3 rounded-lg border-2 transition-colors ${
+                    newProject.icon === icon
+                      ? "border-gray-500 bg-gray-100 dark:bg-gray-600"
+                      : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                  }`}
+                >
+                  <Icon icon={icon} className="h-6 w-6 mx-auto dark:text-white" />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
