@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import type { Project } from "../types/project";
 import ProjectCard from "./ProjectCard";
 import Button from "./Button";
+import CreateProjectModal from "./CreateProjectModal";
 
 interface ProjectsHomeProps {
   projects: Project[];
@@ -13,34 +14,6 @@ interface ProjectsHomeProps {
   onProjectDelete: (projectId: string) => void;
 }
 
-interface NewProjectForm {
-  name: string;
-  description: string;
-  icon: string;
-  color: string;
-}
-
-const availableIcons = [
-  "material-symbols:api",
-  "material-symbols:web",
-  "material-symbols:smartphone",
-  "material-symbols:desktop-windows",
-  "material-symbols:cloud",
-  "material-symbols:database",
-  "material-symbols:code",
-  "material-symbols:settings",
-];
-
-const availableColors = [
-  "bg-blue-100",
-  "bg-green-100",
-  "bg-purple-100",
-  "bg-yellow-100",
-  "bg-pink-100",
-  "bg-indigo-100",
-  "bg-red-100",
-  "bg-orange-100",
-];
 
 const ProjectsHome: React.FC<ProjectsHomeProps> = ({
   projects,
@@ -49,47 +22,6 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
   onProjectDelete,
 }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
-  const [newProject, setNewProject] = useState<NewProjectForm>({
-    name: "",
-    description: "",
-    icon: "material-symbols:api",
-    color: "bg-blue-100",
-  });
-
-  const handleCreateProject = () => {
-    if (newProject.name.trim()) {
-      onProjectCreate({
-        name: newProject.name.trim(),
-        description: newProject.description.trim(),
-        icon: newProject.icon,
-        color: newProject.color,
-        environments: [
-          {
-            id: "default",
-            name: "Development",
-            baseUrl: "http://localhost:3000",
-          },
-        ],
-      });
-
-      setNewProject({
-        name: "",
-        description: "",
-        icon: "material-symbols:api",
-        color: "bg-blue-100",
-      });
-      handleCloseModal();
-    }
-  };
-
-  const handleCloseModal = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setShowCreateModal(false);
-      setIsClosing(false);
-    }, 300); // Duration matches CSS animation
-  };
 
   return (
     <div className="min-h-screen">
@@ -152,113 +84,11 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
         )}
       </main>
 
-      {/* Create Project Modal */}
-      {showCreateModal && (
-        <div 
-          className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 modal-overlay ${isClosing ? 'closing' : ''}`}
-          onClick={handleCloseModal}
-        >
-          <div 
-            className={`bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md modal-content ${isClosing ? 'closing' : ''}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-xl font-semibold mb-4 dark:text-white">Create New Project</h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Project Name *
-                </label>
-                <input
-                  type="text"
-                  value={newProject.name}
-                  onChange={e =>
-                    setNewProject({ ...newProject, name: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-gray-500 focus:border-gray-500"
-                  placeholder="My API Project"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={newProject.description}
-                  onChange={e =>
-                    setNewProject({
-                      ...newProject,
-                      description: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-gray-500 focus:border-gray-500"
-                  placeholder="Optional project description"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Icon
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {availableIcons.map(icon => (
-                    <button
-                      key={icon}
-                      onClick={() => setNewProject({ ...newProject, icon })}
-                      className={`p-3 rounded-lg border-2 transition-colors ${
-                        newProject.icon === icon
-                          ? "border-gray-500 bg-gray-100"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <Icon icon={icon} className="h-6 w-6 mx-auto" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Color
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {availableColors.map(color => (
-                    <button
-                      key={color}
-                      onClick={() => setNewProject({ ...newProject, color })}
-                      className={`h-10 rounded-lg border-2 transition-colors ${color} ${
-                        newProject.color === color
-                          ? "border-gray-500"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <Button
-                onClick={handleCreateProject}
-                disabled={!newProject.name.trim()}
-                variant="primary"
-                className="flex-1"
-              >
-                Create Project
-              </Button>
-              <Button
-                onClick={handleCloseModal}
-                variant="secondary"
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CreateProjectModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onProjectCreate={onProjectCreate}
+      />
     </div>
   );
 };
