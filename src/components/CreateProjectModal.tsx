@@ -7,7 +7,9 @@ import Button from "./Button";
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onProjectCreate: (project: Omit<Project, "id" | "createdAt" | "updatedAt">) => void;
+  onProjectCreate: (
+    project: Omit<Project, "id" | "createdAt" | "updatedAt">
+  ) => void;
 }
 
 interface NewProjectForm {
@@ -26,6 +28,17 @@ const availableIcons = [
   "material-symbols:database",
   "material-symbols:code",
   "material-symbols:settings",
+  "zondicons:wallet",
+  "mingcute:coupon-fill",
+  "fa6-solid:user",
+  "streamline-ultimate:tool-box-bold",
+  "zondicons:notification",
+  "tdesign:task-checked-filled",
+  "streamline:bag-dollar-solid",
+  "ci:transfer",
+  "material-symbols:encrypted",
+  "mdi:circle-slice-8",
+  "mdi:cloud",
 ];
 
 const availableColors = [
@@ -74,7 +87,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         icon: "material-symbols:api",
         color: "bg-blue-100",
       });
-      
+
       onClose();
     }
   };
@@ -105,7 +118,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           <input
             type="text"
             value={newProject.name}
-            onChange={(e) =>
+            onChange={e =>
               setNewProject({ ...newProject, name: e.target.value })
             }
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-gray-500 focus:border-gray-500"
@@ -120,7 +133,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </label>
           <textarea
             value={newProject.description}
-            onChange={(e) =>
+            onChange={e =>
               setNewProject({
                 ...newProject,
                 description: e.target.value,
@@ -137,7 +150,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
             Icon
           </label>
           <div className="grid grid-cols-4 gap-2">
-            {availableIcons.map((icon) => (
+            {availableIcons.map(icon => (
               <button
                 key={icon}
                 onClick={() => setNewProject({ ...newProject, icon })}
@@ -158,7 +171,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
             Color
           </label>
           <div className="grid grid-cols-4 gap-2">
-            {availableColors.map((color) => (
+            {availableColors.map(color => (
               <button
                 key={color}
                 onClick={() => setNewProject({ ...newProject, color })}
