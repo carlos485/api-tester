@@ -3,6 +3,8 @@ import { Icon } from "@iconify/react";
 import type { Project } from "../types/project";
 import Modal from "./Modal";
 import Button from "./Button";
+import Input from "./Input";
+import Textarea from "./Textarea";
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -96,39 +98,23 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       maxWidth="max-w-md"
     >
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Project Name *
-          </label>
-          <input
-            type="text"
-            value={newProject.name}
-            onChange={e =>
-              setNewProject({ ...newProject, name: e.target.value })
-            }
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-gray-500 focus:border-gray-500"
-            placeholder="My API Project"
-            autoFocus
-          />
-        </div>
+        <Input
+          label="Project Name"
+          value={newProject.name}
+          onChange={(value) => setNewProject({ ...newProject, name: value })}
+          placeholder="My API Project"
+          required
+          autoFocus
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Description
-          </label>
-          <textarea
-            value={newProject.description}
-            onChange={e =>
-              setNewProject({
-                ...newProject,
-                description: e.target.value,
-              })
-            }
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-gray-500 focus:border-gray-500"
-            placeholder="Optional project description"
-            rows={3}
-          />
-        </div>
+        <Textarea
+          label="Description"
+          value={newProject.description}
+          onChange={(value) => setNewProject({ ...newProject, description: value })}
+          placeholder="Optional project description"
+          rows={3}
+          maxLength={200}
+        />
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
