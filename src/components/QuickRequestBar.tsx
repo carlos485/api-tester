@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
-import EnvironmentSelector from "./EnvironmentSelector";
 import type { Environment } from "../types/project";
 
 interface QuickRequestBarProps {
@@ -8,21 +7,24 @@ interface QuickRequestBarProps {
   environments?: Environment[];
 }
 
-const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest, environments = [] }) => {
-  const [method, setMethod] = useState("GET");
+const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
+  const [method] = useState("GET");
   const [url, setUrl] = useState("");
-  const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
+  const [selectedEnvironment] = useState<Environment | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (url.trim()) {
       let finalUrl = url.trim();
-      
+
       // If environment is selected and URL is relative, prepend base URL
-      if (selectedEnvironment && !finalUrl.startsWith('http')) {
-        finalUrl = selectedEnvironment.baseUrl.replace(/\/$/, '') + '/' + finalUrl.replace(/^\//, '');
+      if (selectedEnvironment && !finalUrl.startsWith("http")) {
+        finalUrl =
+          selectedEnvironment.baseUrl.replace(/\/$/, "") +
+          "/" +
+          finalUrl.replace(/^\//, "");
       }
-      
+
       onSendRequest({ method, url: finalUrl });
     }
   };
@@ -31,26 +33,6 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest, enviro
     <div className="mb-6">
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2 items-center bg-white rounded-lg border border-gray-300 shadow-sm p-1">
-          <EnvironmentSelector
-            selectedEnvironment={selectedEnvironment}
-            onEnvironmentChange={setSelectedEnvironment}
-            environments={environments}
-          />
-          <select
-            value={method}
-            onChange={e => setMethod(e.target.value)}
-            className="transition-all bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5"
-          >
-            <option value="GET" selected>
-              GET
-            </option>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-            <option value="DELETE">DELETE</option>
-            <option value="PATCH">PATCH</option>
-            <option value="HEAD">HEAD</option>
-            <option value="OPTIONS">OPTIONS</option>
-          </select>
           {/* <input
             type="url"
             value={url}
@@ -64,7 +46,11 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest, enviro
             value={url}
             onChange={e => setUrl(e.target.value)}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-            placeholder={selectedEnvironment ? "/api/endpoint or full URL" : "https://api.example.com/endpoint"}
+            placeholder={
+              selectedEnvironment
+                ? "/api/endpoint or full URL"
+                : "https://api.example.com/endpoint"
+            }
             required
           />
           <button
