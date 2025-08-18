@@ -28,10 +28,10 @@ interface TabsProps {
 
 const tabVariants = {
   default: {
-    container: "border-b border-gray-200",
+    container: "border-b border-gray-300",
     nav: "-mb-px flex space-x-8",
-    tab: "py-2 px-1 border-t-2 border-x-2 rounded-sm font-medium text-sm transition-colors duration-200",
-    activeTab: "border-gray-900 text-gray-900",
+    tab: "py-2 px-3 border-t border-x rounded-t-md font-medium text-sm transition-colors duration-200",
+    activeTab: "border-gray-300 border-b-white text-gray-900 bg-white",
     inactiveTab:
       "border-transparent text-gray-400 hover:text-gray-500 hover:border-gray-500",
   },
@@ -72,7 +72,7 @@ export const Tabs: FC<TabsProps> = ({
   );
 
   const rightElement = Children.toArray(children).find(
-    (child): child is ReactElement<TabsRightProps> => 
+    (child): child is ReactElement<TabsRightProps> =>
       isValidElement(child) && child.type === TabsRight
   );
 
@@ -102,7 +102,9 @@ export const Tabs: FC<TabsProps> = ({
           )}
         </div>
       </div>
-      <div className="mt-4">{tabs[activeTab]?.props.children}</div>
+      <div className="bg-white border-x border-b border-gray-300 rounded-b-md p-4">
+        {tabs[activeTab]?.props.children}
+      </div>
     </div>
   );
 };
