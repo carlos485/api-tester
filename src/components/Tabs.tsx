@@ -1,11 +1,12 @@
-import React, { useState, ReactElement, Children, isValidElement } from "react";
+import { useState, Children, isValidElement } from "react";
+import type { ReactElement, ReactNode, FC } from "react";
 
 interface TabProps {
   header: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-export const Tab: React.FC<TabProps> = ({ children }) => {
+export const Tab: FC<TabProps> = ({ children }) => {
   return <>{children}</>;
 };
 
@@ -14,7 +15,7 @@ interface TabsProps {
   defaultActiveTab?: number;
 }
 
-export const Tabs: React.FC<TabsProps> = ({
+export const Tabs: FC<TabsProps> = ({
   children,
   defaultActiveTab = 0,
 }) => {
