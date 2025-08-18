@@ -28,9 +28,9 @@ interface TabsProps {
 
 const tabVariants = {
   default: {
-    container: "border-x border-gray-200",
+    container: "border-b border-gray-200",
     nav: "-mb-px flex space-x-8",
-    tab: "py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200",
+    tab: "py-2 px-1 border-t-2 border-x-2 rounded-sm font-medium text-sm transition-colors duration-200",
     activeTab: "border-gray-900 text-gray-900",
     inactiveTab:
       "border-transparent text-gray-400 hover:text-gray-500 hover:border-gray-500",
@@ -72,7 +72,8 @@ export const Tabs: FC<TabsProps> = ({
   );
 
   const rightElement = Children.toArray(children).find(
-    child => isValidElement(child) && child.type === TabsRight
+    (child): child is ReactElement<TabsRightProps> => 
+      isValidElement(child) && child.type === TabsRight
   );
 
   const styles = tabVariants[variant];
