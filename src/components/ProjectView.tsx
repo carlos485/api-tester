@@ -4,6 +4,7 @@ import type { Project, ApiRequest, ApiResponse } from "../types/project";
 import QuickRequestBar from "./QuickRequestBar";
 import RequestTabs from "./RequestTabs";
 import ResponseViewer from "./ResponseViewer";
+import { Tabs, Tab } from "./Tabs";
 
 interface ProjectViewProps {
   project: Project;
@@ -158,15 +159,19 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
       </header>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <QuickRequestBar
-          onSendRequest={handleQuickRequest}
-          environments={project.environments}
-        />
-        <RequestTabs />
-        <div className="mt-6">
-          <ResponseViewer response={response} loading={loading} />
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-8">
+        <Tabs defaultActiveTab={0}>
+          <Tab header="Coupons">
+            <QuickRequestBar
+              onSendRequest={handleQuickRequest}
+              environments={project.environments}
+            />
+            <RequestTabs />
+            <div className="mt-6">
+              <ResponseViewer response={response} loading={loading} />
+            </div>
+          </Tab>
+        </Tabs>
       </div>
     </div>
   );

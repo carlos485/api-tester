@@ -32,7 +32,7 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
   return (
     <div className="mb-6">
       <form onSubmit={handleSubmit}>
-        <div className="flex gap-2 items-center bg-white rounded-lg border border-gray-300 shadow-sm p-1">
+        <div className="flex gap-2 items-center bg-white rounded-lg p-1">
           {/* <input
             type="url"
             value={url}
