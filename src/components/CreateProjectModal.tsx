@@ -101,7 +101,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         <Input
           label="Project Name"
           value={newProject.name}
-          onChange={(value) => setNewProject({ ...newProject, name: value })}
+          onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
           placeholder="My API Project"
           required
           autoFocus
