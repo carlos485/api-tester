@@ -41,6 +41,17 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
             className="flex-1 px-4 py-3 text-gray-900 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
             required
           /> */}
+          <select
+            name=""
+            id=""
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block min-w-24 p-2.5"
+          >
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="PATCH">PATCH</option>
+            <option value="DELETE">DELETE</option>
+          </select>
           <input
             type="text"
             value={url}
