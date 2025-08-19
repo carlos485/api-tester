@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import type { Environment } from "../types/project";
+import RequestMethodSelect, { type HttpMethod } from "./RequestMethodSelect";
+import Input from "./Input";
 
 interface QuickRequestBarProps {
   onSendRequest: (request: { method: string; url: string }) => void;
@@ -8,7 +10,7 @@ interface QuickRequestBarProps {
 }
 
 const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
-  const [method] = useState("GET");
+  const [method, setMethod] = useState<HttpMethod>("GET");
   const [url, setUrl] = useState("");
   const [selectedEnvironment] = useState<Environment | null>(null);
 
@@ -33,30 +35,12 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
     <div className="mb-6">
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2 items-center bg-white rounded-lg p-1">
-          {/* <input
-            type="url"
-            value={url}
-            onChange={e => setUrl(e.target.value)}
-            placeholder="https://api.example.com/endpoint"
-            className="flex-1 px-4 py-3 text-gray-900 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
-            required
-          /> */}
-          <select
-            name=""
-            id=""
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block min-w-24 p-2.5"
-          >
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-            <option value="PATCH">PATCH</option>
-            <option value="DELETE">DELETE</option>
-          </select>
-          <input
+          <RequestMethodSelect value={method} onChange={setMethod} />
+          <Input
             type="text"
             value={url}
             onChange={e => setUrl(e.target.value)}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+            variant="full-width"
             placeholder={
               selectedEnvironment
                 ? "/api/endpoint or full URL"
