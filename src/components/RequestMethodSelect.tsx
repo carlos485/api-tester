@@ -27,12 +27,19 @@ const RequestMethodSelect: FC<RequestMethodSelectProps> = ({
     onChange(e.target.value as HttpMethod);
   };
 
+  // Check if being used as addon (no default styles needed)
+  const isAddon = className.includes('addon') || className === '';
+  
+  const selectClassName = isAddon 
+    ? `bg-transparent border-0 text-gray-900 text-sm focus:ring-0 focus:border-0 focus:outline-none min-w-20 ${className}`.trim()
+    : `bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block min-w-24 p-2.5 ${className}`.trim();
+
   return (
     <select
       value={value}
       onChange={handleChange}
       disabled={disabled}
-      className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block min-w-24 p-2.5 ${className}`}
+      className={selectClassName}
     >
       <option value="GET" className={methodColors.GET}>
         GET

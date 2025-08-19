@@ -35,12 +35,18 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
     <div className="mb-6">
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2 items-center bg-white rounded-lg p-1">
-          <RequestMethodSelect value={method} onChange={setMethod} />
           <Input
             type="text"
             value={url}
             onChange={e => setUrl(e.target.value)}
             variant="full-width"
+            leftAddon={
+              <RequestMethodSelect 
+                value={method} 
+                onChange={setMethod} 
+                className="addon"
+              />
+            }
             placeholder={
               selectedEnvironment
                 ? "/api/endpoint or full URL"
