@@ -44,7 +44,7 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
               <RequestMethodSelect 
                 value={method} 
                 onChange={setMethod} 
-                className="addon"
+                variant="addon"
               />
             }
             placeholder={
