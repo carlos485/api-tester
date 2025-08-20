@@ -17,7 +17,7 @@ interface SelectProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
-  variant?: 'default' | 'minimal' | 'addon';
+  variant?: "default" | "minimal" | "addon";
   showColors?: boolean;
 }
 
@@ -28,8 +28,8 @@ const Select: FC<SelectProps> = ({
   placeholder = "Select option...",
   disabled = false,
   className = "",
-  variant = 'default',
-  showColors = false
+  variant = "default",
+  showColors = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -41,14 +41,17 @@ const Select: FC<SelectProps> = ({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+      if (
+        selectRef.current &&
+        !selectRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
         setFocusedIndex(-1);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Handle keyboard navigation
@@ -56,8 +59,8 @@ const Select: FC<SelectProps> = ({
     if (disabled) return;
 
     switch (event.key) {
-      case 'Enter':
-      case ' ':
+      case "Enter":
+      case " ":
         event.preventDefault();
         if (!isOpen) {
           setIsOpen(true);
@@ -71,11 +74,11 @@ const Select: FC<SelectProps> = ({
           }
         }
         break;
-      case 'Escape':
+      case "Escape":
         setIsOpen(false);
         setFocusedIndex(-1);
         break;
-      case 'ArrowDown':
+      case "ArrowDown":
         event.preventDefault();
         if (!isOpen) {
           setIsOpen(true);
@@ -87,7 +90,7 @@ const Select: FC<SelectProps> = ({
           });
         }
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         event.preventDefault();
         if (isOpen) {
           setFocusedIndex(prev => {
@@ -109,20 +112,23 @@ const Select: FC<SelectProps> = ({
 
   const getVariantStyles = () => {
     switch (variant) {
-      case 'minimal':
+      case "minimal":
         return {
-          trigger: "bg-transparent border-0 focus:ring-0 focus:border-0 focus:outline-none min-w-20",
-          dropdown: "mt-1 bg-white border border-gray-300 rounded-lg shadow-lg"
+          trigger:
+            "bg-transparent border-0 focus:ring-0 focus:border-0 focus:outline-none min-w-20",
+          dropdown: "mt-1 bg-white border border-gray-300 rounded-lg shadow-lg",
         };
-      case 'addon':
+      case "addon":
         return {
-          trigger: "bg-transparent border-0 focus:ring-0 focus:border-0 focus:outline-none min-w-20",
-          dropdown: "mt-1 bg-white border border-gray-300 rounded-lg shadow-lg"
+          trigger:
+            "bg-transparent border-0 focus:ring-0 focus:border-0 focus:outline-none w-20",
+          dropdown: "mt-1 bg-white border border-gray-300 rounded-lg shadow-lg w-32",
         };
       default:
         return {
-          trigger: "bg-gray-50 border border-gray-300 focus:ring-gray-500 focus:border-gray-500 min-w-24",
-          dropdown: "mt-1 bg-white border border-gray-300 rounded-lg shadow-lg"
+          trigger:
+            "bg-gray-50 border border-gray-300 focus:ring-gray-500 focus:border-gray-500 min-w-24",
+          dropdown: "mt-1 bg-white border border-gray-300 rounded-lg shadow-lg",
         };
     }
   };
@@ -139,70 +145,96 @@ const Select: FC<SelectProps> = ({
         disabled={disabled}
         className={`
           ${styles.trigger}
-          w-full px-3 py-2 text-left text-sm rounded-lg 
+          ${variant === 'addon' ? '' : 'w-full'} px-3 py-2 text-left text-sm rounded-lg 
           flex items-center justify-between
           transition-colors duration-200
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100'}
-          ${isOpen ? 'ring-2 ring-gray-500' : ''}
+          ${
+            disabled
+              ? "opacity-50 cursor-not-allowed"
+              : "cursor-pointer hover:bg-gray-100"
+          }
+          ${isOpen ? "ring-2 ring-gray-500" : ""}
         `}
       >
         <div className="flex items-center gap-2">
           {selectedOption?.icon && (
             <span className="flex-shrink-0">{selectedOption.icon}</span>
           )}
-          <span className={showColors && selectedOption?.color ? selectedOption.color : 'text-gray-900'}>
+          <span
+            className={
+              showColors && selectedOption?.color
+                ? selectedOption.color
+                : "text-gray-900"
+            }
+          >
             {selectedOption?.label || placeholder}
           </span>
-          {selectedOption?.badge && (
-            <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
-              {selectedOption.badge}
-            </span>
-          )}
         </div>
         <svg
-          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`ml-4 w-4 h-4 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
       {/* Dropdown Options */}
       {isOpen && (
-        <div className={`absolute z-50 w-full ${styles.dropdown} max-h-60 overflow-auto`}>
+        <div
+          className={`absolute z-50 ${variant === 'addon' ? 'w-32' : 'w-full'} ${styles.dropdown} max-h-60 overflow-auto`}
+        >
           <div className="py-1">
             {options.map((option, index) => (
               <div
                 key={option.value}
-                ref={el => optionsRef.current[index] = el!}
+                ref={el => (optionsRef.current[index] = el!)}
                 onClick={() => handleOptionClick(option)}
                 className={`
                   px-3 py-2 cursor-pointer flex items-center gap-2
                   transition-colors duration-150
-                  ${option.disabled 
-                    ? 'opacity-50 cursor-not-allowed' 
-                    : 'hover:bg-gray-100'
+                  ${
+                    option.disabled
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-gray-100"
                   }
-                  ${focusedIndex === index ? 'bg-gray-100' : ''}
-                  ${option.value === value ? 'bg-blue-50 border-r-2 border-blue-500' : ''}
+                  ${focusedIndex === index ? "bg-gray-100" : ""}
+                  ${
+                    option.value === value
+                      ? "bg-blue-50 border-r-2 border-blue-500"
+                      : ""
+                  }
                 `}
               >
                 {option.icon && (
                   <span className="flex-shrink-0">{option.icon}</span>
                 )}
-                <span className={`flex-1 ${showColors && option.color ? option.color : 'text-gray-900'}`}>
+                <span
+                  className={`flex-1 ${
+                    showColors && option.color ? option.color : "text-gray-900"
+                  }`}
+                >
                   {option.label}
                 </span>
-                {option.badge && (
-                  <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
-                    {option.badge}
-                  </span>
-                )}
                 {option.value === value && (
-                  <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  <svg
+                    className="w-4 h-4 text-blue-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 )}
               </div>
