@@ -196,7 +196,9 @@ const Select: FC<SelectProps> = ({
             {options.map((option, index) => (
               <div
                 key={option.value}
-                ref={el => (optionsRef.current[index] = el!)}
+                ref={el => {
+                  if (el) optionsRef.current[index] = el;
+                }}
                 onClick={() => handleOptionClick(option)}
                 className={`
                   px-3 py-2 cursor-pointer flex items-center gap-2
