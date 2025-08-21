@@ -4,6 +4,12 @@ import ProjectsHome from "./components/ProjectsHome";
 import ProjectView from "./components/ProjectView";
 import { useAuth } from "./hooks/useAuth";
 import { useProjects } from "./hooks/useProjects";
+import { 
+  saveSelectedProject, 
+  getSelectedProject, 
+  clearSelectedProject,
+  clearAllSessionData
+} from "./utils/sessionStorage";
 
 // Loading component
 const LoadingScreen = () => (
@@ -27,12 +33,30 @@ function App() {
     }
   }, [authLoading, user, signInAnonymously]);
 
+  // Restore selected project from sessionStorage
+  useEffect(() => {
+    if (!projectsLoading && projects.length > 0 && !selectedProject) {
+      const savedProjectId = getSelectedProject();
+      if (savedProjectId) {
+        const savedProject = projects.find(p => p.id === savedProjectId);
+        if (savedProject) {
+          setSelectedProject(savedProject);
+        } else {
+          // Project not found, clear from session storage
+          clearSelectedProject();
+        }
+      }
+    }
+  }, [projects, projectsLoading, selectedProject]);
+
   const handleProjectSelect = (project: Project) => {
     setSelectedProject(project);
+    saveSelectedProject(project.id);
   };
 
   const handleBackToHome = () => {
     setSelectedProject(null);
+    clearSelectedProject();
   };
 
   const handleProjectCreate = async (projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -49,6 +73,7 @@ function App() {
       await deleteProject(projectId);
       if (selectedProject?.id === projectId) {
         setSelectedProject(null);
+        clearAllSessionData(); // Clear all session data when deleting current project
       }
     } catch (error) {
       console.error('Failed to delete project:', error);

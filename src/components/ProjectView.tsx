@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import type { Project, ApiRequest, ApiResponse, Endpoint } from "../types/project";
 import QuickRequestBar from "./QuickRequestBar";
@@ -7,6 +7,17 @@ import ResponseViewer from "./ResponseViewer";
 import { Tabs, Tab } from "./Tabs";
 import Sidebar from "./Sidebar";
 import { useEndpoints } from "../hooks/useEndpoints";
+import { 
+  saveRequestTabs, 
+  getRequestTabs, 
+  saveActiveTabIndex, 
+  getActiveTabIndex,
+  saveSelectedEndpoint,
+  getSelectedEndpoint,
+  clearRequestTabs,
+  clearActiveTabIndex,
+  clearSelectedEndpoint
+} from "../utils/sessionStorage";
 
 interface ProjectViewProps {
   project: Project;
@@ -22,6 +33,7 @@ interface RequestTab {
 }
 
 const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
+  // Initialize with default values, will be restored from sessionStorage in useEffect
   const [requestTabs, setRequestTabs] = useState<RequestTab[]>([
     {
       id: "tab-1",
@@ -33,6 +45,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
   ]);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string>();
+  const [isRestoredFromSession, setIsRestoredFromSession] = useState(false);
   
   // Use the endpoints hook for real Firebase data
   const {
@@ -41,6 +54,43 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
     error: endpointsError,
     createEndpoint
   } = useEndpoints(project.id);
+
+  // Restore state from sessionStorage on component mount
+  useEffect(() => {
+    const savedTabs = getRequestTabs();
+    const savedActiveIndex = getActiveTabIndex();
+    const savedEndpointId = getSelectedEndpoint();
+
+    if (savedTabs.length > 0) {
+      setRequestTabs(savedTabs);
+      setActiveTabIndex(Math.min(savedActiveIndex, savedTabs.length - 1));
+    }
+    
+    if (savedEndpointId) {
+      setSelectedEndpointId(savedEndpointId);
+    }
+    
+    setIsRestoredFromSession(true);
+  }, []);
+
+  // Save state to sessionStorage whenever it changes (but not on initial mount)
+  useEffect(() => {
+    if (isRestoredFromSession) {
+      saveRequestTabs(requestTabs);
+    }
+  }, [requestTabs, isRestoredFromSession]);
+
+  useEffect(() => {
+    if (isRestoredFromSession) {
+      saveActiveTabIndex(activeTabIndex);
+    }
+  }, [activeTabIndex, isRestoredFromSession]);
+
+  useEffect(() => {
+    if (isRestoredFromSession && selectedEndpointId) {
+      saveSelectedEndpoint(selectedEndpointId);
+    }
+  }, [selectedEndpointId, isRestoredFromSession]);
 
   const handleSendRequest = async (request: ApiRequest) => {
     const currentTab = requestTabs[activeTabIndex];
@@ -219,6 +269,14 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
 
   const currentTab = requestTabs[activeTabIndex];
 
+  // Clean up session storage when going back to home
+  const handleBackToHomeWithCleanup = () => {
+    clearRequestTabs();
+    clearActiveTabIndex();
+    clearSelectedEndpoint();
+    onBackToHome();
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
@@ -227,7 +285,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                onClick={onBackToHome}
+                onClick={handleBackToHomeWithCleanup}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 title="Back to projects"
               >
