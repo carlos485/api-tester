@@ -13,9 +13,25 @@ interface ProjectViewProps {
   onBackToHome: () => void;
 }
 
+interface RequestTab {
+  id: string;
+  name: string;
+  request: ApiRequest;
+  response: ApiResponse | null;
+  loading: boolean;
+}
+
 const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
-  const [response, setResponse] = useState<ApiResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [requestTabs, setRequestTabs] = useState<RequestTab[]>([
+    {
+      id: "tab-1",
+      name: "New Request",
+      request: { method: "GET", url: "", headers: {}, body: "" },
+      response: null,
+      loading: false,
+    },
+  ]);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string>();
   
   // Use the endpoints hook for real Firebase data
@@ -27,7 +43,16 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
   } = useEndpoints(project.id);
 
   const handleSendRequest = async (request: ApiRequest) => {
-    setLoading(true);
+    const currentTab = requestTabs[activeTabIndex];
+    if (!currentTab) return;
+
+    // Update the current tab's loading state
+    setRequestTabs(prev => prev.map((tab, index) => 
+      index === activeTabIndex 
+        ? { ...tab, loading: true, request } 
+        : tab
+    ));
+
     const startTime = Date.now();
 
     try {
@@ -67,13 +92,20 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
         headers[key] = value;
       });
 
-      setResponse({
+      const responseData: ApiResponse = {
         status: response.status,
         statusText: response.statusText,
         headers,
         data,
         time: endTime - startTime,
-      });
+      };
+
+      // Update the current tab's response
+      setRequestTabs(prev => prev.map((tab, index) => 
+        index === activeTabIndex 
+          ? { ...tab, response: responseData, loading: false } 
+          : tab
+      ));
     } catch (error) {
       const endTime = Date.now();
       console.error("Request failed:", error);
@@ -103,7 +135,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
         errorDetails = { originalError: error.name };
       }
 
-      setResponse({
+      const errorResponse: ApiResponse = {
         status: 0,
         statusText: "Network Error",
         headers: {},
@@ -113,9 +145,14 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
           timestamp: new Date().toISOString(),
         },
         time: endTime - startTime,
-      });
-    } finally {
-      setLoading(false);
+      };
+
+      // Update the current tab's error response
+      setRequestTabs(prev => prev.map((tab, index) => 
+        index === activeTabIndex 
+          ? { ...tab, response: errorResponse, loading: false } 
+          : tab
+      ));
     }
   };
 
@@ -134,15 +171,36 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
 
   const handleEndpointSelect = (endpoint: Endpoint) => {
     setSelectedEndpointId(endpoint.id);
-    // Optionally auto-populate the request form with endpoint data
-    const request: ApiRequest = {
-      method: endpoint.method,
-      url: endpoint.url,
-      headers: endpoint.headers || {},
-      body: endpoint.body || "",
+    
+    // Create a new tab for this endpoint
+    const newTab: RequestTab = {
+      id: `endpoint-${endpoint.id}-${Date.now()}`,
+      name: endpoint.name,
+      request: {
+        method: endpoint.method,
+        url: endpoint.url,
+        headers: endpoint.headers || {},
+        body: endpoint.body || "",
+      },
+      response: null,
+      loading: false,
     };
-    // Could trigger form update here or automatically send request
-    handleSendRequest(request);
+
+    setRequestTabs(prev => [...prev, newTab]);
+    setActiveTabIndex(requestTabs.length); // Switch to the new tab
+  };
+
+  const handleAddTab = () => {
+    const newTab: RequestTab = {
+      id: `tab-${Date.now()}`,
+      name: "New Request",
+      request: { method: "GET", url: "", headers: {}, body: "" },
+      response: null,
+      loading: false,
+    };
+
+    setRequestTabs(prev => [...prev, newTab]);
+    setActiveTabIndex(requestTabs.length); // Switch to the new tab
   };
 
   const handleAddEndpoint = async () => {
@@ -158,6 +216,8 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
       // Here you could show a toast notification
     }
   };
+
+  const currentTab = requestTabs[activeTabIndex];
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -220,17 +280,26 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
                 </div>
               )}
               
-              <Tabs defaultActiveTab={0}>
-                <Tab header="Coupons">
-                  <QuickRequestBar
-                    onSendRequest={handleQuickRequest}
-                    environments={project.environments}
-                  />
-                  <RequestTabs />
-                  <div className="mt-6">
-                    <ResponseViewer response={response} loading={loading} />
-                  </div>
-                </Tab>
+              <Tabs 
+                defaultActiveTab={activeTabIndex} 
+                onAddTab={handleAddTab}
+                onTabChange={setActiveTabIndex}
+              >
+                {requestTabs.map((tab, index) => (
+                  <Tab key={tab.id} header={tab.name}>
+                    <QuickRequestBar
+                      onSendRequest={handleQuickRequest}
+                      environments={project.environments}
+                    />
+                    <RequestTabs />
+                    <div className="mt-6">
+                      <ResponseViewer 
+                        response={tab.response} 
+                        loading={tab.loading} 
+                      />
+                    </div>
+                  </Tab>
+                ))}
               </Tabs>
             </div>
           </div>

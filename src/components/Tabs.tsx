@@ -1,5 +1,6 @@
 import { useState, Children, isValidElement } from "react";
 import type { ReactElement, ReactNode, FC } from "react";
+import { Icon } from "@iconify/react";
 
 interface TabProps {
   header: string;
@@ -25,6 +26,7 @@ interface TabsProps {
   defaultActiveTab?: number;
   variant?: TabVariant;
   onAddTab?: () => void;
+  onTabChange?: (index: number) => void;
 }
 
 const tabVariants = {
@@ -72,6 +74,7 @@ export const Tabs: FC<TabsProps> = ({
   defaultActiveTab = 0,
   variant = "default",
   onAddTab,
+  onTabChange,
 }) => {
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
 
@@ -95,7 +98,10 @@ export const Tabs: FC<TabsProps> = ({
             {tabs.map((tab, index) => (
               <button
                 key={index}
-                onClick={() => setActiveTab(index)}
+                onClick={() => {
+                  setActiveTab(index);
+                  onTabChange?.(index);
+                }}
                 className={`${styles.tab} ${
                   activeTab === index ? styles.activeTab : styles.inactiveTab
                 }`}
@@ -109,9 +115,7 @@ export const Tabs: FC<TabsProps> = ({
                 className="ml-2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200"
                 title="Add new tab"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
+                <Icon icon="material-symbols:add" className="w-4 h-4" />
               </button>
             )}
           </nav>
