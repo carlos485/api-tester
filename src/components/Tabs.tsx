@@ -18,7 +18,7 @@ export const TabsRight: FC<TabsRightProps> = ({ children }) => {
   return <>{children}</>;
 };
 
-type TabVariant = "default" | "pills" | "minimal" | "cards";
+type TabVariant = "default" | "pills" | "minimal" | "cards" | "underline";
 
 interface TabsProps {
   children: ReactNode;
@@ -57,6 +57,13 @@ const tabVariants = {
     activeTab: "bg-white border-b-white text-gray-900",
     inactiveTab:
       "bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100",
+  },
+  underline: {
+    container: "border-b border-gray-200",
+    nav: "flex space-x-8",
+    tab: "py-2 px-1 border-b-2 font-medium text-sm cursor-pointer transition-colors duration-200",
+    activeTab: "border-gray-900 text-gray-900",
+    inactiveTab: "border-transparent text-gray-400 hover:text-gray-500 hover:border-gray-500",
   },
 };
 
@@ -115,7 +122,7 @@ export const Tabs: FC<TabsProps> = ({
           )}
         </div>
       </div>
-      <div className="bg-white border-x border-b border-gray-300 rounded-b-md p-4">
+      <div className={`bg-white p-4 ${variant === "underline" ? "" : "border-x border-b border-gray-300 rounded-b-md"}`}>
         {tabs[activeTab]?.props.children}
       </div>
     </div>
