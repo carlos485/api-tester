@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
-import type { Project, ApiRequest, ApiResponse } from "../types/project";
+import type { Project, ApiRequest, ApiResponse, Endpoint } from "../types/project";
 import QuickRequestBar from "./QuickRequestBar";
 import RequestTabs from "./RequestTabs";
 import ResponseViewer from "./ResponseViewer";
 import { Tabs, Tab } from "./Tabs";
+import Sidebar from "./Sidebar";
+import { useEndpoints } from "../hooks/useEndpoints";
 
 interface ProjectViewProps {
   project: Project;
@@ -14,6 +16,15 @@ interface ProjectViewProps {
 const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedEndpointId, setSelectedEndpointId] = useState<string>();
+  
+  // Use the endpoints hook for real Firebase data
+  const {
+    endpoints,
+    loading: endpointsLoading,
+    error: endpointsError,
+    createEndpoint
+  } = useEndpoints(project.id);
 
   const handleSendRequest = async (request: ApiRequest) => {
     setLoading(true);
@@ -121,10 +132,37 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
     handleSendRequest(request);
   };
 
+  const handleEndpointSelect = (endpoint: Endpoint) => {
+    setSelectedEndpointId(endpoint.id);
+    // Optionally auto-populate the request form with endpoint data
+    const request: ApiRequest = {
+      method: endpoint.method,
+      url: endpoint.url,
+      headers: endpoint.headers || {},
+      body: endpoint.body || "",
+    };
+    // Could trigger form update here or automatically send request
+    handleSendRequest(request);
+  };
+
+  const handleAddEndpoint = async () => {
+    try {
+      await createEndpoint({
+        name: "New Endpoint",
+        method: "GET",
+        url: "https://api.example.com",
+        description: "New endpoint description",
+      });
+    } catch (error) {
+      console.error("Failed to create endpoint:", error);
+      // Here you could show a toast notification
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-white border-b border-gray-200 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -158,20 +196,45 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
         </div>
       </header>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-8">
-        <Tabs defaultActiveTab={0}>
-          <Tab header="Coupons">
-            <QuickRequestBar
-              onSendRequest={handleQuickRequest}
-              environments={project.environments}
+      {/* Main Content */}
+      <div className="flex flex-1 h-[calc(100vh-80px)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="flex gap-6 my-8">
+            {/* Sidebar */}
+            <Sidebar
+              endpoints={endpoints}
+              onEndpointSelect={handleEndpointSelect}
+              onAddEndpoint={handleAddEndpoint}
+              selectedEndpointId={selectedEndpointId}
+              loading={endpointsLoading}
             />
-            <RequestTabs />
-            <div className="mt-6">
-              <ResponseViewer response={response} loading={loading} />
+            
+            {/* Content Area */}
+            <div className="flex-1 overflow-auto">
+              {endpointsError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-red-700 text-sm">
+                    <Icon icon="material-symbols:error" className="h-4 w-4" />
+                    <span>Error loading endpoints: {endpointsError}</span>
+                  </div>
+                </div>
+              )}
+              
+              <Tabs defaultActiveTab={0}>
+                <Tab header="Coupons">
+                  <QuickRequestBar
+                    onSendRequest={handleQuickRequest}
+                    environments={project.environments}
+                  />
+                  <RequestTabs />
+                  <div className="mt-6">
+                    <ResponseViewer response={response} loading={loading} />
+                  </div>
+                </Tab>
+              </Tabs>
             </div>
-          </Tab>
-        </Tabs>
+          </div>
+        </div>
       </div>
     </div>
   );
