@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import type { FC, ReactNode } from "react";
+import { Icon } from "@iconify/react";
 
 export interface SelectOption {
   value: string;
@@ -122,7 +123,8 @@ const Select: FC<SelectProps> = ({
         return {
           trigger:
             "bg-transparent border-0 focus:ring-0 focus:border-0 focus:outline-none w-20",
-          dropdown: "mt-1 bg-white border border-gray-300 rounded-lg shadow-lg w-32",
+          dropdown:
+            "mt-1 bg-white border border-gray-300 rounded-lg shadow-lg w-32",
         };
       default:
         return {
@@ -145,7 +147,9 @@ const Select: FC<SelectProps> = ({
         disabled={disabled}
         className={`
           ${styles.trigger}
-          ${variant === 'addon' ? '' : 'w-full'} px-3 py-2 text-left text-sm rounded-lg 
+          ${
+            variant === "addon" ? "" : "w-full"
+          } px-2 py-2 text-left text-sm rounded-lg 
           flex items-center justify-between
           transition-colors duration-200
           ${
@@ -156,41 +160,34 @@ const Select: FC<SelectProps> = ({
           ${isOpen ? "ring-2 ring-gray-500" : ""}
         `}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           {selectedOption?.icon && (
             <span className="flex-shrink-0">{selectedOption.icon}</span>
           )}
           <span
-            className={
+            className={`truncate ${
               showColors && selectedOption?.color
                 ? selectedOption.color
                 : "text-gray-900"
-            }
+            }`}
           >
             {selectedOption?.label || placeholder}
           </span>
         </div>
-        <svg
-          className={`ml-4 w-4 h-4 transition-transform duration-200 ${
+        <Icon
+          icon="heroicons:chevron-down-20-solid"
+          className={`flex-shrink-0 w-4 h-4 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+        />
       </button>
 
       {/* Dropdown Options */}
       {isOpen && (
         <div
-          className={`absolute z-50 ${variant === 'addon' ? 'w-32' : 'w-full'} ${styles.dropdown} max-h-60 overflow-auto`}
+          className={`absolute z-50 ${
+            variant === "addon" ? "w-32" : "w-full"
+          } ${styles.dropdown} max-h-60 overflow-auto`}
         >
           <div className="py-1">
             {options.map((option, index) => (
