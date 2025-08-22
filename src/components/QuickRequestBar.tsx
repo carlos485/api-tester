@@ -32,7 +32,7 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
   };
 
   return (
-    <div className="mb-6">
+    <div className="mb-2">
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2 items-center bg-white rounded-lg p-1">
           <Input
@@ -41,9 +41,9 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
             onChange={e => setUrl(e.target.value)}
             variant="full-width"
             leftAddon={
-              <RequestMethodSelect 
-                value={method} 
-                onChange={setMethod} 
+              <RequestMethodSelect
+                value={method}
+                onChange={setMethod}
                 variant="addon"
               />
             }

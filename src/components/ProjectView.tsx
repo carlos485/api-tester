@@ -275,7 +275,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
     if (requestTabs.length <= 1) return; // Don't close if it's the last tab
 
     setRequestTabs(prev => prev.filter((_, index) => index !== indexToClose));
-    
+
     // Adjust active tab index
     if (indexToClose === activeTabIndex) {
       // If closing the active tab, move to the previous tab or the first tab
@@ -383,6 +383,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
               >
                 {requestTabs.map(tab => (
                   <Tab key={tab.id} header={tab.name}>
+                    <h1 className="text-md text-gray-500 my-2">New Request</h1>
                     <QuickRequestBar
                       onSendRequest={handleQuickRequest}
                       environments={project.environments}
