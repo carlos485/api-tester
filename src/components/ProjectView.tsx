@@ -51,6 +51,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string>();
   const [isRestoredFromSession, setIsRestoredFromSession] = useState(false);
+  const [shouldActivateLastTab, setShouldActivateLastTab] = useState(false);
 
   // Use the endpoints hook for real Firebase data
   const {
@@ -96,6 +97,14 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
       saveSelectedEndpoint(selectedEndpointId);
     }
   }, [selectedEndpointId, isRestoredFromSession]);
+
+  // Effect to activate the last tab when a new tab is added
+  useEffect(() => {
+    if (shouldActivateLastTab && requestTabs.length > 0) {
+      setActiveTabIndex(requestTabs.length - 1);
+      setShouldActivateLastTab(false);
+    }
+  }, [shouldActivateLastTab, requestTabs]);
 
   const handleSendRequest = async (request: ApiRequest) => {
     const currentTab = requestTabs[activeTabIndex];
@@ -246,7 +255,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
     };
 
     setRequestTabs(prev => [...prev, newTab]);
-    setActiveTabIndex(requestTabs.length); // Switch to the new tab
+    setShouldActivateLastTab(true);
   };
 
   const handleAddTab = () => {
@@ -259,7 +268,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
     };
 
     setRequestTabs(prev => [...prev, newTab]);
-    setActiveTabIndex(requestTabs.length); // Switch to the new tab
+    setShouldActivateLastTab(true);
   };
 
   const handleCloseTab = (indexToClose: number) => {
