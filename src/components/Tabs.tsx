@@ -33,7 +33,7 @@ const tabVariants = {
   default: {
     container: "border-b border-gray-300",
     nav: "-mb-px flex space-x-8",
-    tab: "py-2 px-3 border-t border-x rounded-t-md font-medium text-sm transition-colors duration-200",
+    tab: "py-2 px-3 border-t border-x rounded-t-md font-medium text-sm transition-colors duration-200 mr-0",
     activeTab: "border-gray-300 border-b-white text-gray-900 bg-white",
     inactiveTab:
       "border-transparent text-gray-400 hover:text-gray-500 hover:border-gray-500",
@@ -65,7 +65,8 @@ const tabVariants = {
     nav: "flex space-x-8",
     tab: "py-2 px-1 border-b-2 font-medium text-sm cursor-pointer transition-colors duration-200",
     activeTab: "border-gray-900 text-gray-900",
-    inactiveTab: "border-transparent text-gray-400 hover:text-gray-500 hover:border-gray-500",
+    inactiveTab:
+      "border-transparent text-gray-400 hover:text-gray-500 hover:border-gray-500",
   },
 };
 
@@ -112,7 +113,7 @@ export const Tabs: FC<TabsProps> = ({
             {onAddTab && (
               <button
                 onClick={onAddTab}
-                className="ml-2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200"
+                className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200"
                 title="Add new tab"
               >
                 <Icon icon="material-symbols:add" className="w-4 h-4" />
@@ -126,7 +127,13 @@ export const Tabs: FC<TabsProps> = ({
           )}
         </div>
       </div>
-      <div className={`bg-white p-4 ${variant === "underline" ? "" : "border-x border-b border-gray-300 rounded-b-md"}`}>
+      <div
+        className={`bg-white p-4 ${
+          variant === "underline"
+            ? ""
+            : "border-x border-b border-gray-300 rounded-b-md"
+        }`}
+      >
         {tabs[activeTab]?.props.children}
       </div>
     </div>
