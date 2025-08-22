@@ -1,22 +1,27 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import type { Project, ApiRequest, ApiResponse, Endpoint } from "../types/project";
+import type {
+  Project,
+  ApiRequest,
+  ApiResponse,
+  Endpoint,
+} from "../types/project";
 import QuickRequestBar from "./QuickRequestBar";
 import RequestTabs from "./RequestTabs";
 import ResponseViewer from "./ResponseViewer";
 import { Tabs, Tab } from "./Tabs";
 import Sidebar from "./Sidebar";
 import { useEndpoints } from "../hooks/useEndpoints";
-import { 
-  saveRequestTabs, 
-  getRequestTabs, 
-  saveActiveTabIndex, 
+import {
+  saveRequestTabs,
+  getRequestTabs,
+  saveActiveTabIndex,
   getActiveTabIndex,
   saveSelectedEndpoint,
   getSelectedEndpoint,
   clearRequestTabs,
   clearActiveTabIndex,
-  clearSelectedEndpoint
+  clearSelectedEndpoint,
 } from "../utils/sessionStorage";
 
 interface ProjectViewProps {
@@ -46,13 +51,13 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [selectedEndpointId, setSelectedEndpointId] = useState<string>();
   const [isRestoredFromSession, setIsRestoredFromSession] = useState(false);
-  
+
   // Use the endpoints hook for real Firebase data
   const {
     endpoints,
     loading: endpointsLoading,
     error: endpointsError,
-    createEndpoint
+    createEndpoint,
   } = useEndpoints(project.id);
 
   // Restore state from sessionStorage on component mount
@@ -65,11 +70,11 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
       setRequestTabs(savedTabs);
       setActiveTabIndex(Math.min(savedActiveIndex, savedTabs.length - 1));
     }
-    
+
     if (savedEndpointId) {
       setSelectedEndpointId(savedEndpointId);
     }
-    
+
     setIsRestoredFromSession(true);
   }, []);
 
@@ -97,11 +102,11 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
     if (!currentTab) return;
 
     // Update the current tab's loading state
-    setRequestTabs(prev => prev.map((tab, index) => 
-      index === activeTabIndex 
-        ? { ...tab, loading: true, request } 
-        : tab
-    ));
+    setRequestTabs(prev =>
+      prev.map((tab, index) =>
+        index === activeTabIndex ? { ...tab, loading: true, request } : tab
+      )
+    );
 
     const startTime = Date.now();
 
@@ -151,11 +156,13 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
       };
 
       // Update the current tab's response
-      setRequestTabs(prev => prev.map((tab, index) => 
-        index === activeTabIndex 
-          ? { ...tab, response: responseData, loading: false } 
-          : tab
-      ));
+      setRequestTabs(prev =>
+        prev.map((tab, index) =>
+          index === activeTabIndex
+            ? { ...tab, response: responseData, loading: false }
+            : tab
+        )
+      );
     } catch (error) {
       const endTime = Date.now();
       console.error("Request failed:", error);
@@ -198,11 +205,13 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
       };
 
       // Update the current tab's error response
-      setRequestTabs(prev => prev.map((tab, index) => 
-        index === activeTabIndex 
-          ? { ...tab, response: errorResponse, loading: false } 
-          : tab
-      ));
+      setRequestTabs(prev =>
+        prev.map((tab, index) =>
+          index === activeTabIndex
+            ? { ...tab, response: errorResponse, loading: false }
+            : tab
+        )
+      );
     }
   };
 
@@ -221,7 +230,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
 
   const handleEndpointSelect = (endpoint: Endpoint) => {
     setSelectedEndpointId(endpoint.id);
-    
+
     // Create a new tab for this endpoint
     const newTab: RequestTab = {
       id: `endpoint-${endpoint.id}-${Date.now()}`,
@@ -267,10 +276,11 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
     }
   };
 
-  const currentTab = requestTabs[activeTabIndex];
+  // const currentTab = requestTabs[activeTabIndex];
 
   // Clean up session storage when going back to home
   const handleBackToHomeWithCleanup = () => {
+    // Clear only ProjectView specific data, not the selected project
     clearRequestTabs();
     clearActiveTabIndex();
     clearSelectedEndpoint();
@@ -326,7 +336,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
               selectedEndpointId={selectedEndpointId}
               loading={endpointsLoading}
             />
-            
+
             {/* Content Area */}
             <div className="flex-1 overflow-auto">
               {endpointsError && (
@@ -337,13 +347,13 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
                   </div>
                 </div>
               )}
-              
-              <Tabs 
-                defaultActiveTab={activeTabIndex} 
+
+              <Tabs
+                defaultActiveTab={activeTabIndex}
                 onAddTab={handleAddTab}
                 onTabChange={setActiveTabIndex}
               >
-                {requestTabs.map((tab, index) => (
+                {requestTabs.map(tab => (
                   <Tab key={tab.id} header={tab.name}>
                     <QuickRequestBar
                       onSendRequest={handleQuickRequest}
@@ -351,9 +361,9 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
                     />
                     <RequestTabs />
                     <div className="mt-6">
-                      <ResponseViewer 
-                        response={tab.response} 
-                        loading={tab.loading} 
+                      <ResponseViewer
+                        response={tab.response}
+                        loading={tab.loading}
                       />
                     </div>
                   </Tab>

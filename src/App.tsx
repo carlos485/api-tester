@@ -25,6 +25,7 @@ function App() {
   const { user, loading: authLoading, signInAnonymously } = useAuth();
   const { projects, loading: projectsLoading, createProject, deleteProject } = useProjects(user?.uid || null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [shouldRestore, setShouldRestore] = useState(true);
 
   // Auto sign-in anonymously if no user
   useEffect(() => {
@@ -33,9 +34,9 @@ function App() {
     }
   }, [authLoading, user, signInAnonymously]);
 
-  // Restore selected project from sessionStorage
+  // Restore selected project from sessionStorage (only once on app load)
   useEffect(() => {
-    if (!projectsLoading && projects.length > 0 && !selectedProject) {
+    if (!projectsLoading && projects.length > 0 && !selectedProject && shouldRestore) {
       const savedProjectId = getSelectedProject();
       if (savedProjectId) {
         const savedProject = projects.find(p => p.id === savedProjectId);
@@ -46,8 +47,9 @@ function App() {
           clearSelectedProject();
         }
       }
+      setShouldRestore(false); // Disable further automatic restoration
     }
-  }, [projects, projectsLoading, selectedProject]);
+  }, [projects, projectsLoading, selectedProject, shouldRestore]);
 
   const handleProjectSelect = (project: Project) => {
     setSelectedProject(project);
