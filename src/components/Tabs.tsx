@@ -27,6 +27,8 @@ interface TabsProps {
   variant?: TabVariant;
   onAddTab?: () => void;
   onTabChange?: (index: number) => void;
+  onCloseTab?: (index: number) => void;
+  showCloseButton?: boolean;
 }
 
 const tabVariants = {
@@ -76,6 +78,8 @@ export const Tabs: FC<TabsProps> = ({
   variant = "default",
   onAddTab,
   onTabChange,
+  onCloseTab,
+  showCloseButton = false,
 }) => {
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
 
@@ -97,18 +101,34 @@ export const Tabs: FC<TabsProps> = ({
         <div className="flex justify-between items-center">
           <nav className={styles.nav}>
             {tabs.map((tab, index) => (
-              <button
+              <div
                 key={index}
-                onClick={() => {
-                  setActiveTab(index);
-                  onTabChange?.(index);
-                }}
                 className={`${styles.tab} ${
                   activeTab === index ? styles.activeTab : styles.inactiveTab
-                }`}
+                } ${showCloseButton ? 'group flex items-center gap-2' : ''}`}
               >
-                {tab.props.header}
-              </button>
+                <button
+                  onClick={() => {
+                    setActiveTab(index);
+                    onTabChange?.(index);
+                  }}
+                  className={`${showCloseButton ? 'flex-1 text-left' : 'w-full'}`}
+                >
+                  {tab.props.header}
+                </button>
+                {showCloseButton && onCloseTab && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCloseTab(index);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 rounded-sm p-0.5 transition-all duration-150"
+                    title="Close tab"
+                  >
+                    <Icon icon="material-symbols:close" className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
             ))}
             {onAddTab && (
               <button

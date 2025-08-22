@@ -262,6 +262,23 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
     setActiveTabIndex(requestTabs.length); // Switch to the new tab
   };
 
+  const handleCloseTab = (indexToClose: number) => {
+    if (requestTabs.length <= 1) return; // Don't close if it's the last tab
+
+    setRequestTabs(prev => prev.filter((_, index) => index !== indexToClose));
+    
+    // Adjust active tab index
+    if (indexToClose === activeTabIndex) {
+      // If closing the active tab, move to the previous tab or the first tab
+      const newActiveIndex = indexToClose > 0 ? indexToClose - 1 : 0;
+      setActiveTabIndex(newActiveIndex);
+    } else if (indexToClose < activeTabIndex) {
+      // If closing a tab before the active tab, decrease the active index
+      setActiveTabIndex(prev => prev - 1);
+    }
+    // If closing a tab after the active tab, no change needed
+  };
+
   const handleAddEndpoint = async () => {
     try {
       await createEndpoint({
@@ -352,6 +369,8 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
                 defaultActiveTab={activeTabIndex}
                 onAddTab={handleAddTab}
                 onTabChange={setActiveTabIndex}
+                onCloseTab={handleCloseTab}
+                showCloseButton={requestTabs.length > 1}
               >
                 {requestTabs.map(tab => (
                   <Tab key={tab.id} header={tab.name}>
