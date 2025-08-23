@@ -11,6 +11,7 @@ import RequestTabs from "./RequestTabs";
 import ResponseViewer from "./ResponseViewer";
 import { Tabs, Tab } from "./Tabs";
 import Sidebar from "./Sidebar";
+import ProjectSelector from "./ProjectSelector";
 import { useEndpoints } from "../hooks/useEndpoints";
 import {
   saveRequestTabs,
@@ -26,7 +27,9 @@ import {
 
 interface ProjectViewProps {
   project: Project;
+  projects: Project[];
   onBackToHome: () => void;
+  onProjectChange: (project: Project) => void;
 }
 
 interface RequestTab {
@@ -37,7 +40,7 @@ interface RequestTab {
   loading: boolean;
 }
 
-const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
+const ProjectView: React.FC<ProjectViewProps> = ({ project, projects, onBackToHome, onProjectChange }) => {
   // Initialize with default values, will be restored from sessionStorage in useEffect
   const [requestTabs, setRequestTabs] = useState<RequestTab[]>([
     {
@@ -327,21 +330,11 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
               >
                 <Icon icon="material-symbols:arrow-back" className="h-5 w-5" />
               </button>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gray-100">
-                  <Icon icon={project.icon} className="h-6 w-6 text-gray-900" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    {project.name}
-                  </h1>
-                  {project.description && (
-                    <p className="text-gray-600 text-sm">
-                      {project.description}
-                    </p>
-                  )}
-                </div>
-              </div>
+              <ProjectSelector
+                projects={projects}
+                currentProject={project}
+                onProjectChange={onProjectChange}
+              />
             </div>
             <button className="cursor-pointer p-2 border-2 rounded-lg hover:bg-gray-50 transition-colors">
               <Icon icon="material-symbols:settings" />

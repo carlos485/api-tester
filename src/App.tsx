@@ -92,7 +92,9 @@ function App() {
     return (
       <ProjectView
         project={selectedProject}
+        projects={projects}
         onBackToHome={handleBackToHome}
+        onProjectChange={handleProjectSelect}
       />
     );
   }
