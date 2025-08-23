@@ -383,7 +383,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, onBackToHome }) => {
               >
                 {requestTabs.map(tab => (
                   <Tab key={tab.id} header={tab.name}>
-                    <h1 className="text-md text-gray-500 my-2">New Request</h1>
+                    <h1 className="text-md text-gray-500 mb-2">New Request</h1>
                     <QuickRequestBar
                       onSendRequest={handleQuickRequest}
                       environments={project.environments}
