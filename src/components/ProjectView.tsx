@@ -12,6 +12,7 @@ import ResponseViewer from "./ResponseViewer";
 import { Tabs, Tab } from "./Tabs";
 import Sidebar from "./Sidebar";
 import ProjectSelector from "./ProjectSelector";
+import Input from "./Input";
 import { useEndpoints } from "../hooks/useEndpoints";
 import {
   saveRequestTabs,
@@ -40,7 +41,12 @@ interface RequestTab {
   loading: boolean;
 }
 
-const ProjectView: React.FC<ProjectViewProps> = ({ project, projects, onBackToHome, onProjectChange }) => {
+const ProjectView: React.FC<ProjectViewProps> = ({
+  project,
+  projects,
+  onBackToHome,
+  onProjectChange,
+}) => {
   // Initialize with default values, will be restored from sessionStorage in useEffect
   const [requestTabs, setRequestTabs] = useState<RequestTab[]>([
     {
@@ -55,6 +61,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, projects, onBackToHo
   const [selectedEndpointId, setSelectedEndpointId] = useState<string>();
   const [isRestoredFromSession, setIsRestoredFromSession] = useState(false);
   const [shouldActivateLastTab, setShouldActivateLastTab] = useState(false);
+  const [editingTabName, setEditingTabName] = useState<string | null>(null);
 
   // Use the endpoints hook for real Firebase data
   const {
@@ -305,10 +312,21 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, projects, onBackToHo
     }
   };
 
-  const handleRequestChange = (tabIndex: number, updatedRequest: ApiRequest) => {
+  const handleRequestChange = (
+    tabIndex: number,
+    updatedRequest: ApiRequest
+  ) => {
     setRequestTabs(prev =>
       prev.map((tab, index) =>
         index === tabIndex ? { ...tab, request: updatedRequest } : tab
+      )
+    );
+  };
+
+  const handleTabNameChange = (tabIndex: number, newName: string) => {
+    setRequestTabs(prev =>
+      prev.map((tab, index) =>
+        index === tabIndex ? { ...tab, name: newName } : tab
       )
     );
   };
@@ -384,14 +402,28 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, projects, onBackToHo
               >
                 {requestTabs.map((tab, tabIndex) => (
                   <Tab key={tab.id} header={tab.name}>
-                    <h1 className="text-md text-gray-500 mb-2">New Request</h1>
+                    <Input
+                      type="text"
+                      value={tab.name}
+                      onChange={(e) => handleTabNameChange(tabIndex, e.target.value)}
+                      onFocus={() => setEditingTabName(tab.id)}
+                      onBlur={() => setEditingTabName(null)}
+                      className={`text-md text-gray-600 mb-2 w-auto inline-block min-w-[120px] ${
+                        editingTabName === tab.id 
+                          ? "border border-gray-300" 
+                          : "border-0 hover:border hover:border-gray-200"
+                      }`}
+                      style={{ width: `${Math.max(120, tab.name.length * 8 + 20)}px` }}
+                    />
                     <QuickRequestBar
                       onSendRequest={handleQuickRequest}
                       environments={project.environments}
                     />
-                    <RequestTabs 
+                    <RequestTabs
                       request={tab.request}
-                      onRequestChange={(updatedRequest) => handleRequestChange(tabIndex, updatedRequest)}
+                      onRequestChange={updatedRequest =>
+                        handleRequestChange(tabIndex, updatedRequest)
+                      }
                     />
                     <div className="mt-6">
                       <ResponseViewer
