@@ -5,6 +5,7 @@ import type {
   ApiRequest,
   ApiResponse,
   Endpoint,
+  HttpMethod,
 } from "../types/project";
 import QuickRequestBar from "./QuickRequestBar";
 import RequestTabs from "./RequestTabs";
@@ -62,6 +63,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   const [isRestoredFromSession, setIsRestoredFromSession] = useState(false);
   const [shouldActivateLastTab, setShouldActivateLastTab] = useState(false);
   const [editingTabName, setEditingTabName] = useState<string | null>(null);
+  const [savingTab, setSavingTab] = useState<string | null>(null);
 
   // Use the endpoints hook for real Firebase data
   const {
@@ -331,6 +333,32 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     );
   };
 
+  const handleSaveEndpoint = async (tabIndex: number) => {
+    const tab = requestTabs[tabIndex];
+    if (!tab) return;
+
+    setSavingTab(tab.id);
+
+    try {
+      await createEndpoint({
+        name: tab.name || "Untitled Request",
+        method: tab.request.method as HttpMethod,
+        url: tab.request.url || "",
+        description: `Saved from ${tab.name || "Untitled Request"}`,
+        headers: tab.request.headers,
+        body: tab.request.body,
+      });
+
+      // TODO: Show success message/toast
+      console.log("Endpoint saved successfully!");
+    } catch (error) {
+      console.error("Failed to save endpoint:", error);
+      // TODO: Show error message/toast
+    } finally {
+      setSavingTab(null);
+    }
+  };
+
   // const currentTab = requestTabs[activeTabIndex];
 
   // Clean up session storage when going back to home
@@ -420,8 +448,19 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                           width: `${Math.max(120, tab.name.length * 8 + 20)}px`,
                         }}
                       />
-                      <button className="p-1 transition-colors duration-300 text-2xl text-gray-500 border-2 border-transparent focus:outline-none rounded-lg hover:text-gray-600 hover:border-gray-600 focus:z-10 focus:ring-4 focus:ring-gray-100">
-                        <Icon icon="uil:save" />
+                      <button
+                        onClick={() => handleSaveEndpoint(tabIndex)}
+                        disabled={savingTab === tab.id}
+                        className="p-1 transition-colors duration-300 text-2xl text-gray-500 border-2 border-transparent focus:outline-none rounded-lg hover:text-gray-600 hover:border-gray-600 focus:z-10 focus:ring-4 focus:ring-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Save as endpoint"
+                      >
+                        <Icon
+                          icon={
+                            savingTab === tab.id
+                              ? "line-md:loading-loop"
+                              : "uil:save"
+                          }
+                        />
                       </button>
                     </div>
                     <QuickRequestBar
