@@ -33,12 +33,11 @@ export class EndpointsService {
     try {
       const q = query(
         collection(db, ENDPOINTS_COLLECTION),
-        where("projectId", "==", projectId),
-        orderBy("createdAt", "desc")
+        where("projectId", "==", projectId)
       );
       
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map((doc) => {
+      const endpoints = querySnapshot.docs.map((doc) => {
         const data = doc.data();
         return {
           ...data,
@@ -47,6 +46,9 @@ export class EndpointsService {
           updatedAt: convertTimestamp(data.updatedAt),
         } as Endpoint;
       });
+      
+      // Sort by createdAt descending in client
+      return endpoints.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } catch (error) {
       console.error("Error getting endpoints:", error);
       throw error;
@@ -60,8 +62,7 @@ export class EndpointsService {
   ): () => void {
     const q = query(
       collection(db, ENDPOINTS_COLLECTION),
-      where("projectId", "==", projectId),
-      orderBy("createdAt", "desc")
+      where("projectId", "==", projectId)
     );
 
     return onSnapshot(q, (snapshot) => {
@@ -74,7 +75,10 @@ export class EndpointsService {
           updatedAt: convertTimestamp(data.updatedAt),
         } as Endpoint;
       });
-      callback(endpoints);
+      
+      // Sort by createdAt descending in client
+      const sortedEndpoints = endpoints.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      callback(sortedEndpoints);
     });
   }
 
@@ -128,12 +132,11 @@ export class EndpointsService {
     try {
       const q = query(
         collection(db, ENDPOINT_FOLDERS_COLLECTION),
-        where("projectId", "==", projectId),
-        orderBy("createdAt", "desc")
+        where("projectId", "==", projectId)
       );
       
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map((doc) => {
+      const folders = querySnapshot.docs.map((doc) => {
         const data = doc.data();
         return {
           ...data,
@@ -142,6 +145,9 @@ export class EndpointsService {
           updatedAt: convertTimestamp(data.updatedAt),
         } as EndpointFolder;
       });
+      
+      // Sort by createdAt descending in client
+      return folders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } catch (error) {
       console.error("Error getting endpoint folders:", error);
       throw error;

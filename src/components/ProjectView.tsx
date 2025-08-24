@@ -242,13 +242,34 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     method: string;
     url: string;
   }) => {
+    const currentTab = requestTabs[activeTabIndex];
+    if (!currentTab) return;
+
     const request: ApiRequest = {
+      ...currentTab.request,
       method: quickRequest.method,
       url: quickRequest.url,
-      headers: {},
-      body: "",
     };
+    
+    // Send the request
     handleSendRequest(request);
+  };
+
+  const handleQuickRequestChange = (tabIndex: number, quickRequest: {
+    method: string;
+    url: string;
+  }) => {
+    const currentTab = requestTabs[tabIndex];
+    if (!currentTab) return;
+
+    const updatedRequest: ApiRequest = {
+      ...currentTab.request,
+      method: quickRequest.method,
+      url: quickRequest.url,
+    };
+    
+    // Update the tab's request state
+    handleRequestChange(tabIndex, updatedRequest);
   };
 
   const handleEndpointSelect = (endpoint: Endpoint) => {
@@ -489,6 +510,9 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                     <QuickRequestBar
                       onSendRequest={handleQuickRequest}
                       environments={project.environments}
+                      initialMethod={tab.request.method}
+                      initialUrl={tab.request.url}
+                      onRequestChange={(quickRequest) => handleQuickRequestChange(tabIndex, quickRequest)}
                     />
                     <RequestTabs
                       request={tab.request}

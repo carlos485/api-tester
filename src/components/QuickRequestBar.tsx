@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import type { Environment } from "../types/project";
 import RequestMethodSelect, { type HttpMethod } from "./RequestMethodSelect";
@@ -7,12 +7,44 @@ import Input from "./Input";
 interface QuickRequestBarProps {
   onSendRequest: (request: { method: string; url: string }) => void;
   environments?: Environment[];
+  initialMethod?: string;
+  initialUrl?: string;
+  onRequestChange?: (request: { method: string; url: string }) => void;
 }
 
-const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
-  const [method, setMethod] = useState<HttpMethod>("GET");
-  const [url, setUrl] = useState("");
+const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ 
+  onSendRequest, 
+  initialMethod = "GET", 
+  initialUrl = "",
+  onRequestChange 
+}) => {
+  const [method, setMethod] = useState<HttpMethod>(initialMethod as HttpMethod);
+  const [url, setUrl] = useState(initialUrl);
   const [selectedEnvironment] = useState<Environment | null>(null);
+
+  // Sync with props when they change
+  useEffect(() => {
+    setMethod(initialMethod as HttpMethod);
+  }, [initialMethod]);
+
+  useEffect(() => {
+    setUrl(initialUrl);
+  }, [initialUrl]);
+
+  // Notify parent of changes
+  const handleMethodChange = (newMethod: HttpMethod) => {
+    setMethod(newMethod);
+    if (onRequestChange) {
+      onRequestChange({ method: newMethod, url });
+    }
+  };
+
+  const handleUrlChange = (newUrl: string) => {
+    setUrl(newUrl);
+    if (onRequestChange) {
+      onRequestChange({ method, url: newUrl });
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,12 +70,12 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ onSendRequest }) => {
           <Input
             type="text"
             value={url}
-            onChange={e => setUrl(e.target.value)}
+            onChange={e => handleUrlChange(e.target.value)}
             variant="full-width"
             leftAddon={
               <RequestMethodSelect
                 value={method}
-                onChange={setMethod}
+                onChange={handleMethodChange}
                 variant="addon"
               />
             }
