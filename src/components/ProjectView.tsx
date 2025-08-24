@@ -40,6 +40,7 @@ interface RequestTab {
   request: ApiRequest;
   response: ApiResponse | null;
   loading: boolean;
+  endpointId?: string; // ID of the original endpoint if this tab was created from one
 }
 
 const ProjectView: React.FC<ProjectViewProps> = ({
@@ -71,6 +72,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     loading: endpointsLoading,
     error: endpointsError,
     createEndpoint,
+    updateEndpoint,
   } = useEndpoints(project.id);
 
   // Restore state from sessionStorage on component mount
@@ -264,6 +266,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
       },
       response: null,
       loading: false,
+      endpointId: endpoint.id, // Store the endpoint ID
     };
 
     setRequestTabs(prev => [...prev, newTab]);
@@ -340,17 +343,33 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     setSavingTab(tab.id);
 
     try {
-      await createEndpoint({
+      const endpointData = {
         name: tab.name || "Untitled Request",
         method: tab.request.method as HttpMethod,
         url: tab.request.url || "",
-        description: `Saved from ${tab.name || "Untitled Request"}`,
+        description: tab.endpointId 
+          ? `Updated from ${tab.name || "Untitled Request"}`
+          : `Saved from ${tab.name || "Untitled Request"}`,
         headers: tab.request.headers,
         body: tab.request.body,
-      });
+      };
 
-      // TODO: Show success message/toast
-      console.log("Endpoint saved successfully!");
+      if (tab.endpointId) {
+        // Update existing endpoint
+        await updateEndpoint(tab.endpointId, endpointData);
+        console.log("Endpoint updated successfully!");
+      } else {
+        // Create new endpoint
+        const newEndpointId = await createEndpoint(endpointData);
+        
+        // Update the tab to include the new endpoint ID
+        setRequestTabs(prev =>
+          prev.map((t, index) =>
+            index === tabIndex ? { ...t, endpointId: newEndpointId } : t
+          )
+        );
+        console.log("New endpoint created successfully!");
+      }
     } catch (error) {
       console.error("Failed to save endpoint:", error);
       // TODO: Show error message/toast
@@ -451,8 +470,12 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                       <button
                         onClick={() => handleSaveEndpoint(tabIndex)}
                         disabled={savingTab === tab.id}
-                        className="p-1 transition-colors duration-300 text-2xl text-gray-500 border-2 border-transparent focus:outline-none rounded-lg hover:text-gray-600 hover:border-gray-600 focus:z-10 focus:ring-4 focus:ring-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Save as endpoint"
+                        className={`p-1 transition-colors duration-300 text-2xl border-2 border-transparent focus:outline-none rounded-lg focus:z-10 focus:ring-4 focus:ring-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          tab.endpointId 
+                            ? "text-blue-600 hover:text-blue-700 hover:border-blue-600" 
+                            : "text-gray-500 hover:text-gray-600 hover:border-gray-600"
+                        }`}
+                        title={tab.endpointId ? "Update endpoint" : "Save as new endpoint"}
                       >
                         <Icon
                           icon={
