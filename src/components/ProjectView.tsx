@@ -402,19 +402,28 @@ const ProjectView: React.FC<ProjectViewProps> = ({
               >
                 {requestTabs.map((tab, tabIndex) => (
                   <Tab key={tab.id} header={tab.name}>
-                    <Input
-                      type="text"
-                      value={tab.name}
-                      onChange={(e) => handleTabNameChange(tabIndex, e.target.value)}
-                      onFocus={() => setEditingTabName(tab.id)}
-                      onBlur={() => setEditingTabName(null)}
-                      className={`text-md text-gray-600 mb-2 w-auto inline-block min-w-[120px] ${
-                        editingTabName === tab.id 
-                          ? "border border-gray-300" 
-                          : "border-0 hover:border hover:border-gray-200"
-                      }`}
-                      style={{ width: `${Math.max(120, tab.name.length * 8 + 20)}px` }}
-                    />
+                    <div className="flex items-center gap-4">
+                      <Input
+                        type="text"
+                        value={tab.name}
+                        onChange={e =>
+                          handleTabNameChange(tabIndex, e.target.value)
+                        }
+                        onFocus={() => setEditingTabName(tab.id)}
+                        onBlur={() => setEditingTabName(null)}
+                        className={`text-md text-gray-600 w-auto inline-block min-w-[120px] ${
+                          editingTabName === tab.id
+                            ? "border border-gray-300"
+                            : "border-0 hover:border hover:border-gray-200"
+                        }`}
+                        style={{
+                          width: `${Math.max(120, tab.name.length * 8 + 20)}px`,
+                        }}
+                      />
+                      <button className="p-1 transition-colors duration-300 text-2xl text-gray-500 border-2 border-transparent focus:outline-none rounded-lg hover:text-gray-600 hover:border-gray-600 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                        <Icon icon="uil:save" />
+                      </button>
+                    </div>
                     <QuickRequestBar
                       onSendRequest={handleQuickRequest}
                       environments={project.environments}
