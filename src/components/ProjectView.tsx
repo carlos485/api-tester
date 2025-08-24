@@ -305,6 +305,14 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, projects, onBackToHo
     }
   };
 
+  const handleRequestChange = (tabIndex: number, updatedRequest: ApiRequest) => {
+    setRequestTabs(prev =>
+      prev.map((tab, index) =>
+        index === tabIndex ? { ...tab, request: updatedRequest } : tab
+      )
+    );
+  };
+
   // const currentTab = requestTabs[activeTabIndex];
 
   // Clean up session storage when going back to home
@@ -374,14 +382,17 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, projects, onBackToHo
                 onCloseTab={handleCloseTab}
                 showCloseButton={requestTabs.length > 1}
               >
-                {requestTabs.map(tab => (
+                {requestTabs.map((tab, tabIndex) => (
                   <Tab key={tab.id} header={tab.name}>
                     <h1 className="text-md text-gray-500 mb-2">New Request</h1>
                     <QuickRequestBar
                       onSendRequest={handleQuickRequest}
                       environments={project.environments}
                     />
-                    <RequestTabs />
+                    <RequestTabs 
+                      request={tab.request}
+                      onRequestChange={(updatedRequest) => handleRequestChange(tabIndex, updatedRequest)}
+                    />
                     <div className="mt-6">
                       <ResponseViewer
                         response={tab.response}

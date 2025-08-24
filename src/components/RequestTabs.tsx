@@ -1,11 +1,81 @@
+import { useState } from "react";
 import { Tabs, Tab } from "./Tabs";
+import type { ApiRequest } from "../types/project";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface RequestTabsProps {
-  // Props will be added when needed
+  request: ApiRequest;
+  onRequestChange: (request: ApiRequest) => void;
 }
 
-const RequestTabs: React.FC<RequestTabsProps> = () => {
+interface HeaderRow {
+  id: string;
+  key: string;
+  value: string;
+  description: string;
+  enabled: boolean;
+}
+
+const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) => {
+  // Convert headers object to array for table display
+  const headersToArray = (headers: Record<string, string>): HeaderRow[] => {
+    return Object.entries(headers).map(([key, value]) => ({
+      id: `header-${Date.now()}-${Math.random()}`,
+      key,
+      value,
+      description: "",
+      enabled: true,
+    }));
+  };
+
+  const [headerRows, setHeaderRows] = useState<HeaderRow[]>(() => {
+    const existingHeaders = headersToArray(request.headers);
+    // Always add one empty row for new headers
+    return [...existingHeaders, {
+      id: `new-header-${Date.now()}`,
+      key: "",
+      value: "",
+      description: "",
+      enabled: true,
+    }];
+  });
+
+  // Update request headers when headerRows change
+  const updateRequestHeaders = (rows: HeaderRow[]) => {
+    const headers: Record<string, string> = {};
+    rows.forEach(row => {
+      if (row.key.trim() && row.value.trim() && row.enabled) {
+        headers[row.key.trim()] = row.value.trim();
+      }
+    });
+    
+    onRequestChange({
+      ...request,
+      headers,
+    });
+  };
+
+  const handleHeaderChange = (id: string, field: keyof HeaderRow, value: string | boolean) => {
+    setHeaderRows(prev => {
+      const newRows = prev.map(row => 
+        row.id === id ? { ...row, [field]: value } : row
+      );
+      
+      // If the last row (empty row) is being edited, add a new empty row
+      const lastRow = newRows[newRows.length - 1];
+      if (lastRow && (lastRow.key || lastRow.value) && lastRow.id.startsWith('new-header')) {
+        newRows.push({
+          id: `new-header-${Date.now()}`,
+          key: "",
+          value: "",
+          description: "",
+          enabled: true,
+        });
+      }
+      
+      updateRequestHeaders(newRows);
+      return newRows;
+    });
+  };
   return (
     <div className="bg-white rounded-lg">
       <Tabs variant="underline">
@@ -124,48 +194,52 @@ const RequestTabs: React.FC<RequestTabsProps> = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="bg-white border-b border-gray-200 hover:bg-gray-50">
-                    <td className="w-4 p-4">
-                      <div className="flex items-center">
+                  {headerRows.map((header, index) => (
+                    <tr key={header.id} className="bg-white border-b border-gray-200 hover:bg-gray-50">
+                      <td className="w-4 p-4">
+                        <div className="flex items-center">
+                          <input
+                            id={`checkbox-header-${header.id}`}
+                            type="checkbox"
+                            checked={header.enabled}
+                            onChange={(e) => handleHeaderChange(header.id, 'enabled', e.target.checked)}
+                            className="w-4 h-4 text-gray-900 bg-gray-100 border-gray-300 rounded-sm focus:ring-gray-900"
+                          />
+                          <label
+                            htmlFor={`checkbox-header-${header.id}`}
+                            className="sr-only"
+                          >
+                            checkbox
+                          </label>
+                        </div>
+                      </td>
+                      <td className="py-2 px-2">
                         <input
-                          id="checkbox-table-search-headers-1"
-                          type="checkbox"
-                          className="w-4 h-4 text-gray-900 bg-gray-100 border-gray-300 rounded-sm focus:ring-gray-900"
+                          type="text"
+                          value={header.key}
+                          onChange={(e) => handleHeaderChange(header.id, 'key', e.target.value)}
+                          className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                          placeholder={index === headerRows.length - 1 ? "Añadir un nuevo header" : ""}
                         />
-                        <label
-                          htmlFor="checkbox-table-search-headers-1"
-                          className="sr-only"
-                        >
-                          checkbox
-                        </label>
-                      </div>
-                    </td>
-                    <td className="py-2 px-2">
-                      <input
-                        type="text"
-                        id="header_key"
-                        className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                        placeholder="Añadir un nuevo header"
-                        required
-                      />
-                    </td>
-                    <td className="py-2 px-2">
-                      <input
-                        type="text"
-                        id="header_value"
-                        className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                        required
-                      />
-                    </td>
-                    <td className="py-2 px-2">
-                      <input
-                        type="text"
-                        id="header_description"
-                        className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                        required
-                      />
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="py-2 px-2">
+                        <input
+                          type="text"
+                          value={header.value}
+                          onChange={(e) => handleHeaderChange(header.id, 'value', e.target.value)}
+                          className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                        />
+                      </td>
+                      <td className="py-2 px-2">
+                        <input
+                          type="text"
+                          value={header.description}
+                          onChange={(e) => handleHeaderChange(header.id, 'description', e.target.value)}
+                          className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                        />
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
