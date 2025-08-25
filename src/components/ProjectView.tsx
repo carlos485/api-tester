@@ -278,23 +278,33 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   const handleEndpointSelect = (endpoint: Endpoint) => {
     setSelectedEndpointId(endpoint.id);
 
-    // Create a new tab for this endpoint
-    const newTab: RequestTab = {
-      id: `endpoint-${endpoint.id}-${Date.now()}`,
-      name: endpoint.name,
-      request: {
-        method: endpoint.method,
-        url: endpoint.url,
-        headers: endpoint.headers || {},
-        body: endpoint.body || "",
-      },
-      response: null,
-      loading: false,
-      endpointId: endpoint.id, // Store the endpoint ID
-    };
+    // Check if a tab for this endpoint already exists
+    const existingTabIndex = requestTabs.findIndex(
+      tab => tab.endpointId === endpoint.id
+    );
 
-    setRequestTabs(prev => [...prev, newTab]);
-    setShouldActivateLastTab(true);
+    if (existingTabIndex !== -1) {
+      // Tab already exists, just activate it
+      setActiveTabIndex(existingTabIndex);
+    } else {
+      // Create a new tab for this endpoint
+      const newTab: RequestTab = {
+        id: `endpoint-${endpoint.id}-${Date.now()}`,
+        name: endpoint.name,
+        request: {
+          method: endpoint.method,
+          url: endpoint.url,
+          headers: endpoint.headers || {},
+          body: endpoint.body || "",
+        },
+        response: null,
+        loading: false,
+        endpointId: endpoint.id, // Store the endpoint ID
+      };
+
+      setRequestTabs(prev => [...prev, newTab]);
+      setShouldActivateLastTab(true);
+    }
   };
 
   const handleAddTab = () => {
