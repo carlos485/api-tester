@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 
 interface ConfirmationModalProps {
@@ -8,7 +9,7 @@ interface ConfirmationModalProps {
   message?: string;
   confirmText?: string;
   cancelText?: string;
-  type?: 'danger' | 'warning' | 'info';
+  type?: "danger" | "warning" | "info";
   loading?: boolean;
 }
 
@@ -20,53 +21,85 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   message = "Are you sure you want to perform this action?",
   confirmText = "Confirm",
   cancelText = "Cancel",
-  type = 'danger',
+  type = "danger",
   loading = false,
 }) => {
-  if (!isOpen) return null;
+  const [isVisible, setIsVisible] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+      // Small delay to trigger enter animation
+      setTimeout(() => setIsVisible(true), 10);
+    } else {
+      setIsVisible(false);
+      // Wait for exit animation to complete before unmounting
+      setTimeout(() => setShouldRender(false), 200);
+    }
+  }, [isOpen]);
+
+  if (!shouldRender) return null;
 
   const typeStyles = {
     danger: {
-      icon: "material-symbols:warning",
+      icon: "line-md:alert",
       iconColor: "text-red-600",
       iconBg: "bg-red-100",
-      confirmButton: "text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300",
+      confirmButton:
+        "text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300",
     },
     warning: {
       icon: "material-symbols:warning",
       iconColor: "text-yellow-600",
       iconBg: "bg-yellow-100",
-      confirmButton: "text-white bg-yellow-600 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300",
+      confirmButton:
+        "text-white bg-yellow-600 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300",
     },
     info: {
       icon: "material-symbols:info",
       iconColor: "text-blue-600",
       iconBg: "bg-blue-100",
-      confirmButton: "text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300",
+      confirmButton:
+        "text-white bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300",
     },
   };
 
   const currentStyle = typeStyles[type];
 
   const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
+    if (e.target === e.currentTarget && !loading) {
+      onClose();
+    }
+  };
+
+  const handleClose = () => {
+    if (!loading) {
       onClose();
     }
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto bg-gray-900 bg-opacity-50"
+      className={`fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto bg-gray-900 transition-opacity duration-200 ${
+        isVisible ? "bg-opacity-50" : "bg-opacity-0"
+      }`}
       onClick={handleBackdropClick}
     >
       <div className="relative w-full max-w-md max-h-full">
-        <div className="relative bg-white rounded-lg shadow">
+        <div
+          className={`relative bg-white rounded-lg shadow transition-all duration-200 transform ${
+            isVisible
+              ? "opacity-100 scale-100 translate-y-0"
+              : "opacity-0 scale-95 -translate-y-4"
+          }`}
+        >
           {/* Modal header */}
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={loading}
-            className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
+            className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
           >
             <Icon icon="material-symbols:close" className="w-3 h-3" />
             <span className="sr-only">Close modal</span>
@@ -74,42 +107,37 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
           {/* Modal body */}
           <div className="p-6 text-center">
-            <div className={`mx-auto mb-4 w-12 h-12 ${currentStyle.iconBg} rounded-full flex items-center justify-center`}>
-              <Icon 
-                icon={currentStyle.icon} 
-                className={`w-5 h-5 ${currentStyle.iconColor}`} 
+            <div
+              className={`mx-auto mb-4 w-12 h-12 ${currentStyle.iconBg} rounded-full flex items-center justify-center`}
+            >
+              <Icon
+                icon={currentStyle.icon}
+                className={`w-5 h-5 ${currentStyle.iconColor}`}
               />
             </div>
-            
-            <h3 className="mb-5 text-lg font-normal text-gray-500">
-              {title}
-            </h3>
-            
-            <p className="mb-5 text-sm text-gray-500">
-              {message}
-            </p>
+
+            <h3 className="mb-5 text-lg font-normal text-gray-500">{title}</h3>
+
+            <p className="mb-5 text-sm text-gray-500">{message}</p>
 
             <div className="flex justify-center gap-4">
               <button
                 type="button"
                 onClick={onConfirm}
                 disabled={loading}
-                className={`font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center disabled:opacity-50 disabled:cursor-not-allowed ${currentStyle.confirmButton}`}
+                className={`font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 ${currentStyle.confirmButton}`}
               >
                 {loading && (
-                  <Icon 
-                    icon="line-md:loading-loop" 
-                    className="w-4 h-4 mr-2" 
-                  />
+                  <Icon icon="line-md:loading-loop" className="w-4 h-4 mr-2" />
                 )}
                 {confirmText}
               </button>
-              
+
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleClose}
                 disabled={loading}
-                className="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
               >
                 {cancelText}
               </button>
