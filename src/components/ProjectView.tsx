@@ -120,6 +120,17 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     }
   }, [shouldActivateLastTab, requestTabs]);
 
+  // Update selectedEndpointId when active tab changes
+  useEffect(() => {
+    const currentTab = requestTabs[activeTabIndex];
+    if (currentTab?.endpointId) {
+      setSelectedEndpointId(currentTab.endpointId);
+    } else {
+      // If the current tab is not from an endpoint, clear selection
+      setSelectedEndpointId(undefined);
+    }
+  }, [activeTabIndex, requestTabs]);
+
   const handleSendRequest = async (request: ApiRequest) => {
     const currentTab = requestTabs[activeTabIndex];
     if (!currentTab) return;
