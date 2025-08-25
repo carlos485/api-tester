@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import Input from "./Input";
+import ConfirmationModal from "./ConfirmationModal";
 import type { Endpoint, HttpMethod } from "../types/project";
 
 interface SidebarProps {
   endpoints: Endpoint[];
   onEndpointSelect: (endpoint: Endpoint) => void;
   onAddEndpoint?: () => void;
+  onDeleteEndpoint?: (endpointId: string) => void;
   selectedEndpointId?: string;
   loading?: boolean;
 }
@@ -25,6 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   endpoints,
   onEndpointSelect,
   onAddEndpoint,
+  onDeleteEndpoint,
   selectedEndpointId,
   loading = false,
 }) => {
@@ -32,6 +35,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set()
   );
+  const [endpointToDelete, setEndpointToDelete] = useState<Endpoint | null>(
+    null
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const filteredEndpoints = endpoints.filter(
     endpoint =>
@@ -60,6 +67,28 @@ const Sidebar: React.FC<SidebarProps> = ({
       }
       return newSet;
     });
+  };
+
+  const handleDeleteClick = (endpoint: Endpoint) => {
+    setEndpointToDelete(endpoint);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!endpointToDelete || !onDeleteEndpoint) return;
+
+    setIsDeleting(true);
+    try {
+      await onDeleteEndpoint(endpointToDelete.id);
+      setEndpointToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete endpoint:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setEndpointToDelete(null);
   };
 
   return (
@@ -130,31 +159,49 @@ const Sidebar: React.FC<SidebarProps> = ({
                   {expandedFolders.has(folder) && (
                     <div className="ml-6 mt-1">
                       {folderEndpoints.map(endpoint => (
-                        <button
+                        <div
                           key={endpoint.id}
-                          onClick={() => onEndpointSelect(endpoint)}
-                          className={`w-full text-left p-2 rounded-lg transition-colors duration-200 ${
+                          className={`group relative w-full text-left p-2 rounded-lg transition-colors duration-200 ${
                             selectedEndpointId === endpoint.id
                               ? "bg-gray-50 border-l-2 border-gray-500"
                               : "hover:bg-gray-200"
                           }`}
                         >
-                          <div className="flex items-center gap-2 mb-1">
-                            <span
-                              className={`text-xs font-semibold px-2 py-0.5 rounded ${
-                                methodColors[endpoint.method]
-                              }`}
+                          <button
+                            onClick={() => onEndpointSelect(endpoint)}
+                            className="w-full text-left"
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <span
+                                className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                                  methodColors[endpoint.method]
+                                }`}
+                              >
+                                {endpoint.method}
+                              </span>
+                              <span className="text-sm font-medium text-gray-900 truncate">
+                                {endpoint.name}
+                              </span>
+                            </div>
+                            <div className="text-xs text-gray-500 truncate">
+                              {endpoint.url}
+                            </div>
+                          </button>
+
+                          {/* Delete button - only visible on hover */}
+                          {onDeleteEndpoint && (
+                            <button
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleDeleteClick(endpoint);
+                              }}
+                              className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-red-100 text-red-600 hover:text-red-700 rounded p-1 transition-all duration-200"
+                              title="Delete endpoint"
                             >
-                              {endpoint.method}
-                            </span>
-                            <span className="text-sm font-medium text-gray-900 truncate">
-                              {endpoint.name}
-                            </span>
-                          </div>
-                          <div className="text-xs text-gray-500 truncate">
-                            {endpoint.url}
-                          </div>
-                        </button>
+                              <Icon icon="line-md:trash" className="w-5 h-5" />
+                            </button>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )}
@@ -176,6 +223,19 @@ const Sidebar: React.FC<SidebarProps> = ({
           New Endpoint
         </button>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={endpointToDelete !== null}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Delete Endpoint"
+        message={`Are you sure you want to delete "${endpointToDelete?.name}"? This action cannot be undone and will close any open tabs using this endpoint.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        loading={isDeleting}
+      />
     </div>
   );
 };

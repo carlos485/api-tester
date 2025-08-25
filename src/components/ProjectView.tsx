@@ -73,6 +73,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     error: endpointsError,
     createEndpoint,
     updateEndpoint,
+    deleteEndpoint,
   } = useEndpoints(project.id);
 
   // Restore state from sessionStorage on component mount
@@ -380,6 +381,40 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     }
   };
 
+  const handleDeleteEndpoint = async (endpointId: string) => {
+    try {
+      await deleteEndpoint(endpointId);
+      
+      // Close any tabs that were using this deleted endpoint
+      setRequestTabs(prev => {
+        const filteredTabs = prev.filter(tab => tab.endpointId !== endpointId);
+        
+        // If we removed tabs and the active index is now invalid, adjust it
+        if (filteredTabs.length > 0 && activeTabIndex >= filteredTabs.length) {
+          setActiveTabIndex(filteredTabs.length - 1);
+        } else if (filteredTabs.length === 0) {
+          // If no tabs remain, create a default one
+          const defaultTab: RequestTab = {
+            id: `tab-${Date.now()}`,
+            name: "New Request",
+            request: { method: "GET", url: "", headers: {}, body: "" },
+            response: null,
+            loading: false,
+          };
+          setActiveTabIndex(0);
+          return [defaultTab];
+        }
+        
+        return filteredTabs;
+      });
+      
+      console.log("Endpoint deleted successfully!");
+    } catch (error) {
+      console.error("Failed to delete endpoint:", error);
+      // Here you could show a toast notification
+    }
+  };
+
   const handleRequestChange = (
     tabIndex: number,
     updatedRequest: ApiRequest
@@ -488,6 +523,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
               endpoints={endpoints}
               onEndpointSelect={handleEndpointSelect}
               onAddEndpoint={handleAddEndpoint}
+              onDeleteEndpoint={handleDeleteEndpoint}
               selectedEndpointId={selectedEndpointId}
               loading={endpointsLoading}
             />
