@@ -16,6 +16,8 @@ interface HeaderRow {
 }
 
 const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) => {
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+
   // Convert headers object to array for table display
   const headersToArray = (headers: Record<string, string>): HeaderRow[] => {
     return Object.entries(headers).map(([key, value]) => ({
@@ -78,7 +80,11 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
   };
   return (
     <div className="bg-white rounded-lg">
-      <Tabs variant="underline">
+      <Tabs 
+        variant="underline"
+        defaultActiveTab={activeTabIndex}
+        onTabChange={setActiveTabIndex}
+      >
         <Tab header="Parameters">
           <div className="space-y-4">
             {/* Parameters content will be added here */}

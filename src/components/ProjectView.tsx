@@ -367,18 +367,19 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     setActiveTabIndex(newActiveIndex);
   };
 
-  const handleAddEndpoint = async () => {
-    try {
-      await createEndpoint({
-        name: "New Endpoint",
-        method: "GET",
-        url: "https://api.example.com",
-        description: "New endpoint description",
-      });
-    } catch (error) {
-      console.error("Failed to create endpoint:", error);
-      // Here you could show a toast notification
-    }
+  const handleAddEndpoint = () => {
+    // Create a new empty tab instead of saving to database
+    const newTab: RequestTab = {
+      id: `tab-${Date.now()}`,
+      name: "New Request",
+      request: { method: "GET", url: "", headers: {}, body: "" },
+      response: null,
+      loading: false,
+      // No endpointId - this is a new unsaved request
+    };
+
+    setRequestTabs(prev => [...prev, newTab]);
+    setShouldActivateLastTab(true);
   };
 
   const handleDeleteEndpoint = async (endpointId: string) => {
