@@ -1,4 +1,4 @@
-import { useState, Children, isValidElement } from "react";
+import { useState, useEffect, Children, isValidElement } from "react";
 import type { ReactElement, ReactNode, FC } from "react";
 import { Icon } from "@iconify/react";
 
@@ -82,6 +82,18 @@ export const Tabs: FC<TabsProps> = ({
   showCloseButton = false,
 }) => {
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
+
+  // Sync with external defaultActiveTab changes
+  useEffect(() => {
+    const tabsCount = Children.toArray(children).filter(
+      (child): child is ReactElement<TabProps> =>
+        isValidElement(child) && child.type === Tab
+    ).length;
+    
+    // Ensure the active tab index is valid
+    const validIndex = Math.max(0, Math.min(defaultActiveTab, tabsCount - 1));
+    setActiveTab(validIndex);
+  }, [defaultActiveTab, children]);
 
   const tabs = Children.toArray(children).filter(
     (child): child is ReactElement<TabProps> =>

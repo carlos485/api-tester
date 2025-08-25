@@ -250,15 +250,18 @@ const ProjectView: React.FC<ProjectViewProps> = ({
       method: quickRequest.method,
       url: quickRequest.url,
     };
-    
+
     // Send the request
     handleSendRequest(request);
   };
 
-  const handleQuickRequestChange = (tabIndex: number, quickRequest: {
-    method: string;
-    url: string;
-  }) => {
+  const handleQuickRequestChange = (
+    tabIndex: number,
+    quickRequest: {
+      method: string;
+      url: string;
+    }
+  ) => {
     const currentTab = requestTabs[tabIndex];
     if (!currentTab) return;
 
@@ -267,7 +270,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
       method: quickRequest.method,
       url: quickRequest.url,
     };
-    
+
     // Update the tab's request state
     handleRequestChange(tabIndex, updatedRequest);
   };
@@ -310,18 +313,36 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   const handleCloseTab = (indexToClose: number) => {
     if (requestTabs.length <= 1) return; // Don't close if it's the last tab
 
-    setRequestTabs(prev => prev.filter((_, index) => index !== indexToClose));
+    // Calculate the new active index before filtering
+    let newActiveIndex = activeTabIndex;
 
-    // Adjust active tab index
     if (indexToClose === activeTabIndex) {
-      // If closing the active tab, move to the previous tab or the first tab
-      const newActiveIndex = indexToClose > 0 ? indexToClose - 1 : 0;
-      setActiveTabIndex(newActiveIndex);
+      // If closing the active tab, decide which tab to activate next
+      if (indexToClose === requestTabs.length - 1) {
+        // Closing the last tab, move to the previous one
+        newActiveIndex = indexToClose - 1;
+      } else {
+        // Closing a tab in the middle, keep the same index (next tab will shift to this position)
+        newActiveIndex = indexToClose;
+      }
     } else if (indexToClose < activeTabIndex) {
       // If closing a tab before the active tab, decrease the active index
-      setActiveTabIndex(prev => prev - 1);
+      newActiveIndex = activeTabIndex - 1;
     }
-    // If closing a tab after the active tab, no change needed
+    // If closing a tab after the active tab, no change needed (newActiveIndex stays the same)
+
+    // Ensure the new index is valid for the filtered array
+    const newTabsLength = requestTabs.length - 1;
+    if (newActiveIndex >= newTabsLength) {
+      newActiveIndex = newTabsLength - 1;
+    }
+    if (newActiveIndex < 0) {
+      newActiveIndex = 0;
+    }
+
+    // Filter out the tab and update the active index
+    setRequestTabs(prev => prev.filter((_, index) => index !== indexToClose));
+    setActiveTabIndex(newActiveIndex);
   };
 
   const handleAddEndpoint = async () => {
@@ -368,7 +389,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
         name: tab.name || "Untitled Request",
         method: tab.request.method as HttpMethod,
         url: tab.request.url || "",
-        description: tab.endpointId 
+        description: tab.endpointId
           ? `Updated from ${tab.name || "Untitled Request"}`
           : `Saved from ${tab.name || "Untitled Request"}`,
         headers: tab.request.headers,
@@ -382,7 +403,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
       } else {
         // Create new endpoint
         const newEndpointId = await createEndpoint(endpointData);
-        
+
         // Update the tab to include the new endpoint ID
         setRequestTabs(prev =>
           prev.map((t, index) =>
@@ -492,11 +513,15 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                         onClick={() => handleSaveEndpoint(tabIndex)}
                         disabled={savingTab === tab.id}
                         className={`p-1 transition-colors duration-300 text-2xl border-2 border-transparent focus:outline-none rounded-lg focus:z-10 focus:ring-4 focus:ring-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${
-                          tab.endpointId 
-                            ? "text-blue-600 hover:text-blue-700 hover:border-blue-600" 
+                          tab.endpointId
+                            ? "text-blue-600 hover:text-blue-700 hover:border-blue-600"
                             : "text-gray-500 hover:text-gray-600 hover:border-gray-600"
                         }`}
-                        title={tab.endpointId ? "Update endpoint" : "Save as new endpoint"}
+                        title={
+                          tab.endpointId
+                            ? "Update endpoint"
+                            : "Save as new endpoint"
+                        }
                       >
                         <Icon
                           icon={
@@ -512,7 +537,9 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                       environments={project.environments}
                       initialMethod={tab.request.method}
                       initialUrl={tab.request.url}
-                      onRequestChange={(quickRequest) => handleQuickRequestChange(tabIndex, quickRequest)}
+                      onRequestChange={quickRequest =>
+                        handleQuickRequestChange(tabIndex, quickRequest)
+                      }
                     />
                     <RequestTabs
                       request={tab.request}
