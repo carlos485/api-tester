@@ -13,12 +13,12 @@ interface SidebarProps {
 
 const methodColors: Record<HttpMethod, string> = {
   GET: "text-green-600",
-  POST: "text-yellow-600", 
+  POST: "text-yellow-600",
   PUT: "text-blue-600",
   PATCH: "text-purple-600",
   DELETE: "text-red-600",
   HEAD: "text-gray-600",
-  OPTIONS: "text-indigo-600"
+  OPTIONS: "text-indigo-600",
 };
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -26,15 +26,18 @@ const Sidebar: React.FC<SidebarProps> = ({
   onEndpointSelect,
   onAddEndpoint,
   selectedEndpointId,
-  loading = false
+  loading = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    new Set()
+  );
 
-  const filteredEndpoints = endpoints.filter(endpoint =>
-    endpoint.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    endpoint.url.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    endpoint.method.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEndpoints = endpoints.filter(
+    endpoint =>
+      endpoint.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      endpoint.url.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      endpoint.method.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Group endpoints by folder
@@ -68,9 +71,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           type="text"
           placeholder="Search endpoints..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full"
-          icon={<Icon icon="material-symbols:search" className="h-4 w-4 text-gray-400" />}
+          onChange={e => setSearchTerm(e.target.value)}
+          variant="full-width"
+          leftAddon={
+            <Icon
+              icon="material-symbols:search"
+              className="h-4 w-4 text-gray-400"
+            />
+          }
         />
       </div>
 
@@ -83,68 +91,83 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         ) : Object.keys(groupedEndpoints).length === 0 ? (
           <div className="p-4 text-center text-gray-500">
-            <Icon icon="material-symbols:search-off" className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-            <p className="text-sm">{endpoints.length === 0 ? "No endpoints yet" : "No endpoints found"}</p>
+            <Icon
+              icon="material-symbols:search-off"
+              className="h-8 w-8 mx-auto mb-2 text-gray-300"
+            />
+            <p className="text-sm">
+              {endpoints.length === 0
+                ? "No endpoints yet"
+                : "No endpoints found"}
+            </p>
           </div>
         ) : (
           <div className="p-2">
-            {Object.entries(groupedEndpoints).map(([folder, folderEndpoints]) => (
-              <div key={folder} className="mb-2">
-                {/* Folder Header */}
-                <button
-                  onClick={() => toggleFolder(folder)}
-                  className="w-full flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-700"
-                >
-                  <Icon
-                    icon={expandedFolders.has(folder) ? "material-symbols:expand-more" : "material-symbols:chevron-right"}
-                    className="h-4 w-4"
-                  />
-                  <Icon icon="material-symbols:folder" className="h-4 w-4 text-yellow-500" />
-                  <span>{folder}</span>
-                  <span className="ml-auto text-xs text-gray-400">
-                    {folderEndpoints.length}
-                  </span>
-                </button>
+            {Object.entries(groupedEndpoints).map(
+              ([folder, folderEndpoints]) => (
+                <div key={folder} className="mb-2">
+                  {/* Folder Header */}
+                  <button
+                    onClick={() => toggleFolder(folder)}
+                    className="w-full flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-700"
+                  >
+                    <Icon
+                      icon={
+                        expandedFolders.has(folder)
+                          ? "material-symbols:expand-more"
+                          : "material-symbols:chevron-right"
+                      }
+                      className="h-4 w-4"
+                    />
+                    <Icon icon="line-md:folder" className="h-4 w-4" />
+                    <span>{folder}</span>
+                    <span className="ml-auto text-xs text-gray-400">
+                      {folderEndpoints.length}
+                    </span>
+                  </button>
 
-                {/* Endpoints in folder */}
-                {expandedFolders.has(folder) && (
-                  <div className="ml-6 mt-1">
-                    {folderEndpoints.map((endpoint) => (
-                      <button
-                        key={endpoint.id}
-                        onClick={() => onEndpointSelect(endpoint)}
-                        className={`w-full text-left p-2 rounded-lg transition-colors duration-200 ${
-                          selectedEndpointId === endpoint.id
-                            ? "bg-blue-50 border-l-2 border-blue-500"
-                            : "hover:bg-gray-50"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <span
-                            className={`text-xs font-semibold px-2 py-0.5 rounded ${methodColors[endpoint.method]}`}
-                          >
-                            {endpoint.method}
-                          </span>
-                          <span className="text-sm font-medium text-gray-900 truncate">
-                            {endpoint.name}
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-500 truncate">
-                          {endpoint.url}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+                  {/* Endpoints in folder */}
+                  {expandedFolders.has(folder) && (
+                    <div className="ml-6 mt-1">
+                      {folderEndpoints.map(endpoint => (
+                        <button
+                          key={endpoint.id}
+                          onClick={() => onEndpointSelect(endpoint)}
+                          className={`w-full text-left p-2 rounded-lg transition-colors duration-200 ${
+                            selectedEndpointId === endpoint.id
+                              ? "bg-gray-50 border-l-2 border-gray-500"
+                              : "hover:bg-gray-200"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span
+                              className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                                methodColors[endpoint.method]
+                              }`}
+                            >
+                              {endpoint.method}
+                            </span>
+                            <span className="text-sm font-medium text-gray-900 truncate">
+                              {endpoint.name}
+                            </span>
+                          </div>
+                          <div className="text-xs text-gray-500 truncate">
+                            {endpoint.url}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            )}
           </div>
         )}
       </div>
 
       {/* Footer Actions */}
       <div className="p-4 border-t border-gray-200">
-        <button 
+        <button
           onClick={onAddEndpoint}
           disabled={!onAddEndpoint}
           className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors duration-200"
