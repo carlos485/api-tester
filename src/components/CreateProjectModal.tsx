@@ -40,8 +40,8 @@ const availableIcons = [
   "material-symbols:encrypted",
   "mdi:circle-slice-8",
   "mdi:cloud",
+  "streamline-ultimate:crypto-encryption-key-bold",
 ];
-
 
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   isOpen,
@@ -101,7 +101,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         <Input
           label="Project Name"
           value={newProject.name}
-          onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+          onChange={e => setNewProject({ ...newProject, name: e.target.value })}
           placeholder="My API Project"
           required
           autoFocus
@@ -110,7 +110,9 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         <Textarea
           label="Description"
           value={newProject.description}
-          onChange={(value) => setNewProject({ ...newProject, description: value })}
+          onChange={value =>
+            setNewProject({ ...newProject, description: value })
+          }
           placeholder="Optional project description"
           rows={3}
           maxLength={200}
@@ -132,13 +134,15 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                       : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
                   }`}
                 >
-                  <Icon icon={icon} className="h-6 w-6 mx-auto dark:text-white" />
+                  <Icon
+                    icon={icon}
+                    className="h-6 w-6 mx-auto dark:text-white"
+                  />
                 </button>
               ))}
             </div>
           </div>
         </div>
-
       </div>
 
       <div className="flex gap-3 mt-6">
@@ -150,12 +154,16 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         >
           Create Project
         </Button>
-        <Button onClick={() => {
-          handleClosing();
-          // Simular Escape para activar la animación del Modal
-          const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
-          document.dispatchEvent(escapeEvent);
-        }} variant="secondary" className="flex-1">
+        <Button
+          onClick={() => {
+            handleClosing();
+            // Simular Escape para activar la animación del Modal
+            const escapeEvent = new KeyboardEvent("keydown", { key: "Escape" });
+            document.dispatchEvent(escapeEvent);
+          }}
+          variant="secondary"
+          className="flex-1"
+        >
           Cancel
         </Button>
       </div>
