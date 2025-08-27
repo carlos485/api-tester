@@ -2,7 +2,6 @@ import {
   collection,
   query,
   where,
-  orderBy,
   getDocs,
   addDoc,
   updateDoc,
@@ -12,7 +11,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import type { Endpoint, EndpointFolder, HttpMethod } from "../types/project";
+import type { Endpoint, EndpointFolder } from "../types/project";
 
 const ENDPOINTS_COLLECTION = "endpoints";
 const ENDPOINT_FOLDERS_COLLECTION = "endpointFolders";

@@ -15,6 +15,14 @@ interface HeaderRow {
   enabled: boolean;
 }
 
+interface ParamRow {
+  id: string;
+  key: string;
+  value: string;
+  description: string;
+  enabled: boolean;
+}
+
 const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
@@ -41,6 +49,29 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
     }];
   });
 
+  // Convert query params object to array for table display
+  const paramsToArray = (params: Record<string, string>): ParamRow[] => {
+    return Object.entries(params).map(([key, value]) => ({
+      id: `param-${Date.now()}-${Math.random()}`,
+      key,
+      value,
+      description: "",
+      enabled: true,
+    }));
+  };
+
+  const [paramRows, setParamRows] = useState<ParamRow[]>(() => {
+    const existingParams = paramsToArray(request.queryParams || {});
+    // Always add one empty row for new params
+    return [...existingParams, {
+      id: `new-param-${Date.now()}`,
+      key: "",
+      value: "",
+      description: "",
+      enabled: true,
+    }];
+  });
+
   // Update request headers when headerRows change
   const updateRequestHeaders = (rows: HeaderRow[]) => {
     const headers: Record<string, string> = {};
@@ -53,6 +84,21 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
     onRequestChange({
       ...request,
       headers,
+    });
+  };
+
+  // Update request query params when paramRows change
+  const updateRequestParams = (rows: ParamRow[]) => {
+    const queryParams: Record<string, string> = {};
+    rows.forEach(row => {
+      if (row.key.trim() && row.value.trim() && row.enabled) {
+        queryParams[row.key.trim()] = row.value.trim();
+      }
+    });
+    
+    onRequestChange({
+      ...request,
+      queryParams,
     });
   };
 
@@ -75,6 +121,29 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
       }
       
       updateRequestHeaders(newRows);
+      return newRows;
+    });
+  };
+
+  const handleParamChange = (id: string, field: keyof ParamRow, value: string | boolean) => {
+    setParamRows(prev => {
+      const newRows = prev.map(row => 
+        row.id === id ? { ...row, [field]: value } : row
+      );
+      
+      // If the last row (empty row) is being edited, add a new empty row
+      const lastRow = newRows[newRows.length - 1];
+      if (lastRow && (lastRow.key || lastRow.value) && lastRow.id.startsWith('new-param')) {
+        newRows.push({
+          id: `new-param-${Date.now()}`,
+          key: "",
+          value: "",
+          description: "",
+          enabled: true,
+        });
+      }
+      
+      updateRequestParams(newRows);
       return newRows;
     });
   };
@@ -119,48 +188,52 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="bg-white border-b border-gray-200 hover:bg-gray-50">
-                    <td className="w-4 p-4">
-                      <div className="flex items-center">
+                  {paramRows.map((param, index) => (
+                    <tr key={param.id} className="bg-white border-b border-gray-200 hover:bg-gray-50">
+                      <td className="w-4 p-4">
+                        <div className="flex items-center">
+                          <input
+                            id={`checkbox-param-${param.id}`}
+                            type="checkbox"
+                            checked={param.enabled}
+                            onChange={(e) => handleParamChange(param.id, 'enabled', e.target.checked)}
+                            className="w-4 h-4 text-gray-900 bg-gray-100 border-gray-300 rounded-sm focus:ring-gray-900"
+                          />
+                          <label
+                            htmlFor={`checkbox-param-${param.id}`}
+                            className="sr-only"
+                          >
+                            checkbox
+                          </label>
+                        </div>
+                      </td>
+                      <td className="py-2 px-2">
                         <input
-                          id="checkbox-table-search-1"
-                          type="checkbox"
-                          className="w-4 h-4 text-gray-900 bg-gray-100 border-gray-300 rounded-sm focus:ring-gray-900"
+                          type="text"
+                          value={param.key}
+                          onChange={(e) => handleParamChange(param.id, 'key', e.target.value)}
+                          className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                          placeholder={index === paramRows.length - 1 ? "Añadir un nuevo parámetro" : ""}
                         />
-                        <label
-                          htmlFor="checkbox-table-search-1"
-                          className="sr-only"
-                        >
-                          checkbox
-                        </label>
-                      </div>
-                    </td>
-                    <td className="py-2 px-2">
-                      <input
-                        type="text"
-                        id="first_name"
-                        className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                        placeholder="Añadir un nuevo parámetro"
-                        required
-                      />
-                    </td>
-                    <td className="py-2 px-2">
-                      <input
-                        type="text"
-                        id="first_name"
-                        className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                        required
-                      />
-                    </td>
-                    <td className="py-2 px-2">
-                      <input
-                        type="text"
-                        id="first_name"
-                        className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                        required
-                      />
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="py-2 px-2">
+                        <input
+                          type="text"
+                          value={param.value}
+                          onChange={(e) => handleParamChange(param.id, 'value', e.target.value)}
+                          className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                        />
+                      </td>
+                      <td className="py-2 px-2">
+                        <input
+                          type="text"
+                          value={param.description}
+                          onChange={(e) => handleParamChange(param.id, 'description', e.target.value)}
+                          className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                        />
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

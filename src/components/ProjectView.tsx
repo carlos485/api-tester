@@ -54,7 +54,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     {
       id: "tab-1",
       name: "New Request",
-      request: { method: "GET", url: "", headers: {}, body: "" },
+      request: { method: "GET", url: "", headers: {}, queryParams: {}, body: "" },
       response: null,
       loading: false,
     },
@@ -146,6 +146,18 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     const startTime = Date.now();
 
     try {
+      // Construct URL with query parameters
+      let requestUrl = request.url;
+      if (request.queryParams && Object.keys(request.queryParams).length > 0) {
+        const url = new URL(request.url);
+        Object.entries(request.queryParams).forEach(([key, value]) => {
+          if (key.trim() && value.trim()) {
+            url.searchParams.set(key.trim(), value.trim());
+          }
+        });
+        requestUrl = url.toString();
+      }
+
       const fetchOptions: RequestInit = {
         method: request.method,
         headers: request.headers,
@@ -160,10 +172,10 @@ const ProjectView: React.FC<ProjectViewProps> = ({
         fetchOptions.body = request.body;
       }
 
-      console.log("Making request to:", request.url);
+      console.log("Making request to:", requestUrl);
       console.log("Request options:", fetchOptions);
 
-      const response = await fetch(request.url, fetchOptions);
+      const response = await fetch(requestUrl, fetchOptions);
       const endTime = Date.now();
 
       console.log("Response received:", response.status, response.statusText);
@@ -307,6 +319,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
           method: endpoint.method,
           url: endpoint.url,
           headers: endpoint.headers || {},
+          queryParams: endpoint.queryParams || {},
           body: endpoint.body || "",
         },
         response: null,
@@ -323,7 +336,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     const newTab: RequestTab = {
       id: `tab-${Date.now()}`,
       name: "New Request",
-      request: { method: "GET", url: "", headers: {}, body: "" },
+      request: { method: "GET", url: "", headers: {}, queryParams: {}, body: "" },
       response: null,
       loading: false,
     };
@@ -372,7 +385,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     const newTab: RequestTab = {
       id: `tab-${Date.now()}`,
       name: "New Request",
-      request: { method: "GET", url: "", headers: {}, body: "" },
+      request: { method: "GET", url: "", headers: {}, queryParams: {}, body: "" },
       response: null,
       loading: false,
       // No endpointId - this is a new unsaved request
@@ -398,7 +411,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
           const defaultTab: RequestTab = {
             id: `tab-${Date.now()}`,
             name: "New Request",
-            request: { method: "GET", url: "", headers: {}, body: "" },
+            request: { method: "GET", url: "", headers: {}, queryParams: {}, body: "" },
             response: null,
             loading: false,
           };
@@ -450,6 +463,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
           ? `Updated from ${tab.name || "Untitled Request"}`
           : `Saved from ${tab.name || "Untitled Request"}`,
         headers: tab.request.headers,
+        queryParams: tab.request.queryParams,
         body: tab.request.body,
       };
 

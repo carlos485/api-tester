@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { EndpointsService } from "../services/endpointsService";
-import type { Endpoint, EndpointFolder, HttpMethod } from "../types/project";
+import type { Endpoint, EndpointFolder } from "../types/project";
 
 export const useEndpoints = (projectId: string | null) => {
   const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
