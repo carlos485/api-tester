@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Icon } from "@iconify/react";
 import { Tabs, Tab } from "./Tabs";
 import type { ApiRequest } from "../types/project";
 
@@ -147,6 +148,22 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
       return newRows;
     });
   };
+
+  const handleDeleteParam = (id: string) => {
+    setParamRows(prev => {
+      const newRows = prev.filter(row => row.id !== id);
+      updateRequestParams(newRows);
+      return newRows;
+    });
+  };
+
+  const handleDeleteHeader = (id: string) => {
+    setHeaderRows(prev => {
+      const newRows = prev.filter(row => row.id !== id);
+      updateRequestHeaders(newRows);
+      return newRows;
+    });
+  };
   return (
     <div className="bg-white rounded-lg">
       <Tabs 
@@ -184,6 +201,9 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                     </th>
                     <th scope="col" className="px-6 py-3">
                       Description
+                    </th>
+                    <th scope="col" className="px-4 py-3 w-12">
+                      
                     </th>
                   </tr>
                 </thead>
@@ -232,6 +252,17 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                           className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
                         />
                       </td>
+                      <td className="py-2 px-2">
+                        {paramRows.filter(row => row.key.trim() || row.value.trim()).length >= 2 && (param.key.trim() || param.value.trim()) && (
+                          <button
+                            onClick={() => handleDeleteParam(param.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-100 rounded p-1 transition-all duration-200"
+                            title="Delete parameter"
+                          >
+                            <Icon icon="line-md:trash" className="w-4 h-4" />
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -269,6 +300,9 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                     </th>
                     <th scope="col" className="px-6 py-3">
                       Description
+                    </th>
+                    <th scope="col" className="px-4 py-3 w-12">
+                      
                     </th>
                   </tr>
                 </thead>
@@ -316,6 +350,17 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                           onChange={(e) => handleHeaderChange(header.id, 'description', e.target.value)}
                           className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
                         />
+                      </td>
+                      <td className="py-2 px-2">
+                        {headerRows.filter(row => row.key.trim() || row.value.trim()).length >= 2 && (header.key.trim() || header.value.trim()) && (
+                          <button
+                            onClick={() => handleDeleteHeader(header.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-100 rounded p-1 transition-all duration-200"
+                            title="Delete header"
+                          >
+                            <Icon icon="line-md:trash" className="w-4 h-4" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
