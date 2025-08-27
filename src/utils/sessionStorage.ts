@@ -5,6 +5,7 @@ const SESSION_KEYS = {
   REQUEST_TABS: 'api-tester-request-tabs',
   ACTIVE_TAB_INDEX: 'api-tester-active-tab-index',
   SELECTED_ENDPOINT: 'api-tester-selected-endpoint',
+  SELECTED_ENVIRONMENT: 'api-tester-selected-environment',
 } as const;
 
 // Generic session storage functions
@@ -110,6 +111,18 @@ export const getSelectedEndpoint = (): string | null => {
 
 export const clearSelectedEndpoint = (): void => {
   removeSessionItem(SESSION_KEYS.SELECTED_ENDPOINT);
+};
+
+export const saveSelectedEnvironment = (environmentId: string): void => {
+  setSessionItem(SESSION_KEYS.SELECTED_ENVIRONMENT, environmentId);
+};
+
+export const getSelectedEnvironment = (): string => {
+  return getSessionItem<string>(SESSION_KEYS.SELECTED_ENVIRONMENT, "");
+};
+
+export const clearSelectedEnvironment = (): void => {
+  removeSessionItem(SESSION_KEYS.SELECTED_ENVIRONMENT);
 };
 
 // Utility to check if sessionStorage is available

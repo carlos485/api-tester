@@ -6,11 +6,13 @@ import type {
   ApiResponse,
   Endpoint,
   HttpMethod,
+  Environment,
 } from "../types/project";
 import QuickRequestBar from "./QuickRequestBar";
 import RequestTabs from "./RequestTabs";
 import ResponseViewer from "./ResponseViewer";
-import { Tabs, Tab } from "./Tabs";
+import { Tabs, Tab, TabsRight } from "./Tabs";
+import EnvironmentSelector from "./EnvironmentSelector";
 import Sidebar from "./Sidebar";
 import ProjectSelector from "./ProjectSelector";
 import Input from "./Input";
@@ -22,9 +24,12 @@ import {
   getActiveTabIndex,
   saveSelectedEndpoint,
   getSelectedEndpoint,
+  saveSelectedEnvironment,
+  getSelectedEnvironment,
   clearRequestTabs,
   clearActiveTabIndex,
   clearSelectedEndpoint,
+  clearSelectedEnvironment,
 } from "../utils/sessionStorage";
 
 interface ProjectViewProps {
@@ -65,6 +70,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   const [shouldActivateLastTab, setShouldActivateLastTab] = useState(false);
   const [editingTabName, setEditingTabName] = useState<string | null>(null);
   const [savingTab, setSavingTab] = useState<string | null>(null);
+  const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
 
   // Use the endpoints hook for real Firebase data
   const {
@@ -81,6 +87,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     const savedTabs = getRequestTabs();
     const savedActiveIndex = getActiveTabIndex();
     const savedEndpointId = getSelectedEndpoint();
+    const savedEnvironmentId = getSelectedEnvironment();
 
     if (savedTabs.length > 0) {
       setRequestTabs(savedTabs);
@@ -89,6 +96,13 @@ const ProjectView: React.FC<ProjectViewProps> = ({
 
     if (savedEndpointId) {
       setSelectedEndpointId(savedEndpointId);
+    }
+
+    if (savedEnvironmentId) {
+      const environment = project.environments.find(env => env.id === savedEnvironmentId);
+      if (environment) {
+        setSelectedEnvironment(environment);
+      }
     }
 
     setIsRestoredFromSession(true);
@@ -132,6 +146,15 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     }
   }, [activeTabIndex, requestTabs]);
 
+  // Save selected environment to sessionStorage when it changes
+  useEffect(() => {
+    const currentSavedId = getSelectedEnvironment();
+    const newId = selectedEnvironment?.id || "";
+    if (newId !== currentSavedId) {
+      saveSelectedEnvironment(newId);
+    }
+  }, [selectedEnvironment]);
+
   const handleSendRequest = async (request: ApiRequest) => {
     const currentTab = requestTabs[activeTabIndex];
     if (!currentTab) return;
@@ -146,10 +169,25 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     const startTime = Date.now();
 
     try {
+      // Use the selected environment object directly
+
+      // Construct base URL with environment base URL if selected
+      let baseUrl = request.url;
+      if (selectedEnvironment && baseUrl) {
+        // If URL is relative, prepend with environment base URL
+        if (baseUrl.startsWith('/')) {
+          baseUrl = selectedEnvironment.baseUrl.replace(/\/$/, '') + baseUrl;
+        }
+        // If URL doesn't start with http, assume it's relative
+        else if (!baseUrl.startsWith('http')) {
+          baseUrl = selectedEnvironment.baseUrl.replace(/\/$/, '') + '/' + baseUrl;
+        }
+      }
+
       // Construct URL with query parameters
-      let requestUrl = request.url;
+      let requestUrl = baseUrl;
       if (request.queryParams && Object.keys(request.queryParams).length > 0) {
-        const url = new URL(request.url);
+        const url = new URL(requestUrl);
         Object.entries(request.queryParams).forEach(([key, value]) => {
           if (key.trim() && value.trim()) {
             url.searchParams.set(key.trim(), value.trim());
@@ -499,6 +537,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     clearRequestTabs();
     clearActiveTabIndex();
     clearSelectedEndpoint();
+    clearSelectedEnvironment();
     onBackToHome();
   };
 
@@ -561,6 +600,13 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                 onCloseTab={handleCloseTab}
                 showCloseButton={requestTabs.length > 1}
               >
+                <TabsRight>
+                  <EnvironmentSelector
+                    selectedEnvironment={selectedEnvironment}
+                    onEnvironmentChange={setSelectedEnvironment}
+                    environments={project.environments}
+                  />
+                </TabsRight>
                 {requestTabs.map((tab, tabIndex) => (
                   <Tab key={tab.id} header={tab.name}>
                     <div className="flex items-center gap-4">
