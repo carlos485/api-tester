@@ -36,7 +36,7 @@ const Button: React.FC<ButtonProps> = ({
     ghost:
       "bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-gray-300 disabled:text-gray-400",
     light:
-      "bg-white border border-gray-300 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:border-gray-600 focus:outline-none focus:ring-gray-100 dark:focus:ring-gray-700 text-gray-900 dark:text-white",
+      "bg-white dark:bg-gray-80 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-60 dark:hover:border-gray-700 focus:outline-none focus:ring-gray-100 dark:focus:ring-gray-700 text-gray-900 dark:text-white",
   };
 
   const sizeClasses = {

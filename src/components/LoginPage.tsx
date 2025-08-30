@@ -15,25 +15,28 @@ export default function LoginPage() {
       name: "Google",
       icon: "logos:google-icon",
       handler: signInWithGoogle,
-      label: "Continuar con Google"
+      label: "Continuar con Google",
     },
     {
-      id: "facebook", 
+      id: "facebook",
       name: "Facebook",
       icon: "logos:facebook",
       handler: signInWithFacebook,
-      label: "Continuar con Facebook"
+      label: "Continuar con Facebook",
     },
     {
       id: "github",
-      name: "GitHub", 
+      name: "GitHub",
       icon: "uil:github",
       handler: signInWithGitHub,
-      label: "Continuar con GitHub"
-    }
+      label: "Continuar con GitHub",
+    },
   ];
 
-  const handleSocialLogin = async (handler: () => Promise<void>, providerName: string) => {
+  const handleSocialLogin = async (
+    handler: () => Promise<void>,
+    providerName: string
+  ) => {
     setError("");
     try {
       await handler();
@@ -60,7 +63,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
@@ -87,7 +90,7 @@ export default function LoginPage() {
 
         {/* Social Login Buttons */}
         <div className="space-y-3">
-          {socialProviders.map((provider) => (
+          {socialProviders.map(provider => (
             <Button
               key={provider.id}
               onClick={() => handleSocialLogin(provider.handler, provider.name)}

@@ -29,6 +29,14 @@ button {
   animation: slideOut 0.3s ease-out;
 }
 
+.bg-gray-80 {
+  background-color: #2a2929;
+}
+
+.bg-gray-60 {
+  background-color: #454648;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -98,16 +106,28 @@ button {
   .custom-scrollbar {
     scrollbar-color: #6b7280 #374151;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-track {
     background: #374151;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: #6b7280;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #9ca3af;
+  }
+
+  .bg-black {
+    background-color: #000 !important;
+  }
+
+  .dark\:bg-gray-80 {
+    background-color: #292f3b;
+  }
+
+  .dark\:hover\:bg-gray-60:hover {
+    background-color: #4f5965;
   }
 }
