@@ -5,7 +5,7 @@ interface ButtonProps {
   onClick?: () => void;
   icon?: string;
   iconPosition?: "left" | "right";
-  variant?: "primary" | "secondary" | "danger" | "ghost";
+  variant?: "primary" | "secondary" | "danger" | "ghost" | "light";
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
@@ -35,6 +35,8 @@ const Button: React.FC<ButtonProps> = ({
       "bg-red-500 hover:bg-red-600 text-white focus:ring-red-500 disabled:bg-red-300",
     ghost:
       "bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-gray-300 disabled:text-gray-400",
+    light:
+      "bg-white hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-100 rounded-lg text-gray-900 border-gray-300",
   };
 
   const sizeClasses = {

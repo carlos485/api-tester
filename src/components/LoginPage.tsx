@@ -4,15 +4,10 @@ import Button from "./Button";
 import { Icon } from "@iconify/react";
 
 export default function LoginPage() {
-  const {
-    signInWithGoogle,
-    signInWithFacebook,
-    signInWithGitHub,
-    loading,
-  } = useAuth();
+  const { signInWithGoogle, signInWithFacebook, signInWithGitHub, loading } =
+    useAuth();
 
   const [error, setError] = useState("");
-
 
   const handleSocialLogin = async (
     provider: "google" | "facebook" | "github"
@@ -82,6 +77,7 @@ export default function LoginPage() {
         <div className="space-y-3">
           <Button
             onClick={() => handleSocialLogin("google")}
+            variant="light"
             disabled={loading}
             className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
@@ -91,6 +87,7 @@ export default function LoginPage() {
 
           <Button
             onClick={() => handleSocialLogin("facebook")}
+            variant="light"
             disabled={loading}
             className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
@@ -100,6 +97,7 @@ export default function LoginPage() {
 
           <Button
             onClick={() => handleSocialLogin("github")}
+            variant="light"
             disabled={loading}
             className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
