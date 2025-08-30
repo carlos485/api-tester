@@ -9,27 +9,39 @@ export default function LoginPage() {
 
   const [error, setError] = useState("");
 
-  const handleSocialLogin = async (
-    provider: "google" | "facebook" | "github"
-  ) => {
+  const socialProviders = [
+    {
+      id: "google",
+      name: "Google",
+      icon: "logos:google-icon",
+      handler: signInWithGoogle,
+      label: "Continuar con Google"
+    },
+    {
+      id: "facebook", 
+      name: "Facebook",
+      icon: "logos:facebook",
+      handler: signInWithFacebook,
+      label: "Continuar con Facebook"
+    },
+    {
+      id: "github",
+      name: "GitHub", 
+      icon: "uil:github",
+      handler: signInWithGitHub,
+      label: "Continuar con GitHub"
+    }
+  ];
+
+  const handleSocialLogin = async (handler: () => Promise<void>, providerName: string) => {
     setError("");
     try {
-      switch (provider) {
-        case "google":
-          await signInWithGoogle();
-          break;
-        case "facebook":
-          await signInWithFacebook();
-          break;
-        case "github":
-          await signInWithGitHub();
-          break;
-      }
+      await handler();
     } catch (error) {
       setError(
         error instanceof Error
           ? error.message
-          : `Error al iniciar sesión con ${provider}`
+          : `Error al iniciar sesión con ${providerName}`
       );
     }
   };
@@ -75,35 +87,18 @@ export default function LoginPage() {
 
         {/* Social Login Buttons */}
         <div className="space-y-3">
-          <Button
-            onClick={() => handleSocialLogin("google")}
-            variant="light"
-            disabled={loading}
-            className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-          >
-            <Icon icon="logos:google-icon" className="h-5 w-5 mr-2" />
-            Continuar con Google
-          </Button>
-
-          <Button
-            onClick={() => handleSocialLogin("facebook")}
-            variant="light"
-            disabled={loading}
-            className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-          >
-            <Icon icon="logos:facebook" className="h-5 w-5 mr-2" />
-            Continuar con Facebook
-          </Button>
-
-          <Button
-            onClick={() => handleSocialLogin("github")}
-            variant="light"
-            disabled={loading}
-            className="w-full shadow-sm"
-          >
-            <Icon icon="uil:github" className="h-5 w-5 mr-2" />
-            Continuar con GitHub
-          </Button>
+          {socialProviders.map((provider) => (
+            <Button
+              key={provider.id}
+              onClick={() => handleSocialLogin(provider.handler, provider.name)}
+              variant="light"
+              disabled={loading}
+              className="w-full shadow-sm"
+            >
+              <Icon icon={provider.icon} className="h-5 w-5 mr-2" />
+              {provider.label}
+            </Button>
+          ))}
         </div>
       </div>
     </div>
