@@ -14,37 +14,7 @@ export const useAuth = () => {
     return unsubscribe;
   }, []);
 
-  const signInAnonymously = async () => {
-    try {
-      setLoading(true);
-      await AuthService.signInAnonymously();
-    } catch (error) {
-      console.error('Error signing in anonymously:', error);
-      setLoading(false);
-    }
-  };
 
-  const signUp = async (email: string, password: string) => {
-    try {
-      setLoading(true);
-      await AuthService.signUp(email, password);
-    } catch (error) {
-      console.error('Error signing up:', error);
-      setLoading(false);
-      throw error;
-    }
-  };
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      setLoading(true);
-      await AuthService.signIn(email, password);
-    } catch (error) {
-      console.error('Error signing in:', error);
-      setLoading(false);
-      throw error;
-    }
-  };
 
   const signOut = async () => {
     try {
@@ -90,9 +60,6 @@ export const useAuth = () => {
   return {
     user,
     loading,
-    signInAnonymously,
-    signUp,
-    signIn,
     signOut,
     signInWithGoogle,
     signInWithFacebook,
