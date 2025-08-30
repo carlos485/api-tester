@@ -15,6 +15,7 @@ import { Tabs, Tab, TabsRight } from "./Tabs";
 import EnvironmentSelector from "./EnvironmentSelector";
 import Sidebar from "./Sidebar";
 import ProjectSelector from "./ProjectSelector";
+import UserMenu from "./UserMenu";
 import Input from "./Input";
 import { useEndpoints } from "../hooks/useEndpoints";
 import {
@@ -561,9 +562,12 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                 onProjectChange={onProjectChange}
               />
             </div>
-            <button className="cursor-pointer p-2 border-2 rounded-lg hover:bg-gray-50 transition-colors">
-              <Icon icon="material-symbols:settings" />
-            </button>
+            <div className="flex items-center space-x-2">
+              <button className="cursor-pointer p-2 border-2 rounded-lg hover:bg-gray-50 transition-colors">
+                <Icon icon="material-symbols:settings" />
+              </button>
+              <UserMenu />
+            </div>
           </div>
         </div>
       </header>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { Project } from "./types/project";
 import ProjectsHome from "./components/ProjectsHome";
 import ProjectView from "./components/ProjectView";
+import LoginPage from "./components/LoginPage";
 import { useAuth } from "./hooks/useAuth";
 import { useProjects } from "./hooks/useProjects";
 import { 
@@ -22,17 +23,10 @@ const LoadingScreen = () => (
 );
 
 function App() {
-  const { user, loading: authLoading, signInAnonymously } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { projects, loading: projectsLoading, createProject, deleteProject } = useProjects(user?.uid || null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [shouldRestore, setShouldRestore] = useState(true);
-
-  // Auto sign-in anonymously if no user
-  useEffect(() => {
-    if (!authLoading && !user) {
-      signInAnonymously();
-    }
-  }, [authLoading, user, signInAnonymously]);
 
   // Restore selected project from sessionStorage (only once on app load)
   useEffect(() => {
@@ -83,8 +77,18 @@ function App() {
     }
   };
 
-  // Show loading while authenticating or loading projects
-  if (authLoading || (user && projectsLoading)) {
+  // Show loading while authenticating
+  if (authLoading) {
+    return <LoadingScreen />;
+  }
+
+  // Show login page if user is not authenticated
+  if (!user) {
+    return <LoginPage />;
+  }
+
+  // Show loading while loading projects
+  if (projectsLoading) {
     return <LoadingScreen />;
   }
 

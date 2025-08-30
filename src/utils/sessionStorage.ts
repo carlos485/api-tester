@@ -65,7 +65,7 @@ interface SerializedRequestTab {
     headers: Record<string, string>;
     body: string;
   };
-  response: any;
+  response: unknown;
   loading: boolean;
 }
 

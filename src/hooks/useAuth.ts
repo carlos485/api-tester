@@ -54,6 +54,39 @@ export const useAuth = () => {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      setLoading(true);
+      await AuthService.signInWithGoogle();
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+      setLoading(false);
+      throw error;
+    }
+  };
+
+  const signInWithFacebook = async () => {
+    try {
+      setLoading(true);
+      await AuthService.signInWithFacebook();
+    } catch (error) {
+      console.error('Error signing in with Facebook:', error);
+      setLoading(false);
+      throw error;
+    }
+  };
+
+  const signInWithGitHub = async () => {
+    try {
+      setLoading(true);
+      await AuthService.signInWithGitHub();
+    } catch (error) {
+      console.error('Error signing in with GitHub:', error);
+      setLoading(false);
+      throw error;
+    }
+  };
+
   return {
     user,
     loading,
@@ -61,5 +94,8 @@ export const useAuth = () => {
     signUp,
     signIn,
     signOut,
+    signInWithGoogle,
+    signInWithFacebook,
+    signInWithGitHub,
   };
 };

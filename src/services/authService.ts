@@ -2,6 +2,10 @@ import {
   signInAnonymously,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  GithubAuthProvider,
   signOut,
   onAuthStateChanged,
   type User,
@@ -11,6 +15,8 @@ import { auth } from '../lib/firebase';
 export interface AuthUser {
   uid: string;
   email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
   isAnonymous: boolean;
 }
 
@@ -20,6 +26,8 @@ export class AuthService {
     return {
       uid: user.uid,
       email: user.email,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
       isAnonymous: user.isAnonymous,
     };
   }
@@ -76,6 +84,42 @@ export class AuthService {
         callback(null);
       }
     });
+  }
+
+  // Iniciar sesión con Google
+  static async signInWithGoogle(): Promise<AuthUser> {
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      return this.convertUser(userCredential.user);
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+      throw error;
+    }
+  }
+
+  // Iniciar sesión con Facebook
+  static async signInWithFacebook(): Promise<AuthUser> {
+    try {
+      const provider = new FacebookAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      return this.convertUser(userCredential.user);
+    } catch (error) {
+      console.error('Error signing in with Facebook:', error);
+      throw error;
+    }
+  }
+
+  // Iniciar sesión con GitHub
+  static async signInWithGitHub(): Promise<AuthUser> {
+    try {
+      const provider = new GithubAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      return this.convertUser(userCredential.user);
+    } catch (error) {
+      console.error('Error signing in with GitHub:', error);
+      throw error;
+    }
   }
 
   // Obtener usuario actual

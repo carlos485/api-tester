@@ -4,6 +4,7 @@ import type { Project } from "../types/project";
 import ProjectCard from "./ProjectCard";
 import Button from "./Button";
 import CreateProjectModal from "./CreateProjectModal";
+import UserMenu from "./UserMenu";
 
 interface ProjectsHomeProps {
   projects: Project[];
@@ -37,13 +38,16 @@ const ProjectsHome: React.FC<ProjectsHomeProps> = ({
                 Manage your API testing projects
               </p>
             </div>
-            <Button
-              onClick={() => setShowCreateModal(true)}
-              icon="material-symbols:add"
-              variant="primary"
-            >
-              New Project
-            </Button>
+            <div className="flex items-center space-x-4">
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                icon="material-symbols:add"
+                variant="primary"
+              >
+                New Project
+              </Button>
+              <UserMenu />
+            </div>
           </div>
         </div>
       </header>
