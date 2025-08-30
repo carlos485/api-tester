@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { Tabs, Tab } from "./Tabs";
+import Button from "./Button";
 import type { ApiRequest } from "../types/project";
+import { generateCurl, copyCurlToClipboard } from "../utils/curlGenerator";
 
 interface RequestTabsProps {
   request: ApiRequest;
@@ -26,6 +28,7 @@ interface ParamRow {
 
 const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [curlCopied, setCurlCopied] = useState(false);
 
   // Convert headers object to array for table display
   const headersToArray = (headers: Record<string, string>): HeaderRow[] => {
@@ -164,6 +167,18 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
       return newRows;
     });
   };
+
+  // Generate cURL command
+  const generatedCurl = generateCurl(request);
+
+  const handleCopyCurl = async () => {
+    const success = await copyCurlToClipboard(generatedCurl);
+    if (success) {
+      setCurlCopied(true);
+      setTimeout(() => setCurlCopied(false), 2000);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg">
       <Tabs 
@@ -366,6 +381,32 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </Tab>
+        
+        <Tab header="cURL">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium text-gray-900">cURL Command</h3>
+              <Button
+                onClick={handleCopyCurl}
+                icon={curlCopied ? "material-symbols:check" : "material-symbols:content-copy"}
+                variant="secondary"
+                size="sm"
+              >
+                {curlCopied ? "Copied!" : "Copy cURL"}
+              </Button>
+            </div>
+            
+            <div className="relative">
+              <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm font-mono">
+                <code>{generatedCurl}</code>
+              </pre>
+            </div>
+            
+            <div className="text-xs text-gray-500">
+              <p>This cURL command can be used in your terminal or imported into other API testing tools.</p>
             </div>
           </div>
         </Tab>

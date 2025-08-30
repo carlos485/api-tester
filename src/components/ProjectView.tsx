@@ -91,7 +91,12 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     const savedEnvironmentId = getSelectedEnvironment();
 
     if (savedTabs.length > 0) {
-      setRequestTabs(savedTabs);
+      // Convert SerializedRequestTab to RequestTab
+      const convertedTabs = savedTabs.map(tab => ({
+        ...tab,
+        response: tab.response as ApiResponse | null
+      }));
+      setRequestTabs(convertedTabs);
       setActiveTabIndex(Math.min(savedActiveIndex, savedTabs.length - 1));
     }
 
