@@ -24,7 +24,7 @@ const Button: React.FC<ButtonProps> = ({
   className = "",
 }) => {
   const baseClasses =
-    "transition-colors duration-300 inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
+    "transition-colors duration-300 inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none";
 
   const variantClasses = {
     primary:
@@ -34,7 +34,7 @@ const Button: React.FC<ButtonProps> = ({
     danger:
       "bg-red-500 hover:bg-red-600 text-white focus:ring-red-500 disabled:bg-red-300",
     ghost:
-      "bg-transparent hover:bg-gray-100 text-gray-700 focus:ring-gray-300 disabled:text-gray-400",
+      "bg-transparent border-2 border-transparent text-gray-700 hover:border-gray-500 focus:border-gray-600 disabled:text-gray-400",
     light:
       "bg-white dark:bg-gray-80 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-60 dark:hover:border-gray-700 focus:outline-none focus:ring-gray-100 dark:focus:ring-gray-700 text-gray-900 dark:text-white",
   };

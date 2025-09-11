@@ -355,7 +355,16 @@ const ProjectView: React.FC<ProjectViewProps> = ({
       // Tab already exists, just activate it
       setActiveTabIndex(existingTabIndex);
     } else {
-      // Create a new tab for this endpoint
+      // Check if there's only one tab that is empty and not associated with any endpoint
+      const shouldReplaceEmptyTab = 
+        requestTabs.length === 1 &&
+        !requestTabs[0].endpointId &&
+        !requestTabs[0].request.url &&
+        !requestTabs[0].request.body &&
+        Object.keys(requestTabs[0].request.headers).length === 0 &&
+        Object.keys(requestTabs[0].request.queryParams).length === 0 &&
+        !requestTabs[0].response;
+
       const newTab: RequestTab = {
         id: `endpoint-${endpoint.id}-${Date.now()}`,
         name: endpoint.name,
@@ -371,8 +380,15 @@ const ProjectView: React.FC<ProjectViewProps> = ({
         endpointId: endpoint.id, // Store the endpoint ID
       };
 
-      setRequestTabs(prev => [...prev, newTab]);
-      setShouldActivateLastTab(true);
+      if (shouldReplaceEmptyTab) {
+        // Replace the empty tab
+        setRequestTabs([newTab]);
+        setActiveTabIndex(0);
+      } else {
+        // Create a new tab for this endpoint
+        setRequestTabs(prev => [...prev, newTab]);
+        setShouldActivateLastTab(true);
+      }
     }
   };
 
@@ -566,6 +582,11 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                 currentProject={project}
                 onProjectChange={onProjectChange}
               />
+              <EnvironmentSelector
+                selectedEnvironment={selectedEnvironment}
+                onEnvironmentChange={setSelectedEnvironment}
+                environments={project.environments}
+              />
             </div>
             <div className="flex items-center space-x-2">
               <button className="cursor-pointer p-2 border-2 rounded-lg hover:bg-gray-50 transition-colors">
@@ -609,13 +630,6 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                 onCloseTab={handleCloseTab}
                 showCloseButton={requestTabs.length > 1}
               >
-                <TabsRight>
-                  <EnvironmentSelector
-                    selectedEnvironment={selectedEnvironment}
-                    onEnvironmentChange={setSelectedEnvironment}
-                    environments={project.environments}
-                  />
-                </TabsRight>
                 {requestTabs.map((tab, tabIndex) => (
                   <Tab key={tab.id} header={tab.name}>
                     <div className="flex items-center gap-4">

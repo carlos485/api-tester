@@ -6,6 +6,7 @@ import Button from './Button';
 export default function UserMenu() {
   const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   if (!user) return null;
 
@@ -21,15 +22,18 @@ export default function UserMenu() {
         variant="ghost"
         className="flex items-center space-x-2"
       >
-        {user.photoURL ? (
+        {user.photoURL && !imageError ? (
           <img
             src={user.photoURL}
             alt={user.displayName || 'User'}
             className="h-8 w-8 rounded-full"
+            onError={() => setImageError(true)}
           />
         ) : (
-          <div className="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-            <Icon icon="material-symbols:person" className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+          <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+            <span className="text-white font-medium text-sm">
+              {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+            </span>
           </div>
         )}
         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
