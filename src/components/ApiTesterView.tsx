@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import type {
-  Project,
   ApiRequest,
   ApiResponse,
   Endpoint,
-  HttpMethod,
   Environment,
 } from "../types/project";
 import QuickRequestBar from "./QuickRequestBar";
@@ -13,11 +11,9 @@ import RequestTabs from "./RequestTabs";
 import ResponseViewer from "./ResponseViewer";
 import { Tabs, Tab } from "./Tabs";
 import EnvironmentSelector from "./EnvironmentSelector";
-import Sidebar from "./Sidebar";
-import ProjectSelector from "./ProjectSelector";
+import ProjectsSidebar from "./ProjectsSidebar";
 import UserMenu from "./UserMenu";
 import Input from "./Input";
-import { useEndpoints } from "../hooks/useEndpoints";
 import {
   saveRequestTabs,
   getRequestTabs,
@@ -25,20 +21,9 @@ import {
   getActiveTabIndex,
   saveSelectedEndpoint,
   getSelectedEndpoint,
-  saveSelectedEnvironment,
   getSelectedEnvironment,
-  clearRequestTabs,
-  clearActiveTabIndex,
-  clearSelectedEndpoint,
   clearSelectedEnvironment,
 } from "../utils/sessionStorage";
-
-interface ProjectViewProps {
-  project: Project;
-  projects: Project[];
-  onBackToHome: () => void;
-  onProjectChange: (project: Project) => void;
-}
 
 interface RequestTab {
   id: string;
@@ -46,15 +31,11 @@ interface RequestTab {
   request: ApiRequest;
   response: ApiResponse | null;
   loading: boolean;
-  endpointId?: string; // ID of the original endpoint if this tab was created from one
+  endpointId?: string;
+  projectId?: string;
 }
 
-const ProjectView: React.FC<ProjectViewProps> = ({
-  project,
-  projects,
-  onBackToHome,
-  onProjectChange,
-}) => {
+const ApiTesterView: React.FC = () => {
   // Initialize with default values, will be restored from sessionStorage in useEffect
   const [requestTabs, setRequestTabs] = useState<RequestTab[]>([
     {
@@ -70,18 +51,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   const [isRestoredFromSession, setIsRestoredFromSession] = useState(false);
   const [shouldActivateLastTab, setShouldActivateLastTab] = useState(false);
   const [editingTabName, setEditingTabName] = useState<string | null>(null);
-  const [savingTab, setSavingTab] = useState<string | null>(null);
   const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
-
-  // Use the endpoints hook for real Firebase data
-  const {
-    endpoints,
-    loading: endpointsLoading,
-    error: endpointsError,
-    createEndpoint,
-    updateEndpoint,
-    deleteEndpoint,
-  } = useEndpoints(project.id);
 
   // Restore state from sessionStorage on component mount
   useEffect(() => {
@@ -105,10 +75,9 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     }
 
     if (savedEnvironmentId) {
-      const environment = project.environments.find(env => env.id === savedEnvironmentId);
-      if (environment) {
-        setSelectedEnvironment(environment);
-      }
+      // We'll handle environment restoration when we have project context
+      // For now, just clear it since we don't have project-specific environments
+      clearSelectedEnvironment();
     }
 
     setIsRestoredFromSession(true);
@@ -147,19 +116,9 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     if (currentTab?.endpointId) {
       setSelectedEndpointId(currentTab.endpointId);
     } else {
-      // If the current tab is not from an endpoint, clear selection
       setSelectedEndpointId(undefined);
     }
   }, [activeTabIndex, requestTabs]);
-
-  // Save selected environment to sessionStorage when it changes
-  useEffect(() => {
-    const currentSavedId = getSelectedEnvironment();
-    const newId = selectedEnvironment?.id || "";
-    if (newId !== currentSavedId) {
-      saveSelectedEnvironment(newId);
-    }
-  }, [selectedEnvironment]);
 
   const handleSendRequest = async (request: ApiRequest) => {
     const currentTab = requestTabs[activeTabIndex];
@@ -175,8 +134,6 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     const startTime = Date.now();
 
     try {
-      // Use the selected environment object directly
-
       // Construct base URL with environment base URL if selected
       let baseUrl = request.url;
       if (selectedEnvironment && baseUrl) {
@@ -343,12 +300,12 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     handleRequestChange(tabIndex, updatedRequest);
   };
 
-  const handleEndpointSelect = (endpoint: Endpoint) => {
+  const handleEndpointSelect = (endpoint: Endpoint & { projectId: string }) => {
     setSelectedEndpointId(endpoint.id);
 
     // Check if a tab for this endpoint already exists
     const existingTabIndex = requestTabs.findIndex(
-      tab => tab.endpointId === endpoint.id
+      tab => tab.endpointId === endpoint.id && tab.projectId === endpoint.projectId
     );
 
     if (existingTabIndex !== -1) {
@@ -377,7 +334,8 @@ const ProjectView: React.FC<ProjectViewProps> = ({
         },
         response: null,
         loading: false,
-        endpointId: endpoint.id, // Store the endpoint ID
+        endpointId: endpoint.id,
+        projectId: endpoint.projectId,
       };
 
       if (shouldReplaceEmptyTab) {
@@ -440,55 +398,6 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     setActiveTabIndex(newActiveIndex);
   };
 
-  const handleAddEndpoint = () => {
-    // Create a new empty tab instead of saving to database
-    const newTab: RequestTab = {
-      id: `tab-${Date.now()}`,
-      name: "New Request",
-      request: { method: "GET", url: "", headers: {}, queryParams: {}, body: "" },
-      response: null,
-      loading: false,
-      // No endpointId - this is a new unsaved request
-    };
-
-    setRequestTabs(prev => [...prev, newTab]);
-    setShouldActivateLastTab(true);
-  };
-
-  const handleDeleteEndpoint = async (endpointId: string) => {
-    try {
-      await deleteEndpoint(endpointId);
-      
-      // Close any tabs that were using this deleted endpoint
-      setRequestTabs(prev => {
-        const filteredTabs = prev.filter(tab => tab.endpointId !== endpointId);
-        
-        // If we removed tabs and the active index is now invalid, adjust it
-        if (filteredTabs.length > 0 && activeTabIndex >= filteredTabs.length) {
-          setActiveTabIndex(filteredTabs.length - 1);
-        } else if (filteredTabs.length === 0) {
-          // If no tabs remain, create a default one
-          const defaultTab: RequestTab = {
-            id: `tab-${Date.now()}`,
-            name: "New Request",
-            request: { method: "GET", url: "", headers: {}, queryParams: {}, body: "" },
-            response: null,
-            loading: false,
-          };
-          setActiveTabIndex(0);
-          return [defaultTab];
-        }
-        
-        return filteredTabs;
-      });
-      
-      console.log("Endpoint deleted successfully!");
-    } catch (error) {
-      console.error("Failed to delete endpoint:", error);
-      // Here you could show a toast notification
-    }
-  };
-
   const handleRequestChange = (
     tabIndex: number,
     updatedRequest: ApiRequest
@@ -508,61 +417,6 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     );
   };
 
-  const handleSaveEndpoint = async (tabIndex: number) => {
-    const tab = requestTabs[tabIndex];
-    if (!tab) return;
-
-    setSavingTab(tab.id);
-
-    try {
-      const endpointData = {
-        name: tab.name || "Untitled Request",
-        method: tab.request.method as HttpMethod,
-        url: tab.request.url || "",
-        description: tab.endpointId
-          ? `Updated from ${tab.name || "Untitled Request"}`
-          : `Saved from ${tab.name || "Untitled Request"}`,
-        headers: tab.request.headers,
-        queryParams: tab.request.queryParams,
-        body: tab.request.body,
-      };
-
-      if (tab.endpointId) {
-        // Update existing endpoint
-        await updateEndpoint(tab.endpointId, endpointData);
-        console.log("Endpoint updated successfully!");
-      } else {
-        // Create new endpoint
-        const newEndpointId = await createEndpoint(endpointData);
-
-        // Update the tab to include the new endpoint ID
-        setRequestTabs(prev =>
-          prev.map((t, index) =>
-            index === tabIndex ? { ...t, endpointId: newEndpointId } : t
-          )
-        );
-        console.log("New endpoint created successfully!");
-      }
-    } catch (error) {
-      console.error("Failed to save endpoint:", error);
-      // TODO: Show error message/toast
-    } finally {
-      setSavingTab(null);
-    }
-  };
-
-  // const currentTab = requestTabs[activeTabIndex];
-
-  // Clean up session storage when going back to home
-  const handleBackToHomeWithCleanup = () => {
-    // Clear only ProjectView specific data, not the selected project
-    clearRequestTabs();
-    clearActiveTabIndex();
-    clearSelectedEndpoint();
-    clearSelectedEnvironment();
-    onBackToHome();
-  };
-
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
@@ -570,22 +424,11 @@ const ProjectView: React.FC<ProjectViewProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button
-                onClick={handleBackToHomeWithCleanup}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Back to projects"
-              >
-                <Icon icon="material-symbols:arrow-back" className="h-5 w-5" />
-              </button>
-              <ProjectSelector
-                projects={projects}
-                currentProject={project}
-                onProjectChange={onProjectChange}
-              />
+              <h1 className="text-xl font-semibold text-gray-900">API Tester</h1>
               <EnvironmentSelector
                 selectedEnvironment={selectedEnvironment}
                 onEnvironmentChange={setSelectedEnvironment}
-                environments={project.environments}
+                environments={[]}
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -603,26 +446,13 @@ const ProjectView: React.FC<ProjectViewProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex gap-6 my-8">
             {/* Sidebar */}
-            <Sidebar
-              endpoints={endpoints}
+            <ProjectsSidebar
               onEndpointSelect={handleEndpointSelect}
-              onAddEndpoint={handleAddEndpoint}
-              onDeleteEndpoint={handleDeleteEndpoint}
               selectedEndpointId={selectedEndpointId}
-              loading={endpointsLoading}
             />
 
             {/* Content Area */}
             <div className="flex-1 overflow-auto">
-              {endpointsError && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-red-700 text-sm">
-                    <Icon icon="material-symbols:error" className="h-4 w-4" />
-                    <span>Error loading endpoints: {endpointsError}</span>
-                  </div>
-                </div>
-              )}
-
               <Tabs
                 defaultActiveTab={activeTabIndex}
                 onAddTab={handleAddTab}
@@ -650,32 +480,10 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                           width: `${Math.max(120, tab.name.length * 8 + 20)}px`,
                         }}
                       />
-                      <button
-                        onClick={() => handleSaveEndpoint(tabIndex)}
-                        disabled={savingTab === tab.id}
-                        className={`p-1 transition-colors duration-300 text-2xl border-2 border-transparent focus:outline-none rounded-lg focus:z-10 focus:ring-4 focus:ring-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${
-                          tab.endpointId
-                            ? "text-blue-600 hover:text-blue-700 hover:border-blue-600"
-                            : "text-gray-500 hover:text-gray-600 hover:border-gray-600"
-                        }`}
-                        title={
-                          tab.endpointId
-                            ? "Update endpoint"
-                            : "Save as new endpoint"
-                        }
-                      >
-                        <Icon
-                          icon={
-                            savingTab === tab.id
-                              ? "line-md:loading-loop"
-                              : "uil:save"
-                          }
-                        />
-                      </button>
                     </div>
                     <QuickRequestBar
                       onSendRequest={handleQuickRequest}
-                      environments={project.environments}
+                      environments={[]}
                       initialMethod={tab.request.method}
                       initialUrl={tab.request.url}
                       onRequestChange={quickRequest =>
@@ -705,4 +513,4 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   );
 };
 
-export default ProjectView;
+export default ApiTesterView;
