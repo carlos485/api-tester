@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import type { Endpoint } from "../types/project";
+import type { Endpoint, EndpointFolder } from "../types/project";
 import { useAuth } from "../hooks/useAuth";
 import { useProjects } from "../hooks/useProjects";
 
@@ -15,7 +15,7 @@ interface ProjectNode {
   type: 'project';
   expanded: boolean;
   folders: FolderNode[];
-  endpoints: (Endpoint & { projectId: string })[];
+  endpoints: (Endpoint & { projectId: string })[]; // Endpoints not in any folder
 }
 
 interface FolderNode {
@@ -23,7 +23,9 @@ interface FolderNode {
   name: string;
   type: 'folder';
   expanded: boolean;
+  parentId?: string;
   endpoints: (Endpoint & { projectId: string })[];
+  subfolders: FolderNode[];
 }
 
 const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
@@ -34,18 +36,98 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   const { projects, loading: projectsLoading } = useProjects(user?.uid || null);
   const [projectNodes, setProjectNodes] = useState<ProjectNode[]>([]);
 
-  // For now, we'll show projects without endpoints to get the basic structure working
-  // TODO: Add proper endpoint loading later
+  // Function to organize endpoints and folders
+  const organizeProjectData = (projectId: string, endpoints: Endpoint[], folders: EndpointFolder[] = []) => {
+    // Group endpoints by folder
+    const endpointsByFolder = endpoints.reduce((acc, endpoint) => {
+      const folderId = endpoint.folder || 'root';
+      if (!acc[folderId]) {
+        acc[folderId] = [];
+      }
+      acc[folderId].push({ ...endpoint, projectId });
+      return acc;
+    }, {} as Record<string, (Endpoint & { projectId: string })[]>);
+
+    // Build folder structure (supporting nested folders)
+    const buildFolderTree = (parentId?: string): FolderNode[] => {
+      return folders
+        .filter(folder => folder.parentId === parentId)
+        .map(folder => ({
+          id: folder.id,
+          name: folder.name,
+          type: 'folder' as const,
+          expanded: true,
+          parentId: folder.parentId,
+          endpoints: endpointsByFolder[folder.id] || [],
+          subfolders: buildFolderTree(folder.id),
+        }));
+    };
+
+    return {
+      folders: buildFolderTree(),
+      endpoints: endpointsByFolder['root'] || [], // Endpoints not in any folder
+    };
+  };
+
+  // For now, we'll show projects with sample data to demonstrate the structure
   useEffect(() => {
     if (!projectsLoading && projects.length > 0) {
-      const nodes: ProjectNode[] = projects.map(project => ({
-        id: project.id,
-        name: project.name,
-        type: 'project' as const,
-        expanded: true,
-        folders: [],
-        endpoints: [], // For now, empty - we'll add endpoint loading later
-      }));
+      const nodes: ProjectNode[] = projects.map(project => {
+        // Sample data - in the future this will come from the database
+        const sampleEndpoints: Endpoint[] = [
+          {
+            id: '1',
+            projectId: project.id,
+            name: 'Get Users',
+            method: 'GET',
+            url: '/api/users',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          {
+            id: '2',
+            projectId: project.id,
+            name: 'Create User',
+            method: 'POST',
+            url: '/api/users',
+            folder: 'auth-folder',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          {
+            id: '3',
+            projectId: project.id,
+            name: 'Login',
+            method: 'POST',
+            url: '/api/auth/login',
+            folder: 'auth-folder',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ];
+
+        const sampleFolders: EndpointFolder[] = [
+          {
+            id: 'auth-folder',
+            projectId: project.id,
+            name: 'Authentication',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ];
+
+        const { folders, endpoints } = organizeProjectData(project.id, sampleEndpoints, sampleFolders);
+
+        return {
+          id: project.id,
+          name: project.name,
+          type: 'project' as const,
+          expanded: true,
+          folders,
+          endpoints,
+        };
+      });
+
       setProjectNodes(nodes);
     }
   }, [projects, projectsLoading]);
@@ -61,17 +143,22 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   };
 
   const toggleFolderExpansion = (projectId: string, folderId: string) => {
+    const toggleFolderInTree = (folders: FolderNode[]): FolderNode[] => {
+      return folders.map(folder => {
+        if (folder.id === folderId) {
+          return { ...folder, expanded: !folder.expanded };
+        }
+        if (folder.subfolders.length > 0) {
+          return { ...folder, subfolders: toggleFolderInTree(folder.subfolders) };
+        }
+        return folder;
+      });
+    };
+
     setProjectNodes(prev =>
       prev.map(node =>
         node.id === projectId
-          ? {
-              ...node,
-              folders: node.folders.map(folder =>
-                folder.id === folderId
-                  ? { ...folder, expanded: !folder.expanded }
-                  : folder
-              ),
-            }
+          ? { ...node, folders: toggleFolderInTree(node.folders) }
           : node
       )
     );
@@ -92,6 +179,56 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
       default:
         return 'text-gray-600';
     }
+  };
+
+  // Recursive component to render folders and their contents
+  const renderFolders = (folders: FolderNode[], projectId: string, depth: number = 1) => {
+    return folders.map(folder => (
+      <div key={folder.id} style={{ marginLeft: `${depth * 16}px` }}>
+        {/* Folder Header */}
+        <div
+          className="flex items-center gap-1 p-2 hover:bg-gray-100 rounded cursor-pointer"
+          onClick={() => toggleFolderExpansion(projectId, folder.id)}
+        >
+          <Icon
+            icon={folder.expanded ? "material-symbols:expand-more" : "material-symbols:chevron-right"}
+            className="h-4 w-4 text-gray-500"
+          />
+          <Icon icon="material-symbols:folder" className="h-4 w-4 text-yellow-500" />
+          <span className="text-sm text-gray-700 truncate">
+            {folder.name}
+          </span>
+        </div>
+
+        {/* Folder Contents */}
+        {folder.expanded && (
+          <div>
+            {/* Subfolder */}
+            {folder.subfolders.length > 0 && renderFolders(folder.subfolders, projectId, depth + 1)}
+
+            {/* Folder Endpoints */}
+            {folder.endpoints.map(endpoint => (
+              <div
+                key={`${endpoint.projectId}-${endpoint.id}`}
+                className={`flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer ${
+                  selectedEndpointId === endpoint.id ? 'bg-blue-50 border-l-2 border-blue-500' : ''
+                }`}
+                onClick={() => onEndpointSelect(endpoint)}
+                style={{ marginLeft: `${(depth + 1) * 16}px` }}
+              >
+                <div className="w-4" /> {/* Spacer for alignment */}
+                <span className={`text-xs font-medium ${getMethodColor(endpoint.method)} min-w-[45px]`}>
+                  {endpoint.method}
+                </span>
+                <span className="text-sm text-gray-700 truncate">
+                  {endpoint.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    ));
   };
 
   if (projectsLoading) {
@@ -148,49 +285,10 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                 {/* Project Contents */}
                 {project.expanded && (
                   <div className="ml-4 space-y-1">
-                    {/* Folders */}
-                    {project.folders.map(folder => (
-                      <div key={folder.id}>
-                        <div
-                          className="flex items-center gap-1 p-2 hover:bg-gray-100 rounded cursor-pointer"
-                          onClick={() => toggleFolderExpansion(project.id, folder.id)}
-                        >
-                          <Icon
-                            icon={folder.expanded ? "material-symbols:expand-more" : "material-symbols:chevron-right"}
-                            className="h-4 w-4 text-gray-500"
-                          />
-                          <Icon icon="material-symbols:folder" className="h-4 w-4 text-yellow-500" />
-                          <span className="text-sm text-gray-700 truncate">
-                            {folder.name}
-                          </span>
-                        </div>
+                    {/* Folders (using recursive rendering) */}
+                    {renderFolders(project.folders, project.id)}
 
-                        {/* Folder Endpoints */}
-                        {folder.expanded && (
-                          <div className="ml-4 space-y-1">
-                            {folder.endpoints.map(endpoint => (
-                              <div
-                                key={`${endpoint.projectId}-${endpoint.id}`}
-                                className={`flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer ${
-                                  selectedEndpointId === endpoint.id ? 'bg-blue-50 border-l-2 border-blue-500' : ''
-                                }`}
-                                onClick={() => onEndpointSelect(endpoint)}
-                              >
-                                <div className="w-4" /> {/* Spacer for alignment */}
-                                <span className={`text-xs font-medium ${getMethodColor(endpoint.method)}`}>
-                                  {endpoint.method}
-                                </span>
-                                <span className="text-sm text-gray-700 truncate">
-                                  {endpoint.name}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-
-                    {/* Direct Project Endpoints */}
+                    {/* Direct Project Endpoints (not in any folder) */}
                     {project.endpoints.map(endpoint => (
                       <div
                         key={`${endpoint.projectId}-${endpoint.id}`}
