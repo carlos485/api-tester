@@ -35,6 +35,7 @@ interface RequestTab {
   loading: boolean;
   endpointId?: string;
   projectId?: string;
+  isTransient?: boolean; // Tab transitoria que puede ser reemplazada
 }
 
 interface ProjectTab {
@@ -42,6 +43,7 @@ interface ProjectTab {
   name: string;
   type: 'project';
   project: Project;
+  isTransient?: boolean; // Tab transitoria que puede ser reemplazada
 }
 
 type Tab = RequestTab | ProjectTab;
@@ -134,6 +136,37 @@ const ApiTesterView: React.FC = () => {
       setSelectedEndpointId(undefined);
     }
   }, [activeTabIndex, tabs]);
+
+  // Helper function to find transient tab index
+  const findTransientTabIndex = () => {
+    return tabs.findIndex(tab => tab.isTransient === true);
+  };
+
+  // Helper function to replace transient tab or add new tab
+  const addOrReplaceTab = (newTab: Tab) => {
+    const transientIndex = findTransientTabIndex();
+    
+    if (transientIndex !== -1) {
+      // Replace the transient tab
+      setTabs(prev => 
+        prev.map((tab, index) => index === transientIndex ? newTab : tab)
+      );
+      setActiveTabIndex(transientIndex);
+    } else {
+      // Add new tab
+      setTabs(prev => [...prev, newTab]);
+      setShouldActivateLastTab(true);
+    }
+  };
+
+  // Function to confirm a tab (make it permanent)
+  const confirmTab = (tabIndex: number) => {
+    setTabs(prev =>
+      prev.map((tab, index) =>
+        index === tabIndex ? { ...tab, isTransient: false } : tab
+      )
+    );
+  };
 
   const handleSendRequest = async (request: ApiRequest) => {
     const currentTab = tabs[activeTabIndex];
@@ -307,16 +340,16 @@ const ApiTesterView: React.FC = () => {
       // Tab already exists, just activate it
       setActiveTabIndex(existingTabIndex);
     } else {
-      // Create a new tab for this project
+      // Create a new transient tab for this project
       const newTab: ProjectTab = {
         id: `project-${project.id}-${Date.now()}`,
         name: project.name,
         type: 'project',
         project: project,
+        isTransient: true, // Nueva tab es transitoria
       };
 
-      setTabs(prev => [...prev, newTab]);
-      setShouldActivateLastTab(true);
+      addOrReplaceTab(newTab);
     }
   };
 
@@ -378,6 +411,7 @@ const ApiTesterView: React.FC = () => {
         loading: false,
         endpointId: endpoint.id,
         projectId: endpoint.projectId,
+        isTransient: true, // Nueva tab es transitoria
       };
 
       if (shouldReplaceEmptyTab) {
@@ -385,9 +419,8 @@ const ApiTesterView: React.FC = () => {
         setTabs([newTab]);
         setActiveTabIndex(0);
       } else {
-        // Create a new tab for this endpoint
-        setTabs(prev => [...prev, newTab]);
-        setShouldActivateLastTab(true);
+        // Use the new system for transient tabs
+        addOrReplaceTab(newTab);
       }
     }
   };
@@ -445,21 +478,32 @@ const ApiTesterView: React.FC = () => {
     tabIndex: number,
     updatedRequest: ApiRequest
   ) => {
+    // Confirm the tab when changes are made
+    confirmTab(tabIndex);
+    
     setTabs(prev =>
       prev.map((tab, index) =>
         index === tabIndex && tab.type === 'request' 
-          ? { ...tab, request: updatedRequest } 
+          ? { ...tab, request: updatedRequest, isTransient: false } 
           : tab
       )
     );
   };
 
   const handleTabNameChange = (tabIndex: number, newName: string) => {
+    // Confirm the tab when name is changed
+    confirmTab(tabIndex);
+    
     setTabs(prev =>
       prev.map((tab, index) =>
-        index === tabIndex ? { ...tab, name: newName } : tab
+        index === tabIndex ? { ...tab, name: newName, isTransient: false } : tab
       )
     );
+  };
+
+  // Handle double click on tab header to confirm it
+  const handleTabDoubleClick = (tabIndex: number) => {
+    confirmTab(tabIndex);
   };
 
   return (
@@ -504,10 +548,11 @@ const ApiTesterView: React.FC = () => {
                 onAddTab={handleAddTab}
                 onTabChange={setActiveTabIndex}
                 onCloseTab={handleCloseTab}
+                onTabDoubleClick={handleTabDoubleClick}
                 showCloseButton={tabs.length > 1}
               >
                 {tabs.map((tab, tabIndex) => (
-                  <Tab key={tab.id} header={tab.name}>
+                  <Tab key={tab.id} header={tab.name} isTransient={tab.isTransient}>
                     {tab.type === 'request' ? (
                       <>
                         <div className="flex items-center gap-4">

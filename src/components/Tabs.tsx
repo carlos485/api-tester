@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react";
 interface TabProps {
   header: string;
   children: ReactNode;
+  isTransient?: boolean;
 }
 
 export const Tab: FC<TabProps> = ({ children }) => {
@@ -28,6 +29,7 @@ interface TabsProps {
   onAddTab?: () => void;
   onTabChange?: (index: number) => void;
   onCloseTab?: (index: number) => void;
+  onTabDoubleClick?: (index: number) => void;
   showCloseButton?: boolean;
 }
 
@@ -79,6 +81,7 @@ export const Tabs: FC<TabsProps> = ({
   onAddTab,
   onTabChange,
   onCloseTab,
+  onTabDoubleClick,
   showCloseButton = false,
 }) => {
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
@@ -117,14 +120,18 @@ export const Tabs: FC<TabsProps> = ({
                 key={index}
                 className={`${styles.tab} ${
                   activeTab === index ? styles.activeTab : styles.inactiveTab
-                } ${showCloseButton ? 'group flex items-center gap-2' : ''}`}
+                } ${showCloseButton ? 'group flex items-center gap-2' : ''} ${
+                  tab.props.isTransient ? 'italic opacity-75' : ''
+                }`}
               >
                 <button
                   onClick={() => {
                     setActiveTab(index);
                     onTabChange?.(index);
                   }}
+                  onDoubleClick={() => onTabDoubleClick?.(index)}
                   className={`${showCloseButton ? 'flex-1 text-left' : 'w-full'}`}
+                  title={tab.props.isTransient ? "Tab transitoria - doble clic para fijar" : ""}
                 >
                   {tab.props.header}
                 </button>
