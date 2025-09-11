@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import type { Endpoint, EndpointFolder } from "../types/project";
+import type { Endpoint, EndpointFolder, Project } from "../types/project";
 import { useAuth } from "../hooks/useAuth";
 import { useProjects } from "../hooks/useProjects";
 
 interface ProjectsSidebarProps {
   onEndpointSelect: (endpoint: Endpoint & { projectId: string }) => void;
+  onProjectSelect: (project: Project) => void;
   selectedEndpointId?: string;
 }
 
@@ -30,6 +31,7 @@ interface FolderNode {
 
 const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   onEndpointSelect,
+  onProjectSelect,
   selectedEndpointId,
 }) => {
   const { user } = useAuth();
@@ -146,6 +148,17 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
         node.id === projectId ? { ...node, expanded: !node.expanded } : node
       )
     );
+  };
+
+  const handleProjectClick = (projectId: string) => {
+    // Abrir el proyecto en una tab
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      onProjectSelect(project);
+    }
+    
+    // También expandir/colapsar el proyecto
+    toggleProjectExpansion(projectId);
   };
 
   const toggleFolderExpansion = (projectId: string, folderId: string) => {
@@ -295,7 +308,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                 {/* Project Node */}
                 <div
                   className="flex items-center gap-1 p-2 hover:bg-gray-100 rounded cursor-pointer"
-                  onClick={() => toggleProjectExpansion(project.id)}
+                  onClick={() => handleProjectClick(project.id)}
                 >
                   <Icon
                     icon={

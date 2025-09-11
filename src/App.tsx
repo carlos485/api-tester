@@ -1,4 +1,3 @@
-import React from "react";
 import LoginPage from "./components/LoginPage";
 import ApiTesterView from "./components/ApiTesterView";
 import { useAuth } from "./hooks/useAuth";

@@ -5,6 +5,7 @@ import type {
   ApiResponse,
   Endpoint,
   Environment,
+  Project,
 } from "../types/project";
 import QuickRequestBar from "./QuickRequestBar";
 import RequestTabs from "./RequestTabs";
@@ -28,6 +29,7 @@ import {
 interface RequestTab {
   id: string;
   name: string;
+  type: 'request';
   request: ApiRequest;
   response: ApiResponse | null;
   loading: boolean;
@@ -35,12 +37,22 @@ interface RequestTab {
   projectId?: string;
 }
 
+interface ProjectTab {
+  id: string;
+  name: string;
+  type: 'project';
+  project: Project;
+}
+
+type Tab = RequestTab | ProjectTab;
+
 const ApiTesterView: React.FC = () => {
   // Initialize with default values, will be restored from sessionStorage in useEffect
-  const [requestTabs, setRequestTabs] = useState<RequestTab[]>([
+  const [tabs, setTabs] = useState<Tab[]>([
     {
       id: "tab-1",
       name: "New Request",
+      type: 'request',
       request: { method: "GET", url: "", headers: {}, queryParams: {}, body: "" },
       response: null,
       loading: false,
@@ -61,12 +73,13 @@ const ApiTesterView: React.FC = () => {
     const savedEnvironmentId = getSelectedEnvironment();
 
     if (savedTabs.length > 0) {
-      // Convert SerializedRequestTab to RequestTab
+      // Convert SerializedRequestTab to RequestTab (only request tabs for now)
       const convertedTabs = savedTabs.map(tab => ({
         ...tab,
+        type: 'request' as const,
         response: tab.response as ApiResponse | null
       }));
-      setRequestTabs(convertedTabs);
+      setTabs(convertedTabs);
       setActiveTabIndex(Math.min(savedActiveIndex, savedTabs.length - 1));
     }
 
@@ -86,9 +99,11 @@ const ApiTesterView: React.FC = () => {
   // Save state to sessionStorage whenever it changes (but not on initial mount)
   useEffect(() => {
     if (isRestoredFromSession) {
-      saveRequestTabs(requestTabs);
+      // Only save request tabs to session storage
+      const requestTabsOnly = tabs.filter(tab => tab.type === 'request') as RequestTab[];
+      saveRequestTabs(requestTabsOnly);
     }
-  }, [requestTabs, isRestoredFromSession]);
+  }, [tabs, isRestoredFromSession]);
 
   useEffect(() => {
     if (isRestoredFromSession) {
@@ -104,30 +119,32 @@ const ApiTesterView: React.FC = () => {
 
   // Effect to activate the last tab when a new tab is added
   useEffect(() => {
-    if (shouldActivateLastTab && requestTabs.length > 0) {
-      setActiveTabIndex(requestTabs.length - 1);
+    if (shouldActivateLastTab && tabs.length > 0) {
+      setActiveTabIndex(tabs.length - 1);
       setShouldActivateLastTab(false);
     }
-  }, [shouldActivateLastTab, requestTabs]);
+  }, [shouldActivateLastTab, tabs]);
 
   // Update selectedEndpointId when active tab changes
   useEffect(() => {
-    const currentTab = requestTabs[activeTabIndex];
-    if (currentTab?.endpointId) {
+    const currentTab = tabs[activeTabIndex];
+    if (currentTab?.type === 'request' && currentTab.endpointId) {
       setSelectedEndpointId(currentTab.endpointId);
     } else {
       setSelectedEndpointId(undefined);
     }
-  }, [activeTabIndex, requestTabs]);
+  }, [activeTabIndex, tabs]);
 
   const handleSendRequest = async (request: ApiRequest) => {
-    const currentTab = requestTabs[activeTabIndex];
-    if (!currentTab) return;
+    const currentTab = tabs[activeTabIndex];
+    if (!currentTab || currentTab.type !== 'request') return;
 
     // Update the current tab's loading state
-    setRequestTabs(prev =>
+    setTabs(prev =>
       prev.map((tab, index) =>
-        index === activeTabIndex ? { ...tab, loading: true, request } : tab
+        index === activeTabIndex && tab.type === 'request' 
+          ? { ...tab, loading: true, request } 
+          : tab
       )
     );
 
@@ -204,9 +221,9 @@ const ApiTesterView: React.FC = () => {
       };
 
       // Update the current tab's response
-      setRequestTabs(prev =>
+      setTabs(prev =>
         prev.map((tab, index) =>
-          index === activeTabIndex
+          index === activeTabIndex && tab.type === 'request'
             ? { ...tab, response: responseData, loading: false }
             : tab
         )
@@ -253,9 +270,9 @@ const ApiTesterView: React.FC = () => {
       };
 
       // Update the current tab's error response
-      setRequestTabs(prev =>
+      setTabs(prev =>
         prev.map((tab, index) =>
-          index === activeTabIndex
+          index === activeTabIndex && tab.type === 'request'
             ? { ...tab, response: errorResponse, loading: false }
             : tab
         )
@@ -267,8 +284,8 @@ const ApiTesterView: React.FC = () => {
     method: string;
     url: string;
   }) => {
-    const currentTab = requestTabs[activeTabIndex];
-    if (!currentTab) return;
+    const currentTab = tabs[activeTabIndex];
+    if (!currentTab || currentTab.type !== 'request') return;
 
     const request: ApiRequest = {
       ...currentTab.request,
@@ -280,6 +297,29 @@ const ApiTesterView: React.FC = () => {
     handleSendRequest(request);
   };
 
+  const handleProjectSelect = (project: Project) => {
+    // Check if a tab for this project already exists
+    const existingTabIndex = tabs.findIndex(
+      tab => tab.type === 'project' && tab.project.id === project.id
+    );
+
+    if (existingTabIndex !== -1) {
+      // Tab already exists, just activate it
+      setActiveTabIndex(existingTabIndex);
+    } else {
+      // Create a new tab for this project
+      const newTab: ProjectTab = {
+        id: `project-${project.id}-${Date.now()}`,
+        name: project.name,
+        type: 'project',
+        project: project,
+      };
+
+      setTabs(prev => [...prev, newTab]);
+      setShouldActivateLastTab(true);
+    }
+  };
+
   const handleQuickRequestChange = (
     tabIndex: number,
     quickRequest: {
@@ -287,8 +327,8 @@ const ApiTesterView: React.FC = () => {
       url: string;
     }
   ) => {
-    const currentTab = requestTabs[tabIndex];
-    if (!currentTab) return;
+    const currentTab = tabs[tabIndex];
+    if (!currentTab || currentTab.type !== 'request') return;
 
     const updatedRequest: ApiRequest = {
       ...currentTab.request,
@@ -304,8 +344,8 @@ const ApiTesterView: React.FC = () => {
     setSelectedEndpointId(endpoint.id);
 
     // Check if a tab for this endpoint already exists
-    const existingTabIndex = requestTabs.findIndex(
-      tab => tab.endpointId === endpoint.id && tab.projectId === endpoint.projectId
+    const existingTabIndex = tabs.findIndex(
+      tab => tab.type === 'request' && tab.endpointId === endpoint.id && tab.projectId === endpoint.projectId
     );
 
     if (existingTabIndex !== -1) {
@@ -314,17 +354,19 @@ const ApiTesterView: React.FC = () => {
     } else {
       // Check if there's only one tab that is empty and not associated with any endpoint
       const shouldReplaceEmptyTab = 
-        requestTabs.length === 1 &&
-        !requestTabs[0].endpointId &&
-        !requestTabs[0].request.url &&
-        !requestTabs[0].request.body &&
-        Object.keys(requestTabs[0].request.headers).length === 0 &&
-        Object.keys(requestTabs[0].request.queryParams).length === 0 &&
-        !requestTabs[0].response;
+        tabs.length === 1 &&
+        tabs[0].type === 'request' &&
+        !tabs[0].endpointId &&
+        !tabs[0].request.url &&
+        !tabs[0].request.body &&
+        Object.keys(tabs[0].request.headers).length === 0 &&
+        Object.keys(tabs[0].request.queryParams).length === 0 &&
+        !tabs[0].response;
 
       const newTab: RequestTab = {
         id: `endpoint-${endpoint.id}-${Date.now()}`,
         name: endpoint.name,
+        type: 'request',
         request: {
           method: endpoint.method,
           url: endpoint.url,
@@ -340,11 +382,11 @@ const ApiTesterView: React.FC = () => {
 
       if (shouldReplaceEmptyTab) {
         // Replace the empty tab
-        setRequestTabs([newTab]);
+        setTabs([newTab]);
         setActiveTabIndex(0);
       } else {
         // Create a new tab for this endpoint
-        setRequestTabs(prev => [...prev, newTab]);
+        setTabs(prev => [...prev, newTab]);
         setShouldActivateLastTab(true);
       }
     }
@@ -354,24 +396,25 @@ const ApiTesterView: React.FC = () => {
     const newTab: RequestTab = {
       id: `tab-${Date.now()}`,
       name: "New Request",
+      type: 'request',
       request: { method: "GET", url: "", headers: {}, queryParams: {}, body: "" },
       response: null,
       loading: false,
     };
 
-    setRequestTabs(prev => [...prev, newTab]);
+    setTabs(prev => [...prev, newTab]);
     setShouldActivateLastTab(true);
   };
 
   const handleCloseTab = (indexToClose: number) => {
-    if (requestTabs.length <= 1) return; // Don't close if it's the last tab
+    if (tabs.length <= 1) return; // Don't close if it's the last tab
 
     // Calculate the new active index before filtering
     let newActiveIndex = activeTabIndex;
 
     if (indexToClose === activeTabIndex) {
       // If closing the active tab, decide which tab to activate next
-      if (indexToClose === requestTabs.length - 1) {
+      if (indexToClose === tabs.length - 1) {
         // Closing the last tab, move to the previous one
         newActiveIndex = indexToClose - 1;
       } else {
@@ -385,7 +428,7 @@ const ApiTesterView: React.FC = () => {
     // If closing a tab after the active tab, no change needed (newActiveIndex stays the same)
 
     // Ensure the new index is valid for the filtered array
-    const newTabsLength = requestTabs.length - 1;
+    const newTabsLength = tabs.length - 1;
     if (newActiveIndex >= newTabsLength) {
       newActiveIndex = newTabsLength - 1;
     }
@@ -394,7 +437,7 @@ const ApiTesterView: React.FC = () => {
     }
 
     // Filter out the tab and update the active index
-    setRequestTabs(prev => prev.filter((_, index) => index !== indexToClose));
+    setTabs(prev => prev.filter((_, index) => index !== indexToClose));
     setActiveTabIndex(newActiveIndex);
   };
 
@@ -402,15 +445,17 @@ const ApiTesterView: React.FC = () => {
     tabIndex: number,
     updatedRequest: ApiRequest
   ) => {
-    setRequestTabs(prev =>
+    setTabs(prev =>
       prev.map((tab, index) =>
-        index === tabIndex ? { ...tab, request: updatedRequest } : tab
+        index === tabIndex && tab.type === 'request' 
+          ? { ...tab, request: updatedRequest } 
+          : tab
       )
     );
   };
 
   const handleTabNameChange = (tabIndex: number, newName: string) => {
-    setRequestTabs(prev =>
+    setTabs(prev =>
       prev.map((tab, index) =>
         index === tabIndex ? { ...tab, name: newName } : tab
       )
@@ -448,6 +493,7 @@ const ApiTesterView: React.FC = () => {
             {/* Sidebar */}
             <ProjectsSidebar
               onEndpointSelect={handleEndpointSelect}
+              onProjectSelect={handleProjectSelect}
               selectedEndpointId={selectedEndpointId}
             />
 
@@ -458,50 +504,97 @@ const ApiTesterView: React.FC = () => {
                 onAddTab={handleAddTab}
                 onTabChange={setActiveTabIndex}
                 onCloseTab={handleCloseTab}
-                showCloseButton={requestTabs.length > 1}
+                showCloseButton={tabs.length > 1}
               >
-                {requestTabs.map((tab, tabIndex) => (
+                {tabs.map((tab, tabIndex) => (
                   <Tab key={tab.id} header={tab.name}>
-                    <div className="flex items-center gap-4">
-                      <Input
-                        type="text"
-                        value={tab.name}
-                        onChange={e =>
-                          handleTabNameChange(tabIndex, e.target.value)
-                        }
-                        onFocus={() => setEditingTabName(tab.id)}
-                        onBlur={() => setEditingTabName(null)}
-                        className={`text-md text-gray-600 w-auto inline-block min-w-[120px] ${
-                          editingTabName === tab.id
-                            ? "border border-gray-300"
-                            : "border-0 hover:border hover:border-gray-200"
-                        }`}
-                        style={{
-                          width: `${Math.max(120, tab.name.length * 8 + 20)}px`,
-                        }}
-                      />
-                    </div>
-                    <QuickRequestBar
-                      onSendRequest={handleQuickRequest}
-                      environments={[]}
-                      initialMethod={tab.request.method}
-                      initialUrl={tab.request.url}
-                      onRequestChange={quickRequest =>
-                        handleQuickRequestChange(tabIndex, quickRequest)
-                      }
-                    />
-                    <RequestTabs
-                      request={tab.request}
-                      onRequestChange={updatedRequest =>
-                        handleRequestChange(tabIndex, updatedRequest)
-                      }
-                    />
-                    <div className="mt-6">
-                      <ResponseViewer
-                        response={tab.response}
-                        loading={tab.loading}
-                      />
-                    </div>
+                    {tab.type === 'request' ? (
+                      <>
+                        <div className="flex items-center gap-4">
+                          <Input
+                            type="text"
+                            value={tab.name}
+                            onChange={e =>
+                              handleTabNameChange(tabIndex, e.target.value)
+                            }
+                            onFocus={() => setEditingTabName(tab.id)}
+                            onBlur={() => setEditingTabName(null)}
+                            className={`text-md text-gray-600 w-auto inline-block min-w-[120px] ${
+                              editingTabName === tab.id
+                                ? "border border-gray-300"
+                                : "border-0 hover:border hover:border-gray-200"
+                            }`}
+                            style={{
+                              width: `${Math.max(120, tab.name.length * 8 + 20)}px`,
+                            }}
+                          />
+                        </div>
+                        <QuickRequestBar
+                          onSendRequest={handleQuickRequest}
+                          environments={[]}
+                          initialMethod={tab.request.method}
+                          initialUrl={tab.request.url}
+                          onRequestChange={quickRequest =>
+                            handleQuickRequestChange(tabIndex, quickRequest)
+                          }
+                        />
+                        <RequestTabs
+                          request={tab.request}
+                          onRequestChange={updatedRequest =>
+                            handleRequestChange(tabIndex, updatedRequest)
+                          }
+                        />
+                        <div className="mt-6">
+                          <ResponseViewer
+                            response={tab.response}
+                            loading={tab.loading}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      /* Project Tab Content */
+                      <div className="p-6">
+                        <div className="flex items-center gap-3 mb-6">
+                          <Icon icon={tab.project.icon} className="h-8 w-8 text-gray-900" />
+                          <div>
+                            <h1 className="text-2xl font-bold text-gray-900">{tab.project.name}</h1>
+                            <p className="text-gray-600">{tab.project.description || 'No description available'}</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="bg-white p-6 rounded-lg border">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Information</h3>
+                            <div className="space-y-2">
+                              <div>
+                                <span className="font-medium text-gray-700">Created:</span>
+                                <span className="ml-2 text-gray-600">{tab.project.createdAt.toLocaleDateString()}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Updated:</span>
+                                <span className="ml-2 text-gray-600">{tab.project.updatedAt.toLocaleDateString()}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-700">Environments:</span>
+                                <span className="ml-2 text-gray-600">{tab.project.environments.length} configured</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="bg-white p-6 rounded-lg border">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Environments</h3>
+                            <div className="space-y-3">
+                              {tab.project.environments.map(env => (
+                                <div key={env.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                                  <div>
+                                    <div className="font-medium text-gray-900">{env.name}</div>
+                                    <div className="text-sm text-gray-600">{env.baseUrl}</div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </Tab>
                 ))}
               </Tabs>
