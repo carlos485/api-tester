@@ -563,10 +563,43 @@ const ApiTesterView: React.FC = () => {
                 onTabDoubleClick={handleTabDoubleClick}
                 showCloseButton={tabs.length > 1}
               >
-                {tabs.map((tab, tabIndex) => (
-                  <Tab key={tab.id} header={tab.name} isTransient={tab.isTransient}>
-                    {tab.type === 'request' ? (
-                      <>
+                {tabs.map((tab, tabIndex) => {
+                  // Create custom header with icon/method indicator
+                  const getMethodColor = (method: string) => {
+                    switch (method.toUpperCase()) {
+                      case "GET":
+                        return "text-green-600 bg-green-50";
+                      case "POST":
+                        return "text-blue-600 bg-blue-50";
+                      case "PUT":
+                        return "text-orange-600 bg-orange-50";
+                      case "DELETE":
+                        return "text-red-600 bg-red-50";
+                      case "PATCH":
+                        return "text-purple-600 bg-purple-50";
+                      default:
+                        return "text-gray-600 bg-gray-50";
+                    }
+                  };
+
+                  const tabHeader = tab.type === 'request' ? (
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded ${getMethodColor(tab.request.method)} min-w-[45px] text-center`}>
+                        {tab.request.method}
+                      </span>
+                      <span>{tab.name}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Icon icon="bi:collection" className="h-4 w-4 text-gray-600" />
+                      <span>{tab.name}</span>
+                    </div>
+                  );
+
+                  return (
+                    <Tab key={tab.id} header={tabHeader} isTransient={tab.isTransient}>
+                      {tab.type === 'request' ? (
+                        <>
                         <div className="flex items-center gap-4">
                           <Input
                             type="text"
@@ -608,15 +641,16 @@ const ApiTesterView: React.FC = () => {
                           />
                         </div>
                       </>
-                    ) : (
-                      /* Project Tab Content */
-                      <ProjectDetails 
-                        project={tab.project} 
-                        onProjectUpdate={handleProjectUpdate}
-                      />
-                    )}
-                  </Tab>
-                ))}
+                      ) : (
+                        /* Project Tab Content */
+                        <ProjectDetails 
+                          project={tab.project} 
+                          onProjectUpdate={handleProjectUpdate}
+                        />
+                      )}
+                    </Tab>
+                  );
+                })}
               </Tabs>
             </div>
           </div>

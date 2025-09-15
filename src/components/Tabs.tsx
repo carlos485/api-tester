@@ -3,7 +3,7 @@ import type { ReactElement, ReactNode, FC } from "react";
 import { Icon } from "@iconify/react";
 
 interface TabProps {
-  header: string;
+  header: string | ReactNode;
   children: ReactNode;
   isTransient?: boolean;
 }
