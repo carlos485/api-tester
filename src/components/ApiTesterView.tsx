@@ -15,6 +15,7 @@ import EnvironmentSelector from "./EnvironmentSelector";
 import ProjectsSidebar from "./ProjectsSidebar";
 import UserMenu from "./UserMenu";
 import Input from "./Input";
+import ProjectDetails from "./ProjectDetails";
 import {
   saveRequestTabs,
   getRequestTabs,
@@ -598,47 +599,7 @@ const ApiTesterView: React.FC = () => {
                       </>
                     ) : (
                       /* Project Tab Content */
-                      <div className="p-6">
-                        <div className="flex items-center gap-3 mb-6">
-                          <Icon icon={tab.project.icon} className="h-8 w-8 text-gray-900" />
-                          <div>
-                            <h1 className="text-2xl font-bold text-gray-900">{tab.project.name}</h1>
-                            <p className="text-gray-600">{tab.project.description || 'No description available'}</p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="bg-white p-6 rounded-lg border">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Information</h3>
-                            <div className="space-y-2">
-                              <div>
-                                <span className="font-medium text-gray-700">Created:</span>
-                                <span className="ml-2 text-gray-600">{tab.project.createdAt.toLocaleDateString()}</span>
-                              </div>
-                              <div>
-                                <span className="font-medium text-gray-700">Updated:</span>
-                                <span className="ml-2 text-gray-600">{tab.project.updatedAt.toLocaleDateString()}</span>
-                              </div>
-                              <div>
-                                <span className="font-medium text-gray-700">Environments:</span>
-                                <span className="ml-2 text-gray-600">{tab.project.environments.length} configured</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="bg-white p-6 rounded-lg border">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Environments</h3>
-                            <div className="space-y-3">
-                              {tab.project.environments.map(env => (
-                                <div key={env.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                                  <div>
-                                    <div className="font-medium text-gray-900">{env.name}</div>
-                                    <div className="text-sm text-gray-600">{env.baseUrl}</div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <ProjectDetails project={tab.project} />
                     )}
                   </Tab>
                 ))}
