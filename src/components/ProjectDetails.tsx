@@ -10,22 +10,26 @@ interface ProjectDetailsProps {
 }
 
 const AVAILABLE_ICONS = [
-  "material-symbols:folder",
-  "material-symbols:code",
-  "material-symbols:web",
   "material-symbols:api",
-  "material-symbols:rocket-launch",
-  "material-symbols:database",
-  "material-symbols:cloud",
-  "material-symbols:settings",
-  "material-symbols:bug-report",
-  "material-symbols:security",
-  "material-symbols:analytics",
+  "material-symbols:web",
   "material-symbols:smartphone",
-  "heroicons:cube-transparent",
-  "heroicons:cog-6-tooth",
-  "heroicons:chart-bar",
-  "heroicons:server",
+  "material-symbols:desktop-windows",
+  "material-symbols:cloud",
+  "material-symbols:database",
+  "material-symbols:code",
+  "material-symbols:settings",
+  "zondicons:wallet",
+  "mingcute:coupon-fill",
+  "fa6-solid:user",
+  "streamline-ultimate:tool-box-bold",
+  "zondicons:notification",
+  "tdesign:task-checked-filled",
+  "streamline:bag-dollar-solid",
+  "ci:transfer",
+  "material-symbols:encrypted",
+  "mdi:circle-slice-8",
+  "mdi:cloud",
+  "streamline-ultimate:crypto-encryption-key-bold",
 ];
 
 const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, onProjectUpdate }) => {
@@ -123,19 +127,23 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, onProjectUpdat
           
           {showIconSelector && (
             <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10 w-64">
-              <div className="grid grid-cols-4 gap-2">
-                {AVAILABLE_ICONS.map((iconName) => (
-                  <button
-                    key={iconName}
-                    onClick={() => handleIconChange(iconName)}
-                    className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-                      project.icon === iconName ? 'bg-blue-100 border border-blue-300' : ''
-                    }`}
-                    disabled={isUpdating}
-                  >
-                    <Icon icon={iconName} className="h-6 w-6 text-gray-900" />
-                  </button>
-                ))}
+              <div className="max-h-[15rem] overflow-y-auto border border-gray-200 rounded-lg p-2 custom-scrollbar">
+                <div className="grid grid-cols-4 gap-2">
+                  {AVAILABLE_ICONS.map((iconName) => (
+                    <button
+                      key={iconName}
+                      onClick={() => handleIconChange(iconName)}
+                      className={`p-3 rounded-lg border-2 transition-colors flex items-center justify-center ${
+                        project.icon === iconName
+                          ? 'border-gray-500 bg-gray-100'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      disabled={isUpdating}
+                    >
+                      <Icon icon={iconName} className="h-6 w-6 text-gray-900" />
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="mt-3 pt-3 border-t border-gray-200">
                 <button
