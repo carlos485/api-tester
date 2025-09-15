@@ -94,6 +94,10 @@ const ProjectView: React.FC<ProjectViewProps> = ({
       // Convert SerializedRequestTab to RequestTab
       const convertedTabs = savedTabs.map(tab => ({
         ...tab,
+        request: {
+          ...tab.request,
+          queryParams: tab.request.queryParams || {}
+        },
         response: tab.response as ApiResponse | null
       }));
       setRequestTabs(convertedTabs);

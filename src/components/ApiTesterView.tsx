@@ -80,6 +80,10 @@ const ApiTesterView: React.FC = () => {
       const convertedTabs = savedTabs.map(tab => ({
         ...tab,
         type: 'request' as const,
+        request: {
+          ...tab.request,
+          queryParams: tab.request.queryParams || {}
+        },
         response: tab.response as ApiResponse | null
       }));
       setTabs(convertedTabs);
