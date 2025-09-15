@@ -354,6 +354,17 @@ const ApiTesterView: React.FC = () => {
     }
   };
 
+  const handleProjectUpdate = (updatedProject: Project) => {
+    // Update the project in any existing tabs
+    setTabs(prev =>
+      prev.map(tab =>
+        tab.type === 'project' && tab.project.id === updatedProject.id
+          ? { ...tab, project: updatedProject, name: updatedProject.name }
+          : tab
+      )
+    );
+  };
+
   const handleQuickRequestChange = (
     tabIndex: number,
     quickRequest: {
@@ -599,7 +610,10 @@ const ApiTesterView: React.FC = () => {
                       </>
                     ) : (
                       /* Project Tab Content */
-                      <ProjectDetails project={tab.project} />
+                      <ProjectDetails 
+                        project={tab.project} 
+                        onProjectUpdate={handleProjectUpdate}
+                      />
                     )}
                   </Tab>
                 ))}

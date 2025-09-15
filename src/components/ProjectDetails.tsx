@@ -1,19 +1,204 @@
+import { useState } from "react";
 import { Icon } from "@iconify/react";
 import type { Project } from "../types/project";
+import Input from "./Input";
+import { ProjectService } from "../services/projectService";
 
 interface ProjectDetailsProps {
   project: Project;
+  onProjectUpdate?: (updatedProject: Project) => void;
 }
 
-const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
+const AVAILABLE_ICONS = [
+  "material-symbols:folder",
+  "material-symbols:code",
+  "material-symbols:web",
+  "material-symbols:api",
+  "material-symbols:rocket-launch",
+  "material-symbols:database",
+  "material-symbols:cloud",
+  "material-symbols:settings",
+  "material-symbols:bug-report",
+  "material-symbols:security",
+  "material-symbols:analytics",
+  "material-symbols:smartphone",
+  "heroicons:cube-transparent",
+  "heroicons:cog-6-tooth",
+  "heroicons:chart-bar",
+  "heroicons:server",
+];
+
+const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, onProjectUpdate }) => {
+  const [editingName, setEditingName] = useState(false);
+  const [editingDescription, setEditingDescription] = useState(false);
+  const [showIconSelector, setShowIconSelector] = useState(false);
+  const [localName, setLocalName] = useState(project.name);
+  const [localDescription, setLocalDescription] = useState(project.description || "");
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleNameSave = async () => {
+    if (localName.trim() && localName !== project.name) {
+      setIsUpdating(true);
+      try {
+        await ProjectService.updateProject(project.id, { name: localName.trim() });
+        onProjectUpdate?.({
+          ...project,
+          name: localName.trim(),
+          updatedAt: new Date()
+        });
+      } catch (error) {
+        console.error('Error updating project name:', error);
+        setLocalName(project.name);
+      } finally {
+        setIsUpdating(false);
+      }
+    }
+    setEditingName(false);
+  };
+
+  const handleDescriptionSave = async () => {
+    if (localDescription !== (project.description || "")) {
+      setIsUpdating(true);
+      try {
+        await ProjectService.updateProject(project.id, { description: localDescription });
+        onProjectUpdate?.({
+          ...project,
+          description: localDescription,
+          updatedAt: new Date()
+        });
+      } catch (error) {
+        console.error('Error updating project description:', error);
+        setLocalDescription(project.description || "");
+      } finally {
+        setIsUpdating(false);
+      }
+    }
+    setEditingDescription(false);
+  };
+
+  const handleIconChange = async (newIcon: string) => {
+    if (newIcon !== project.icon) {
+      setIsUpdating(true);
+      try {
+        await ProjectService.updateProject(project.id, { icon: newIcon });
+        onProjectUpdate?.({
+          ...project,
+          icon: newIcon,
+          updatedAt: new Date()
+        });
+      } catch (error) {
+        console.error('Error updating project icon:', error);
+      } finally {
+        setIsUpdating(false);
+      }
+    }
+    setShowIconSelector(false);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent, saveFunction: () => void) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      saveFunction();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      setEditingName(false);
+      setEditingDescription(false);
+      setLocalName(project.name);
+      setLocalDescription(project.description || "");
+    }
+  };
+
   return (
     <div className="p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <Icon icon={project.icon} className="h-8 w-8 text-gray-900" />
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
-          <p className="text-gray-600">{project.description || 'No description available'}</p>
+      <div className="flex items-start gap-3 mb-6">
+        <div className="relative">
+          <button
+            onClick={() => setShowIconSelector(true)}
+            className="h-8 w-8 rounded hover:bg-gray-100 transition-colors duration-200"
+            disabled={isUpdating}
+            title="Change icon"
+          >
+            <Icon icon={project.icon} className="h-8 w-8 text-gray-900" />
+          </button>
+          
+          {showIconSelector && (
+            <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10 w-64">
+              <div className="grid grid-cols-4 gap-2">
+                {AVAILABLE_ICONS.map((iconName) => (
+                  <button
+                    key={iconName}
+                    onClick={() => handleIconChange(iconName)}
+                    className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                      project.icon === iconName ? 'bg-blue-100 border border-blue-300' : ''
+                    }`}
+                    disabled={isUpdating}
+                  >
+                    <Icon icon={iconName} className="h-6 w-6 text-gray-900" />
+                  </button>
+                ))}
+              </div>
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <button
+                  onClick={() => setShowIconSelector(false)}
+                  className="w-full text-sm text-gray-600 hover:text-gray-800"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+        
+        <div className="flex-1">
+          {editingName ? (
+            <Input
+              type="text"
+              value={localName}
+              onChange={(e) => setLocalName(e.target.value)}
+              onBlur={handleNameSave}
+              onKeyDown={(e) => handleKeyDown(e, handleNameSave)}
+              className="text-2xl font-bold text-gray-900 w-full"
+              autoFocus
+              disabled={isUpdating}
+            />
+          ) : (
+            <h1
+              className="text-2xl font-bold text-gray-900 cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 transition-colors"
+              onClick={() => setEditingName(true)}
+              title="Click to edit name"
+            >
+              {project.name}
+            </h1>
+          )}
+          
+          {editingDescription ? (
+            <Input
+              type="text"
+              value={localDescription}
+              onChange={(e) => setLocalDescription(e.target.value)}
+              onBlur={handleDescriptionSave}
+              onKeyDown={(e) => handleKeyDown(e, handleDescriptionSave)}
+              className="text-gray-600 w-full mt-1"
+              placeholder="Add a description..."
+              autoFocus
+              disabled={isUpdating}
+            />
+          ) : (
+            <p
+              className="text-gray-600 cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 transition-colors"
+              onClick={() => setEditingDescription(true)}
+              title="Click to edit description"
+            >
+              {project.description || 'Click to add description...'}
+            </p>
+          )}
+        </div>
+        
+        {isUpdating && (
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+          </div>
+        )}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
