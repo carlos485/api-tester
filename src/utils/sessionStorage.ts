@@ -3,6 +3,7 @@
 const SESSION_KEYS = {
   SELECTED_PROJECT: 'api-tester-selected-project',
   REQUEST_TABS: 'api-tester-request-tabs',
+  ALL_TABS: 'api-tester-all-tabs',
   ACTIVE_TAB_INDEX: 'api-tester-active-tab-index',
   SELECTED_ENDPOINT: 'api-tester-selected-endpoint',
   SELECTED_ENVIRONMENT: 'api-tester-selected-environment',
@@ -69,6 +70,23 @@ interface SerializedRequestTab {
   loading: boolean;
 }
 
+interface SerializedProjectTab {
+  id: string;
+  name: string;
+  type: 'project';
+  projectId: string;
+  isTransient?: boolean;
+}
+
+interface SerializedMixedRequestTab extends SerializedRequestTab {
+  type: 'request';
+  endpointId?: string;
+  projectId?: string;
+  isTransient?: boolean;
+}
+
+type SerializedTab = SerializedMixedRequestTab | SerializedProjectTab;
+
 export const saveRequestTabs = (tabs: SerializedRequestTab[]): void => {
   // Serialize tabs but exclude functions and complex objects
   const serializedTabs = tabs.map(tab => ({
@@ -87,6 +105,42 @@ export const getRequestTabs = (): SerializedRequestTab[] => {
 
 export const clearRequestTabs = (): void => {
   removeSessionItem(SESSION_KEYS.REQUEST_TABS);
+};
+
+// Functions for mixed tabs (request + project)
+export const saveAllTabs = (tabs: SerializedTab[]): void => {
+  const serializedTabs = tabs.map(tab => {
+    if (tab.type === 'project') {
+      return {
+        id: tab.id,
+        name: tab.name,
+        type: tab.type,
+        projectId: tab.projectId,
+        isTransient: tab.isTransient || false,
+      };
+    } else {
+      return {
+        id: tab.id,
+        name: tab.name,
+        type: tab.type,
+        request: tab.request,
+        response: tab.response,
+        loading: false, // Reset loading state on save
+        endpointId: tab.endpointId,
+        projectId: tab.projectId,
+        isTransient: tab.isTransient || false,
+      };
+    }
+  });
+  setSessionItem(SESSION_KEYS.ALL_TABS, serializedTabs);
+};
+
+export const getAllTabs = (): SerializedTab[] => {
+  return getSessionItem<SerializedTab[]>(SESSION_KEYS.ALL_TABS, []);
+};
+
+export const clearAllTabs = (): void => {
+  removeSessionItem(SESSION_KEYS.ALL_TABS);
 };
 
 export const saveActiveTabIndex = (index: number): void => {

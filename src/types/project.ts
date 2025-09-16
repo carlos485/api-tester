@@ -6,6 +6,7 @@ export interface Project {
   createdAt: Date;
   updatedAt: Date;
   environments: Environment[];
+  collectionVariables?: Record<string, string>; // Collection-level variables
 }
 
 export interface Environment {

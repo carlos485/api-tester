@@ -16,9 +16,13 @@ import ProjectsSidebar from "./ProjectsSidebar";
 import UserMenu from "./UserMenu";
 import Input from "./Input";
 import ProjectDetails from "./ProjectDetails";
+import { useAuth } from "../hooks/useAuth";
+import { useProjects } from "../hooks/useProjects";
 import {
   saveRequestTabs,
   getRequestTabs,
+  saveAllTabs,
+  getAllTabs,
   saveActiveTabIndex,
   getActiveTabIndex,
   saveSelectedEndpoint,
@@ -50,6 +54,9 @@ interface ProjectTab {
 type Tab = RequestTab | ProjectTab;
 
 const ApiTesterView: React.FC = () => {
+  const { user } = useAuth();
+  const { projects, loading: projectsLoading } = useProjects(user?.uid || null);
+
   // Initialize with default values, will be restored from sessionStorage in useEffect
   const [tabs, setTabs] = useState<Tab[]>([
     {
@@ -70,24 +77,43 @@ const ApiTesterView: React.FC = () => {
 
   // Restore state from sessionStorage on component mount
   useEffect(() => {
-    const savedTabs = getRequestTabs();
+    const savedAllTabs = getAllTabs();
     const savedActiveIndex = getActiveTabIndex();
     const savedEndpointId = getSelectedEndpoint();
     const savedEnvironmentId = getSelectedEnvironment();
 
-    if (savedTabs.length > 0) {
-      // Convert SerializedRequestTab to RequestTab (only request tabs for now)
-      const convertedTabs = savedTabs.map(tab => ({
-        ...tab,
-        type: 'request' as const,
-        request: {
-          ...tab.request,
-          queryParams: tab.request.queryParams || {}
-        },
-        response: tab.response as ApiResponse | null
-      }));
+    if (savedAllTabs.length > 0) {
+      // Convert serialized tabs back to Tab objects
+      // Note: Project tabs will need to be resolved with actual project data later
+      const convertedTabs: Tab[] = savedAllTabs.map(tab => {
+        if (tab.type === 'project') {
+          return {
+            id: tab.id,
+            name: tab.name,
+            type: 'project' as const,
+            project: null as any, // Will be resolved later when projects are loaded
+            projectId: tab.projectId,
+            isTransient: tab.isTransient || false,
+          };
+        } else {
+          return {
+            id: tab.id,
+            name: tab.name,
+            type: 'request' as const,
+            request: {
+              ...tab.request,
+              queryParams: tab.request.queryParams || {}
+            },
+            response: tab.response as ApiResponse | null,
+            loading: false,
+            endpointId: tab.endpointId,
+            projectId: tab.projectId,
+            isTransient: tab.isTransient || false,
+          };
+        }
+      });
       setTabs(convertedTabs);
-      setActiveTabIndex(Math.min(savedActiveIndex, savedTabs.length - 1));
+      setActiveTabIndex(Math.min(savedActiveIndex, savedAllTabs.length - 1));
     }
 
     if (savedEndpointId) {
@@ -95,18 +121,64 @@ const ApiTesterView: React.FC = () => {
     }
 
     if (savedEnvironmentId) {
-      // We'll handle environment restoration when we have project context
-      // For now, just clear it since we don't have project-specific environments
       clearSelectedEnvironment();
     }
 
     setIsRestoredFromSession(true);
   }, []);
 
+  // Resolve project tabs when projects are loaded
+  useEffect(() => {
+    if (!projectsLoading && projects.length > 0 && isRestoredFromSession) {
+      setTabs(prevTabs =>
+        prevTabs.map(tab => {
+          if (tab.type === 'project' && !tab.project) {
+            const projectId = (tab as any).projectId;
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+              return {
+                ...tab,
+                project,
+                name: project.name,
+              };
+            }
+          }
+          return tab;
+        })
+      );
+    }
+  }, [projects, projectsLoading, isRestoredFromSession]);
+
   // Save state to sessionStorage whenever it changes (but not on initial mount)
   useEffect(() => {
     if (isRestoredFromSession) {
-      // Only save request tabs to session storage
+      // Save all tabs (request and project) to session storage
+      const serializedTabs = tabs.map(tab => {
+        if (tab.type === 'project') {
+          return {
+            id: tab.id,
+            name: tab.name,
+            type: 'project' as const,
+            projectId: tab.project?.id || (tab as any).projectId, // Handle case where project might not be loaded yet
+            isTransient: tab.isTransient || false,
+          };
+        } else {
+          return {
+            id: tab.id,
+            name: tab.name,
+            type: 'request' as const,
+            request: tab.request,
+            response: tab.response,
+            loading: false,
+            endpointId: tab.endpointId,
+            projectId: tab.projectId,
+            isTransient: tab.isTransient || false,
+          };
+        }
+      });
+      saveAllTabs(serializedTabs);
+
+      // Also save request tabs for backward compatibility
       const requestTabsOnly = tabs.filter(tab => tab.type === 'request') as RequestTab[];
       saveRequestTabs(requestTabsOnly);
     }
