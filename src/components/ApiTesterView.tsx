@@ -19,6 +19,7 @@ import ProjectDetails from "./ProjectDetails";
 import { useAuth } from "../hooks/useAuth";
 import { useProjects } from "../hooks/useProjects";
 import { useEndpoints } from "../hooks/useEndpoints";
+import ProjectSelectionModal from "./ProjectSelectionModal";
 import {
   saveRequestTabs,
   getRequestTabs,
@@ -76,6 +77,9 @@ const ApiTesterView: React.FC = () => {
   const [editingTabName, setEditingTabName] = useState<string | null>(null);
   const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
   const [savingTab, setSavingTab] = useState<string | null>(null);
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [pendingTabIndex, setPendingTabIndex] = useState<number | null>(null);
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
 
   // Restore state from sessionStorage on component mount
   useEffect(() => {
@@ -482,69 +486,30 @@ const ApiTesterView: React.FC = () => {
     const tab = tabs[tabIndex];
     if (!tab || tab.type !== 'request') return;
 
+    // If tab has endpointId, update it directly
+    if (tab.endpointId) {
+      await saveEndpointToProject(tabIndex, tab.projectId || projects[0]?.id);
+      return;
+    }
+
+    // If tab doesn't have projectId, show project selection modal
+    if (!tab.projectId) {
+      setPendingTabIndex(tabIndex);
+      setShowProjectModal(true);
+      return;
+    }
+
+    // Save to existing project
+    await saveEndpointToProject(tabIndex, tab.projectId);
+  };
+
+  const saveEndpointToProject = async (tabIndex: number, projectId: string) => {
+    const tab = tabs[tabIndex];
+    if (!tab || tab.type !== 'request') return;
+
     setSavingTab(tab.id);
 
     try {
-      // Check if user has projects
-      if (projects.length === 0) {
-        // Create a default project automatically
-        const shouldCreateProject = confirm(
-          "You don't have any projects yet. Would you like to create a default project to save your endpoints?"
-        );
-
-        if (!shouldCreateProject) {
-          return;
-        }
-
-        // Create default project
-        try {
-          const { ProjectService } = await import("../services/projectService");
-          const defaultProjectData = {
-            name: "My API Collection",
-            description: "Default collection for API endpoints",
-            icon: "material-symbols:api",
-            environments: [
-              {
-                id: "env-" + Date.now(),
-                name: "Development",
-                baseUrl: "http://localhost:3000",
-                variables: {}
-              }
-            ],
-            collectionVariables: {}
-          };
-
-          await ProjectService.createProject(defaultProjectData, user?.uid || "");
-          alert("Default project created successfully! Your endpoint will be saved there.");
-
-          // Wait a moment for the project to be loaded
-          setTimeout(() => {
-            handleSaveEndpoint(tabIndex);
-          }, 1000);
-          return;
-        } catch (error) {
-          console.error("Failed to create default project:", error);
-          alert("Failed to create default project. Please try creating a project manually from the sidebar.");
-          return;
-        }
-      }
-
-      // If tab doesn't have a projectId, let user choose or use the first project
-      let projectId = tab.projectId;
-      if (!projectId) {
-        // For now, use the first project. Later we can add a project selector modal
-        projectId = projects[0].id;
-      }
-
-      // Get endpoints hook for the specific project
-      const project = projects.find(p => p.id === projectId);
-      if (!project) {
-        alert("Project not found. Please select a valid project.");
-        return;
-      }
-
-      // We need to use a different approach since useEndpoints can't be called conditionally
-      // Import the service directly
       const { EndpointsService } = await import("../services/endpointsService");
 
       const endpointData = {
@@ -585,6 +550,55 @@ const ApiTesterView: React.FC = () => {
       alert("Failed to save endpoint. Please try again.");
     } finally {
       setSavingTab(null);
+    }
+  };
+
+  const handleProjectSelectForEndpoint = async (projectId: string) => {
+    if (pendingTabIndex !== null) {
+      await saveEndpointToProject(pendingTabIndex, projectId);
+      setPendingTabIndex(null);
+    }
+    setShowProjectModal(false);
+  };
+
+  const handleCreateProject = async (projectData: {
+    name: string;
+    description: string;
+    icon: string;
+  }) => {
+    setIsCreatingProject(true);
+
+    try {
+      const { ProjectService } = await import("../services/projectService");
+      const fullProjectData = {
+        ...projectData,
+        environments: [
+          {
+            id: "env-" + Date.now(),
+            name: "Development",
+            baseUrl: "http://localhost:3000",
+            variables: {}
+          }
+        ],
+        collectionVariables: {}
+      };
+
+      await ProjectService.createProject(fullProjectData, user?.uid || "");
+
+      // Wait for projects to reload, then find the new project and save endpoint
+      setTimeout(async () => {
+        const newProject = projects.find(p => p.name === projectData.name);
+        if (newProject && pendingTabIndex !== null) {
+          await saveEndpointToProject(pendingTabIndex, newProject.id);
+          setPendingTabIndex(null);
+        }
+        setShowProjectModal(false);
+        setIsCreatingProject(false);
+      }, 1000);
+    } catch (error) {
+      console.error("Failed to create project:", error);
+      alert("Failed to create project. Please try again.");
+      setIsCreatingProject(false);
     }
   };
 
@@ -905,6 +919,16 @@ const ApiTesterView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Project Selection Modal */}
+      <ProjectSelectionModal
+        isOpen={showProjectModal}
+        projects={projects}
+        onClose={() => setShowProjectModal(false)}
+        onSelectProject={handleProjectSelectForEndpoint}
+        onCreateProject={handleCreateProject}
+        isCreating={isCreatingProject}
+      />
     </div>
   );
 };
