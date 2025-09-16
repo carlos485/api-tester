@@ -18,6 +18,7 @@ import Input from "./Input";
 import ProjectDetails from "./ProjectDetails";
 import { useAuth } from "../hooks/useAuth";
 import { useProjects } from "../hooks/useProjects";
+import { useEndpoints } from "../hooks/useEndpoints";
 import {
   saveRequestTabs,
   getRequestTabs,
@@ -74,6 +75,7 @@ const ApiTesterView: React.FC = () => {
   const [shouldActivateLastTab, setShouldActivateLastTab] = useState(false);
   const [editingTabName, setEditingTabName] = useState<string | null>(null);
   const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
+  const [savingTab, setSavingTab] = useState<string | null>(null);
 
   // Restore state from sessionStorage on component mount
   useEffect(() => {
@@ -476,6 +478,116 @@ const ApiTesterView: React.FC = () => {
     });
   };
 
+  const handleSaveEndpoint = async (tabIndex: number) => {
+    const tab = tabs[tabIndex];
+    if (!tab || tab.type !== 'request') return;
+
+    setSavingTab(tab.id);
+
+    try {
+      // Check if user has projects
+      if (projects.length === 0) {
+        // Create a default project automatically
+        const shouldCreateProject = confirm(
+          "You don't have any projects yet. Would you like to create a default project to save your endpoints?"
+        );
+
+        if (!shouldCreateProject) {
+          return;
+        }
+
+        // Create default project
+        try {
+          const { ProjectService } = await import("../services/projectService");
+          const defaultProjectData = {
+            name: "My API Collection",
+            description: "Default collection for API endpoints",
+            icon: "material-symbols:api",
+            environments: [
+              {
+                id: "env-" + Date.now(),
+                name: "Development",
+                baseUrl: "http://localhost:3000",
+                variables: {}
+              }
+            ],
+            collectionVariables: {}
+          };
+
+          await ProjectService.createProject(defaultProjectData, user?.uid || "");
+          alert("Default project created successfully! Your endpoint will be saved there.");
+
+          // Wait a moment for the project to be loaded
+          setTimeout(() => {
+            handleSaveEndpoint(tabIndex);
+          }, 1000);
+          return;
+        } catch (error) {
+          console.error("Failed to create default project:", error);
+          alert("Failed to create default project. Please try creating a project manually from the sidebar.");
+          return;
+        }
+      }
+
+      // If tab doesn't have a projectId, let user choose or use the first project
+      let projectId = tab.projectId;
+      if (!projectId) {
+        // For now, use the first project. Later we can add a project selector modal
+        projectId = projects[0].id;
+      }
+
+      // Get endpoints hook for the specific project
+      const project = projects.find(p => p.id === projectId);
+      if (!project) {
+        alert("Project not found. Please select a valid project.");
+        return;
+      }
+
+      // We need to use a different approach since useEndpoints can't be called conditionally
+      // Import the service directly
+      const { EndpointsService } = await import("../services/endpointsService");
+
+      const endpointData = {
+        name: tab.name || "Untitled Request",
+        method: tab.request.method as any,
+        url: tab.request.url || "",
+        description: tab.endpointId
+          ? `Updated from ${tab.name || "Untitled Request"}`
+          : `Saved from ${tab.name || "Untitled Request"}`,
+        headers: tab.request.headers,
+        queryParams: tab.request.queryParams,
+        body: tab.request.body,
+      };
+
+      if (tab.endpointId) {
+        // Update existing endpoint
+        await EndpointsService.updateEndpoint(tab.endpointId, endpointData);
+        console.log("Endpoint updated successfully!");
+      } else {
+        // Create new endpoint
+        const newEndpointId = await EndpointsService.createEndpoint(endpointData, projectId);
+
+        // Update the tab to include the new endpoint ID and project ID
+        setTabs(prev =>
+          prev.map((t, index) =>
+            index === tabIndex ? {
+              ...t,
+              endpointId: newEndpointId,
+              projectId: projectId,
+              isTransient: false
+            } : t
+          )
+        );
+        console.log("New endpoint created successfully!");
+      }
+    } catch (error) {
+      console.error("Failed to save endpoint:", error);
+      alert("Failed to save endpoint. Please try again.");
+    } finally {
+      setSavingTab(null);
+    }
+  };
+
   const handleQuickRequestChange = (
     tabIndex: number,
     quickRequest: {
@@ -729,6 +841,28 @@ const ApiTesterView: React.FC = () => {
                               width: `${Math.max(120, tab.name.length * 8 + 20)}px`,
                             }}
                           />
+                          <button
+                            onClick={() => handleSaveEndpoint(tabIndex)}
+                            disabled={savingTab === tab.id}
+                            className={`p-1 transition-colors duration-300 text-2xl border-2 border-transparent focus:outline-none rounded-lg focus:z-10 focus:ring-4 focus:ring-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${
+                              tab.endpointId
+                                ? "text-blue-600 hover:text-blue-700 hover:border-blue-600"
+                                : "text-gray-500 hover:text-gray-600 hover:border-gray-600"
+                            }`}
+                            title={
+                              tab.endpointId
+                                ? "Update endpoint"
+                                : "Save as new endpoint"
+                            }
+                          >
+                            <Icon
+                              icon={
+                                savingTab === tab.id
+                                  ? "line-md:loading-loop"
+                                  : "uil:save"
+                              }
+                            />
+                          </button>
                         </div>
                         <QuickRequestBar
                           onSendRequest={handleQuickRequest}
