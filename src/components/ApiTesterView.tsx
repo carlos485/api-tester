@@ -441,6 +441,41 @@ const ApiTesterView: React.FC = () => {
     );
   };
 
+  const handleProjectDelete = (projectId: string) => {
+    // Remove all tabs related to the deleted project
+    setTabs(prev => {
+      const filteredTabs = prev.filter(tab => {
+        if (tab.type === 'project') {
+          return tab.project.id !== projectId;
+        } else if (tab.type === 'request') {
+          return tab.projectId !== projectId;
+        }
+        return true;
+      });
+
+      // If no tabs remain, create a default one
+      if (filteredTabs.length === 0) {
+        const defaultTab: RequestTab = {
+          id: `tab-${Date.now()}`,
+          name: "New Request",
+          type: 'request',
+          request: { method: "GET", url: "", headers: {}, queryParams: {}, body: "" },
+          response: null,
+          loading: false,
+        };
+        setActiveTabIndex(0);
+        return [defaultTab];
+      }
+
+      // Adjust active tab index if necessary
+      if (activeTabIndex >= filteredTabs.length) {
+        setActiveTabIndex(filteredTabs.length - 1);
+      }
+
+      return filteredTabs;
+    });
+  };
+
   const handleQuickRequestChange = (
     tabIndex: number,
     quickRequest: {
@@ -719,9 +754,10 @@ const ApiTesterView: React.FC = () => {
                       </>
                       ) : (
                         /* Project Tab Content */
-                        <ProjectDetails 
-                          project={tab.project} 
+                        <ProjectDetails
+                          project={tab.project}
                           onProjectUpdate={handleProjectUpdate}
+                          onProjectDelete={handleProjectDelete}
                         />
                       )}
                     </Tab>

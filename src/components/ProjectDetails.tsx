@@ -9,6 +9,7 @@ import { Tabs, Tab } from "./Tabs";
 interface ProjectDetailsProps {
   project: Project;
   onProjectUpdate?: (updatedProject: Project) => void;
+  onProjectDelete?: (projectId: string) => void;
 }
 
 interface VariableRow {
@@ -45,6 +46,7 @@ const AVAILABLE_ICONS = [
 const ProjectDetails: React.FC<ProjectDetailsProps> = ({
   project,
   onProjectUpdate,
+  onProjectDelete,
 }) => {
   // Early return if project is not loaded yet
   if (!project) {
@@ -68,6 +70,8 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { endpoints, folders } = useEndpoints(project.id);
 
@@ -312,6 +316,22 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
     }
   };
 
+  const handleDeleteProject = async () => {
+    setIsDeleting(true);
+    try {
+      await ProjectService.deleteProject(project.id);
+      console.log("Project deleted successfully!");
+      setShowDeleteConfirm(false);
+
+      // Notify parent component about deletion
+      onProjectDelete?.(project.id);
+    } catch (error) {
+      console.error("Error deleting project:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // Update variable rows when project changes (only on initial load)
   useEffect(() => {
     const newVariables = variablesToArray();
@@ -529,6 +549,75 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                 )}
               </button>
             </div>
+
+            {/* Delete Button */}
+            <div className="mb-6">
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isDeleting || isUpdating || isSaving}
+                className="w-full px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2"
+              >
+                <Icon icon="material-symbols:delete" className="w-4 h-4" />
+                Delete Collection
+              </button>
+            </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex-shrink-0">
+                      <Icon icon="material-symbols:warning" className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900">Delete Collection</h3>
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <p className="text-sm text-gray-600">
+                      Are you sure you want to delete <strong>"{project.name}"</strong>?
+                      This action cannot be undone and will permanently delete:
+                    </p>
+                    <ul className="mt-2 text-sm text-gray-600 list-disc list-inside">
+                      <li>All endpoints ({endpoints.length})</li>
+                      <li>All folders ({folders.length})</li>
+                      <li>All variables ({project.environments.reduce((total, env) => total + (env.variables ? Object.keys(env.variables).length : 0), 0) + (project.collectionVariables ? Object.keys(project.collectionVariables).length : 0)})</li>
+                      <li>All environments ({project.environments.length})</li>
+                    </ul>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      disabled={isDeleting}
+                      className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleDeleteProject}
+                      disabled={isDeleting}
+                      className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isDeleting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Deleting...
+                        </>
+                      ) : (
+                        <>
+                          <Icon icon="material-symbols:delete" className="w-4 h-4" />
+                          Delete
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
