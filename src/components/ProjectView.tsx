@@ -685,6 +685,9 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                       onRequestChange={quickRequest =>
                         handleQuickRequestChange(tabIndex, quickRequest)
                       }
+                      onCurlParsed={parsedRequest =>
+                        handleRequestChange(tabIndex, parsedRequest)
+                      }
                     />
                     <RequestTabs
                       request={tab.request}

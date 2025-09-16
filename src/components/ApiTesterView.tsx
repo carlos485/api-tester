@@ -738,6 +738,9 @@ const ApiTesterView: React.FC = () => {
                           onRequestChange={quickRequest =>
                             handleQuickRequestChange(tabIndex, quickRequest)
                           }
+                          onCurlParsed={parsedRequest =>
+                            handleRequestChange(tabIndex, parsedRequest)
+                          }
                         />
                         <RequestTabs
                           request={tab.request}

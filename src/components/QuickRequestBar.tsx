@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import type { Environment } from "../types/project";
+import type { Environment, ApiRequest } from "../types/project";
 import RequestMethodSelect, { type HttpMethod } from "./RequestMethodSelect";
 import Input from "./Input";
+import { parseCurl, isCurlCommand } from "../utils/curlParser";
 
 interface QuickRequestBarProps {
   onSendRequest: (request: { method: string; url: string }) => void;
@@ -10,13 +11,15 @@ interface QuickRequestBarProps {
   initialMethod?: string;
   initialUrl?: string;
   onRequestChange?: (request: { method: string; url: string }) => void;
+  onCurlParsed?: (request: ApiRequest) => void;
 }
 
-const QuickRequestBar: React.FC<QuickRequestBarProps> = ({ 
-  onSendRequest, 
-  initialMethod = "GET", 
+const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
+  onSendRequest,
+  initialMethod = "GET",
   initialUrl = "",
-  onRequestChange 
+  onRequestChange,
+  onCurlParsed
 }) => {
   const [method, setMethod] = useState<HttpMethod>(initialMethod as HttpMethod);
   const [url, setUrl] = useState(initialUrl);
@@ -41,8 +44,61 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
 
   const handleUrlChange = (newUrl: string) => {
     setUrl(newUrl);
+
+    // Check if the input looks like a cURL command
+    if (isCurlCommand(newUrl) && onCurlParsed) {
+      const parsedData = parseCurl(newUrl);
+      if (parsedData) {
+        // Update local state
+        setMethod(parsedData.method as HttpMethod);
+        setUrl(parsedData.url);
+
+        // Create full request object for parent
+        const fullRequest: ApiRequest = {
+          method: parsedData.method,
+          url: parsedData.url,
+          headers: parsedData.headers,
+          queryParams: parsedData.queryParams,
+          body: parsedData.body
+        };
+
+        // Notify parent about cURL parsing
+        onCurlParsed(fullRequest);
+        return;
+      }
+    }
+
+    // Normal URL change
     if (onRequestChange) {
       onRequestChange({ method, url: newUrl });
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pastedText = e.clipboardData.getData('text');
+
+    // Check if pasted content is a cURL command
+    if (isCurlCommand(pastedText) && onCurlParsed) {
+      e.preventDefault(); // Prevent default paste behavior
+
+      const parsedData = parseCurl(pastedText);
+      if (parsedData) {
+        // Update local state
+        setMethod(parsedData.method as HttpMethod);
+        setUrl(parsedData.url);
+
+        // Create full request object for parent
+        const fullRequest: ApiRequest = {
+          method: parsedData.method,
+          url: parsedData.url,
+          headers: parsedData.headers,
+          queryParams: parsedData.queryParams,
+          body: parsedData.body
+        };
+
+        // Notify parent about cURL parsing
+        onCurlParsed(fullRequest);
+      }
     }
   };
 
@@ -71,6 +127,7 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
             type="text"
             value={url}
             onChange={e => handleUrlChange(e.target.value)}
+            onPaste={handlePaste}
             variant="full-width"
             leftAddon={
               <RequestMethodSelect
@@ -81,8 +138,8 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
             }
             placeholder={
               selectedEnvironment
-                ? "/api/endpoint or full URL"
-                : "https://api.example.com/endpoint"
+                ? "/api/endpoint or paste cURL command"
+                : "https://api.example.com/endpoint or paste cURL command"
             }
             required
           />
