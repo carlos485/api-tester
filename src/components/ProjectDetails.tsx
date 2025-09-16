@@ -4,6 +4,7 @@ import type { Project } from "../types/project";
 import Input from "./Input";
 import { ProjectService } from "../services/projectService";
 import { useEndpoints } from "../hooks/useEndpoints";
+import { Tabs, Tab } from "./Tabs";
 
 interface ProjectDetailsProps {
   project: Project;
@@ -40,7 +41,8 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, onProjectUpdat
   const [localName, setLocalName] = useState(project.name);
   const [localDescription, setLocalDescription] = useState(project.description || "");
   const [isUpdating, setIsUpdating] = useState(false);
-  
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+
   const { endpoints, folders } = useEndpoints(project.id);
 
   const handleNameSave = async () => {
@@ -239,10 +241,14 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, onProjectUpdat
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Icon icon="material-symbols:cloud" className="h-4 w-4 text-gray-600" />
-                  <span className="text-sm text-gray-700">Environments</span>
+                  <Icon icon="material-symbols:variable" className="h-4 w-4 text-gray-600" />
+                  <span className="text-sm text-gray-700">Variables</span>
                 </div>
-                <span className="text-sm font-medium text-gray-900">{project.environments.length}</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {project.environments.reduce((total, env) =>
+                    total + (env.variables ? Object.keys(env.variables).length : 0), 0
+                  )}
+                </span>
               </div>
             </div>
             
@@ -254,6 +260,78 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, onProjectUpdat
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Tabs Section */}
+      <div className="mt-8">
+        <Tabs
+          variant="underline"
+          defaultActiveTab={activeTabIndex}
+          onTabChange={setActiveTabIndex}
+        >
+          <Tab header="Variables">
+            <div className="space-y-4">
+              {project.environments.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Icon icon="material-symbols:variable" className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>No environments configured yet</p>
+                  <p className="text-sm">Add an environment to start defining variables</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {project.environments.map((environment) => (
+                    <div key={environment.id} className="border border-gray-200 rounded-lg">
+                      <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 rounded-t-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Icon icon="material-symbols:cloud" className="h-4 w-4 text-gray-600" />
+                            <h3 className="font-medium text-gray-900">{environment.name}</h3>
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {environment.variables ? Object.keys(environment.variables).length : 0} variables
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">{environment.baseUrl}</p>
+                      </div>
+
+                      <div className="p-4">
+                        {!environment.variables || Object.keys(environment.variables).length === 0 ? (
+                          <div className="text-center py-4 text-gray-500">
+                            <Icon icon="material-symbols:variable" className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                            <p className="text-sm">No variables defined for this environment</p>
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left">
+                              <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                  <th scope="col" className="px-6 py-3">Variable Name</th>
+                                  <th scope="col" className="px-6 py-3">Value</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {Object.entries(environment.variables).map(([key, value]) => (
+                                  <tr key={key} className="bg-white border-b border-gray-200 hover:bg-gray-50">
+                                    <td className="px-6 py-4 font-medium text-gray-900">
+                                      {key}
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-700 font-mono text-sm">
+                                      {value}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Tab>
+        </Tabs>
       </div>
     </div>
   );
