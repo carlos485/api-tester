@@ -47,7 +47,7 @@ const ProjectSelectionModal: React.FC<ProjectSelectionModalProps> = ({
   onCreateProject,
   isCreating = false,
 }) => {
-  const [showCreateForm, setShowCreateForm] = useState(projects.length === 0);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectDescription, setNewProjectDescription] = useState("");
   const [selectedIcon, setSelectedIcon] = useState("material-symbols:api");
@@ -68,7 +68,7 @@ const ProjectSelectionModal: React.FC<ProjectSelectionModalProps> = ({
     setNewProjectName("");
     setNewProjectDescription("");
     setSelectedIcon("material-symbols:api");
-    setShowCreateForm(projects.length === 0);
+    setShowCreateForm(false);
   };
 
   const handleClose = () => {
@@ -91,31 +91,40 @@ const ProjectSelectionModal: React.FC<ProjectSelectionModalProps> = ({
           </button>
         </div>
 
-        {!showCreateForm && projects.length > 0 && (
+        {!showCreateForm && (
           <div className="mb-6">
-            <h4 className="text-lg font-medium text-gray-900 mb-4">
-              Choose an existing collection:
-            </h4>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {projects.map((project) => (
-                <button
-                  key={project.id}
-                  onClick={() => onSelectProject(project.id)}
-                  className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon icon={project.icon} className="h-8 w-8 text-gray-700" />
-                    <div className="flex-1">
-                      <h5 className="font-medium text-gray-900">{project.name}</h5>
-                      {project.description && (
-                        <p className="text-sm text-gray-600 mt-1">{project.description}</p>
-                      )}
-                    </div>
-                    <Icon icon="material-symbols:arrow-forward" className="h-5 w-5 text-gray-400" />
-                  </div>
-                </button>
-              ))}
-            </div>
+            {projects.length > 0 ? (
+              <>
+                <h4 className="text-lg font-medium text-gray-900 mb-4">
+                  Choose an existing collection:
+                </h4>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {projects.map((project) => (
+                    <button
+                      key={project.id}
+                      onClick={() => onSelectProject(project.id)}
+                      className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon icon={project.icon} className="h-8 w-8 text-gray-700" />
+                        <div className="flex-1">
+                          <h5 className="font-medium text-gray-900">{project.name}</h5>
+                          {project.description && (
+                            <p className="text-sm text-gray-600 mt-1">{project.description}</p>
+                          )}
+                        </div>
+                        <Icon icon="material-symbols:arrow-forward" className="h-5 w-5 text-gray-400" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <Icon icon="material-symbols:folder-open" className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 mb-4">No collections found</p>
+              </div>
+            )}
 
             <div className="mt-6 pt-4 border-t border-gray-200">
               <button
@@ -190,15 +199,13 @@ const ProjectSelectionModal: React.FC<ProjectSelectionModalProps> = ({
             </div>
 
             <div className="flex gap-3 pt-4">
-              {projects.length > 0 && (
-                <button
-                  onClick={() => setShowCreateForm(false)}
-                  disabled={isCreating}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:opacity-50"
-                >
-                  Back to Collections
-                </button>
-              )}
+              <button
+                onClick={() => setShowCreateForm(false)}
+                disabled={isCreating}
+                className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:opacity-50"
+              >
+                Back to Collections
+              </button>
               <button
                 onClick={handleCreateProject}
                 disabled={!newProjectName.trim() || isCreating}
@@ -220,18 +227,6 @@ const ProjectSelectionModal: React.FC<ProjectSelectionModalProps> = ({
           </div>
         )}
 
-        {!showCreateForm && projects.length === 0 && (
-          <div className="text-center py-8">
-            <Icon icon="material-symbols:folder-open" className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 mb-4">No collections found</p>
-            <button
-              onClick={() => setShowCreateForm(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Create Your First Collection
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

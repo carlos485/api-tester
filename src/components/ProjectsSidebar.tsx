@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react";
 import type { Endpoint, EndpointFolder, Project } from "../types/project";
 import { useAuth } from "../hooks/useAuth";
 import { useProjects } from "../hooks/useProjects";
+import { useEndpoints } from "../hooks/useEndpoints";
 
 interface ProjectsSidebarProps {
   onEndpointSelect: (endpoint: Endpoint & { projectId: string }) => void;
@@ -37,6 +38,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   const { user } = useAuth();
   const { projects, loading: projectsLoading } = useProjects(user?.uid || null);
   const [projectNodes, setProjectNodes] = useState<ProjectNode[]>([]);
+  const [projectEndpoints, setProjectEndpoints] = useState<Record<string, { endpoints: Endpoint[], folders: EndpointFolder[] }>>({});
 
   // Function to organize endpoints and folders
   const organizeProjectData = (
@@ -75,57 +77,42 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
     };
   };
 
-  // For now, we'll show projects with sample data to demonstrate the structure
+  // Load endpoints and folders for each project
   useEffect(() => {
     if (!projectsLoading && projects.length > 0) {
+      const loadProjectData = async () => {
+        const { EndpointsService } = await import("../services/endpointsService");
+        const projectData: Record<string, { endpoints: Endpoint[], folders: EndpointFolder[] }> = {};
+
+        for (const project of projects) {
+          try {
+            const [endpoints, folders] = await Promise.all([
+              EndpointsService.getEndpoints(project.id),
+              EndpointsService.getEndpointFolders(project.id)
+            ]);
+            projectData[project.id] = { endpoints, folders };
+          } catch (error) {
+            console.error(`Error loading data for project ${project.id}:`, error);
+            projectData[project.id] = { endpoints: [], folders: [] };
+          }
+        }
+
+        setProjectEndpoints(projectData);
+      };
+
+      loadProjectData();
+    }
+  }, [projects, projectsLoading]);
+
+  // Create project nodes from projects and their data
+  useEffect(() => {
+    if (!projectsLoading && projects.length > 0 && Object.keys(projectEndpoints).length > 0) {
       const nodes: ProjectNode[] = projects.map(project => {
-        // Sample data - in the future this will come from the database
-        const sampleEndpoints: Endpoint[] = [
-          {
-            id: "1",
-            projectId: project.id,
-            name: "Get Users",
-            method: "GET",
-            url: "/api/users",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          {
-            id: "2",
-            projectId: project.id,
-            name: "Create User",
-            method: "POST",
-            url: "/api/users",
-            folder: "auth-folder",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          {
-            id: "3",
-            projectId: project.id,
-            name: "Login",
-            method: "POST",
-            url: "/api/auth/login",
-            folder: "auth-folder",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ];
-
-        const sampleFolders: EndpointFolder[] = [
-          {
-            id: "auth-folder",
-            projectId: project.id,
-            name: "Authentication",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ];
-
+        const projectData = projectEndpoints[project.id] || { endpoints: [], folders: [] };
         const { folders, endpoints } = organizeProjectData(
           project.id,
-          sampleEndpoints,
-          sampleFolders
+          projectData.endpoints,
+          projectData.folders
         );
 
         return {
@@ -139,8 +126,20 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
       });
 
       setProjectNodes(nodes);
+    } else if (!projectsLoading && projects.length > 0) {
+      // Show projects without data while loading
+      const nodes: ProjectNode[] = projects.map(project => ({
+        id: project.id,
+        name: project.name,
+        type: "project" as const,
+        expanded: true,
+        folders: [],
+        endpoints: [],
+      }));
+
+      setProjectNodes(nodes);
     }
-  }, [projects, projectsLoading]);
+  }, [projects, projectsLoading, projectEndpoints]);
 
   const toggleProjectExpansion = (projectId: string) => {
     setProjectNodes(prev =>
