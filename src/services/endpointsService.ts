@@ -27,6 +27,20 @@ const convertToTimestamp = (date: Date): Timestamp => {
 };
 
 export class EndpointsService {
+  // Debug method to get all endpoints
+  static async getAllEndpoints(): Promise<any[]> {
+    try {
+      const querySnapshot = await getDocs(collection(db, ENDPOINTS_COLLECTION));
+      return querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error("Error getting all endpoints:", error);
+      throw error;
+    }
+  }
+
   // Get all endpoints for a project
   static async getEndpoints(projectId: string): Promise<Endpoint[]> {
     try {
@@ -83,15 +97,23 @@ export class EndpointsService {
 
   // Create a new endpoint
   static async createEndpoint(
-    endpointData: Omit<Endpoint, "id" | "createdAt" | "updatedAt">
+    endpointData: Omit<Endpoint, "id" | "createdAt" | "updatedAt">,
+    projectId?: string
   ): Promise<string> {
     try {
       const now = new Date();
-      const docRef = await addDoc(collection(db, ENDPOINTS_COLLECTION), {
+
+      // Ensure projectId is included in the data
+      const finalEndpointData = {
         ...endpointData,
+        projectId: projectId || endpointData.projectId, // Use passed projectId or fallback to data.projectId
         createdAt: convertToTimestamp(now),
         updatedAt: convertToTimestamp(now),
-      });
+      };
+
+      console.log('Creating endpoint with data:', finalEndpointData);
+
+      const docRef = await addDoc(collection(db, ENDPOINTS_COLLECTION), finalEndpointData);
       return docRef.id;
     } catch (error) {
       console.error("Error creating endpoint:", error);

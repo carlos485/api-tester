@@ -39,6 +39,8 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   const { projects, loading: projectsLoading } = useProjects(user?.uid || null);
   const [projectNodes, setProjectNodes] = useState<ProjectNode[]>([]);
   const [projectEndpoints, setProjectEndpoints] = useState<Record<string, { endpoints: Endpoint[], folders: EndpointFolder[] }>>({});
+  const [loadingEndpoints, setLoadingEndpoints] = useState(false);
+
 
   // Function to organize endpoints and folders
   const organizeProjectData = (
@@ -81,23 +83,32 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   useEffect(() => {
     if (!projectsLoading && projects.length > 0) {
       const loadProjectData = async () => {
-        const { EndpointsService } = await import("../services/endpointsService");
-        const projectData: Record<string, { endpoints: Endpoint[], folders: EndpointFolder[] }> = {};
+        setLoadingEndpoints(true);
 
-        for (const project of projects) {
-          try {
-            const [endpoints, folders] = await Promise.all([
-              EndpointsService.getEndpoints(project.id),
-              EndpointsService.getEndpointFolders(project.id)
-            ]);
-            projectData[project.id] = { endpoints, folders };
-          } catch (error) {
-            console.error(`Error loading data for project ${project.id}:`, error);
-            projectData[project.id] = { endpoints: [], folders: [] };
+        try {
+          const { EndpointsService } = await import("../services/endpointsService");
+          const projectData: Record<string, { endpoints: Endpoint[], folders: EndpointFolder[] }> = {};
+
+          for (const project of projects) {
+            try {
+              const [endpoints, folders] = await Promise.all([
+                EndpointsService.getEndpoints(project.id),
+                EndpointsService.getEndpointFolders(project.id)
+              ]);
+              projectData[project.id] = { endpoints, folders };
+              console.log(`Loaded ${endpoints.length} endpoints for project ${project.name}`);
+            } catch (error) {
+              console.error(`Error loading data for project ${project.id}:`, error);
+              projectData[project.id] = { endpoints: [], folders: [] };
+            }
           }
-        }
 
-        setProjectEndpoints(projectData);
+          setProjectEndpoints(projectData);
+          setLoadingEndpoints(false);
+        } catch (error) {
+          console.error('Error in loadProjectData:', error);
+          setLoadingEndpoints(false);
+        }
       };
 
       loadProjectData();
@@ -106,7 +117,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
 
   // Create project nodes from projects and their data
   useEffect(() => {
-    if (!projectsLoading && projects.length > 0 && Object.keys(projectEndpoints).length > 0) {
+    if (!projectsLoading && projects.length > 0) {
       const nodes: ProjectNode[] = projects.map(project => {
         const projectData = projectEndpoints[project.id] || { endpoints: [], folders: [] };
         const { folders, endpoints } = organizeProjectData(
@@ -124,18 +135,6 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
           endpoints,
         };
       });
-
-      setProjectNodes(nodes);
-    } else if (!projectsLoading && projects.length > 0) {
-      // Show projects without data while loading
-      const nodes: ProjectNode[] = projects.map(project => ({
-        id: project.id,
-        name: project.name,
-        type: "project" as const,
-        expanded: true,
-        folders: [],
-        endpoints: [],
-      }));
 
       setProjectNodes(nodes);
     }
@@ -265,11 +264,14 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
     ));
   };
 
-  if (projectsLoading) {
+  if (projectsLoading || loadingEndpoints) {
     return (
       <div className="w-64 bg-white border-r border-gray-200 p-4">
         <div className="flex items-center justify-center h-32">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+          <p className="ml-2 text-sm text-gray-600">
+            {projectsLoading ? "Loading projects..." : "Loading endpoints..."}
+          </p>
         </div>
       </div>
     );
@@ -298,7 +300,14 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
               icon="material-symbols:folder-outline"
               className="h-8 w-8 mx-auto mb-2"
             />
-            <p className="text-sm">No collections yet</p>
+            <p className="text-sm">
+              {projects.length === 0 ? "No collections yet" : "Loading endpoints..."}
+            </p>
+            {projects.length > 0 && (
+              <p className="text-xs mt-1 text-gray-400">
+                Found {projects.length} project(s)
+              </p>
+            )}
           </div>
         ) : (
           <div className="space-y-1">
@@ -369,6 +378,32 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
 
       {/* Add Request Button */}
       <div className="p-4 border-t border-gray-200">
+        <button
+          onClick={async () => {
+            if (projects.length > 0) {
+              try {
+                const { EndpointsService } = await import("../services/endpointsService");
+                await EndpointsService.createEndpoint({
+                  name: "Test Endpoint",
+                  method: "GET",
+                  url: "https://jsonplaceholder.typicode.com/posts/1",
+                  description: "Test endpoint for debugging",
+                  headers: { "Content-Type": "application/json" },
+                  queryParams: {},
+                  body: "",
+                  projectId: projects[0].id
+                });
+                console.log("Test endpoint created!");
+              } catch (error) {
+                console.error("Error creating test endpoint:", error);
+              }
+            }
+          }}
+          className="w-full flex items-center justify-center gap-2 p-2 text-sm text-gray-900 hover:bg-blue-50 rounded border border-blue-200 mb-2"
+        >
+          <Icon icon="material-symbols:add" className="h-4 w-4" />
+          Create Test Endpoint
+        </button>
         <button className="w-full flex items-center justify-center gap-2 p-2 text-sm text-gray-900 hover:bg-blue-50 rounded border border-blue-200">
           <Icon icon="material-symbols:add" className="h-4 w-4" />
           New Request

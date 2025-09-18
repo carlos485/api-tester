@@ -37,6 +37,7 @@ const AVAILABLE_ICONS = [
   "mdi:circle-slice-8",
   "mdi:cloud",
   "streamline-ultimate:crypto-encryption-key-bold",
+  "mdi:email",
 ];
 
 const ProjectSelectionModal: React.FC<ProjectSelectionModalProps> = ({
@@ -99,21 +100,31 @@ const ProjectSelectionModal: React.FC<ProjectSelectionModalProps> = ({
                   Choose an existing collection:
                 </h4>
                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {projects.map((project) => (
+                  {projects.map(project => (
                     <button
                       key={project.id}
                       onClick={() => onSelectProject(project.id)}
                       className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <Icon icon={project.icon} className="h-8 w-8 text-gray-700" />
+                        <Icon
+                          icon={project.icon}
+                          className="h-8 w-8 text-gray-700"
+                        />
                         <div className="flex-1">
-                          <h5 className="font-medium text-gray-900">{project.name}</h5>
+                          <h5 className="font-medium text-gray-900">
+                            {project.name}
+                          </h5>
                           {project.description && (
-                            <p className="text-sm text-gray-600 mt-1">{project.description}</p>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {project.description}
+                            </p>
                           )}
                         </div>
-                        <Icon icon="material-symbols:arrow-forward" className="h-5 w-5 text-gray-400" />
+                        <Icon
+                          icon="material-symbols:arrow-forward"
+                          className="h-5 w-5 text-gray-400"
+                        />
                       </div>
                     </button>
                   ))}
@@ -121,7 +132,10 @@ const ProjectSelectionModal: React.FC<ProjectSelectionModalProps> = ({
               </>
             ) : (
               <div className="text-center py-8">
-                <Icon icon="material-symbols:folder-open" className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <Icon
+                  icon="material-symbols:folder-open"
+                  className="h-16 w-16 text-gray-300 mx-auto mb-4"
+                />
                 <p className="text-gray-500 mb-4">No collections found</p>
               </div>
             )}
@@ -149,7 +163,7 @@ const ProjectSelectionModal: React.FC<ProjectSelectionModalProps> = ({
               <Input
                 type="text"
                 value={newProjectName}
-                onChange={(e) => setNewProjectName(e.target.value)}
+                onChange={e => setNewProjectName(e.target.value)}
                 placeholder="e.g., My API Collection"
                 className="w-full"
                 required
@@ -163,7 +177,7 @@ const ProjectSelectionModal: React.FC<ProjectSelectionModalProps> = ({
               <Input
                 type="text"
                 value={newProjectDescription}
-                onChange={(e) => setNewProjectDescription(e.target.value)}
+                onChange={e => setNewProjectDescription(e.target.value)}
                 placeholder="Optional description for your collection"
                 className="w-full"
               />
@@ -180,17 +194,20 @@ const ProjectSelectionModal: React.FC<ProjectSelectionModalProps> = ({
                 </div>
                 <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-4">
                   <div className="grid grid-cols-10 gap-3">
-                    {AVAILABLE_ICONS.map((iconName) => (
+                    {AVAILABLE_ICONS.map(iconName => (
                       <button
                         key={iconName}
                         onClick={() => setSelectedIcon(iconName)}
                         className={`p-3 rounded-lg border-2 transition-colors flex items-center justify-center hover:scale-105 ${
                           selectedIcon === iconName
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 hover:border-gray-300"
                         }`}
                       >
-                        <Icon icon={iconName} className="h-6 w-6 text-gray-700" />
+                        <Icon
+                          icon={iconName}
+                          className="h-6 w-6 text-gray-700"
+                        />
                       </button>
                     ))}
                   </div>
@@ -226,7 +243,6 @@ const ProjectSelectionModal: React.FC<ProjectSelectionModalProps> = ({
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
