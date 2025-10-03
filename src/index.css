@@ -130,4 +130,24 @@ button {
   .dark\:hover\:bg-gray-60:hover {
     background-color: #4f5965;
   }
+
+  .bg-gray-90 {
+    background-color: #1e1e1e;
+  }
+
+  .dark\:bg-black {
+    background-color: #000;
+  }
+
+  .dark\:bg-gray-70 {
+    background-color: #1e1e1e;
+  }
+
+  .dark\:bg-gray-80 {
+    background-color: #23262d;
+  }
+
+  .dark\:bg-gray-90 {
+    background-color: #0d0f14;
+  }
 }
