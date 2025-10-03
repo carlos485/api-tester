@@ -40,6 +40,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   const [projectNodes, setProjectNodes] = useState<ProjectNode[]>([]);
   const [projectEndpoints, setProjectEndpoints] = useState<Record<string, { endpoints: Endpoint[], folders: EndpointFolder[] }>>({});
   const [loadingEndpoints, setLoadingEndpoints] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
 
   // Function to organize endpoints and folders
@@ -237,9 +238,9 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
             {folder.endpoints.map(endpoint => (
               <div
                 key={`${endpoint.projectId}-${endpoint.id}`}
-                className={`flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer ${
+                className={`flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer ${
                   selectedEndpointId === endpoint.id
-                    ? "bg-blue-50 border-l-2 border-blue-500"
+                    ? "bg-blue-50 dark:bg-blue-900/30"
                     : ""
                 }`}
                 onClick={() => onEndpointSelect(endpoint)}
@@ -247,13 +248,13 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
               >
                 <div className="w-4" /> {/* Spacer for alignment */}
                 <span
-                  className={`text-xs font-medium ${getMethodColor(
+                  className={`text-xs font-semibold ${getMethodColor(
                     endpoint.method
-                  )} min-w-[45px]`}
+                  )} min-w-[42px]`}
                 >
                   {endpoint.method}
                 </span>
-                <span className="text-sm text-gray-700 truncate">
+                <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
                   {endpoint.name}
                 </span>
               </div>
@@ -278,16 +279,26 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   }
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium text-gray-900">Collections</h2>
+    <div className="flex flex-col h-full bg-white dark:bg-gray-800">
+      {/* Search Bar */}
+      <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+        <div className="relative">
+          <Icon
+            icon="material-symbols:search"
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500"
+          />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-9 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-200"
+          />
           <button
-            className="p-1 hover:bg-gray-100 rounded"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
             title="New Collection"
           >
-            <Icon icon="material-symbols:add" className="h-4 w-4" />
+            <Icon icon="material-symbols:add" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           </button>
         </div>
       </div>
@@ -348,22 +359,22 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                     {project.endpoints.map(endpoint => (
                       <div
                         key={`${endpoint.projectId}-${endpoint.id}`}
-                        className={`flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer ${
+                        className={`flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer ${
                           selectedEndpointId === endpoint.id
-                            ? "bg-blue-50 border-l-2 border-blue-500"
+                            ? "bg-blue-50 dark:bg-blue-900/30"
                             : ""
                         }`}
                         onClick={() => onEndpointSelect(endpoint)}
                       >
                         <div className="w-4" /> {/* Spacer for alignment */}
                         <span
-                          className={`text-xs font-medium ${getMethodColor(
+                          className={`text-xs font-semibold ${getMethodColor(
                             endpoint.method
-                          )} min-w-[45px]`}
+                          )} min-w-[42px]`}
                         >
                           {endpoint.method}
                         </span>
-                        <span className="text-sm text-gray-700 truncate">
+                        <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
                           {endpoint.name}
                         </span>
                       </div>
@@ -376,39 +387,6 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
         )}
       </div>
 
-      {/* Add Request Button */}
-      <div className="p-4 border-t border-gray-200">
-        <button
-          onClick={async () => {
-            if (projects.length > 0) {
-              try {
-                const { EndpointsService } = await import("../services/endpointsService");
-                await EndpointsService.createEndpoint({
-                  name: "Test Endpoint",
-                  method: "GET",
-                  url: "https://jsonplaceholder.typicode.com/posts/1",
-                  description: "Test endpoint for debugging",
-                  headers: { "Content-Type": "application/json" },
-                  queryParams: {},
-                  body: "",
-                  projectId: projects[0].id
-                });
-                console.log("Test endpoint created!");
-              } catch (error) {
-                console.error("Error creating test endpoint:", error);
-              }
-            }
-          }}
-          className="w-full flex items-center justify-center gap-2 p-2 text-sm text-gray-900 hover:bg-blue-50 rounded border border-blue-200 mb-2"
-        >
-          <Icon icon="material-symbols:add" className="h-4 w-4" />
-          Create Test Endpoint
-        </button>
-        <button className="w-full flex items-center justify-center gap-2 p-2 text-sm text-gray-900 hover:bg-blue-50 rounded border border-blue-200">
-          <Icon icon="material-symbols:add" className="h-4 w-4" />
-          New Request
-        </button>
-      </div>
     </div>
   );
 };

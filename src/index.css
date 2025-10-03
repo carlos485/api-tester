@@ -2,7 +2,6 @@
 @import "flowbite";
 
 html {
-  background-color: #f9fafb;
   @media (prefers-color-scheme: dark) {
     background-color: #16191c;
   }

@@ -753,7 +753,7 @@ const ApiTesterView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col h-screen dark:bg-gray-900">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 flex-shrink-0 h-14">
         <div className="h-full px-4 flex items-center justify-between">
@@ -821,7 +821,7 @@ const ApiTesterView: React.FC = () => {
                   {tab.type === 'request' ? (
                     <div className="flex flex-col h-full overflow-hidden">
                       {/* Request Name and Save Button */}
-                      <div className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-gray-800">
                         <Input
                           type="text"
                           value={tab.name}
@@ -851,7 +851,7 @@ const ApiTesterView: React.FC = () => {
                       </div>
 
                       {/* Quick Request Bar */}
-                      <div className="px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                      <div className="px-4 py-3 bg-white dark:bg-gray-800">
                         <QuickRequestBar
                           onSendRequest={handleQuickRequest}
                           environments={[]}

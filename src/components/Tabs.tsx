@@ -35,12 +35,12 @@ interface TabsProps {
 
 const tabVariants = {
   default: {
-    container: "border-b border-gray-300",
+    container: "border-b border-gray-300 dark:border-gray-700",
     nav: "-mb-px flex space-x-8",
-    tab: "py-2 px-3 border-t border-x rounded-t-md font-medium text-sm transition-colors duration-200 mr-0",
-    activeTab: "border-gray-300 border-b-white text-gray-900 bg-white",
+    tab: "relative py-2.5 px-3 border-b-2 font-medium text-sm transition-colors duration-200 mr-0 before:content-[''] before:absolute before:left-0 before:top-1 before:bottom-1 before:w-px after:content-[''] after:absolute after:right-0 after:top-1 after:bottom-1 after:w-px",
+    activeTab: "before:bg-gray-300 after:bg-gray-300 dark:before:bg-gray-700 dark:after:bg-gray-700 border-b-blue-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800",
     inactiveTab:
-      "border-transparent text-gray-400 hover:text-gray-500 hover:border-gray-500",
+      "before:bg-transparent after:bg-transparent border-transparent text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400",
   },
   pills: {
     container: "bg-gray-100 p-1 rounded-lg",
