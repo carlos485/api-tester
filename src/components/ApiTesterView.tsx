@@ -11,18 +11,15 @@ import QuickRequestBar from "./QuickRequestBar";
 import RequestTabs from "./RequestTabs";
 import ResponseViewer from "./ResponseViewer";
 import { Tabs, Tab } from "./Tabs";
-import EnvironmentSelector from "./EnvironmentSelector";
 import ProjectsSidebar from "./ProjectsSidebar";
 import UserMenu from "./UserMenu";
 import Input from "./Input";
 import ProjectDetails from "./ProjectDetails";
 import { useAuth } from "../hooks/useAuth";
 import { useProjects } from "../hooks/useProjects";
-import { useEndpoints } from "../hooks/useEndpoints";
 import ProjectSelectionModal from "./ProjectSelectionModal";
 import {
   saveRequestTabs,
-  getRequestTabs,
   saveAllTabs,
   getAllTabs,
   saveActiveTabIndex,
@@ -836,7 +833,7 @@ const ApiTesterView: React.FC = () => {
                           className={`text-sm text-gray-700 dark:text-gray-300 flex-1 ${
                             editingTabName === tab.id
                               ? "border border-gray-300 dark:border-gray-600"
-                              : "border-0 hover:border hover:border-gray-200 dark:hover:border-gray-600"
+                              : "border-transparent hover:border hover:border-gray-200 dark:hover:border-gray-600"
                           }`}
                         />
                         <button
