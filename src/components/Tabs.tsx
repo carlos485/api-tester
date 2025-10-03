@@ -111,7 +111,7 @@ export const Tabs: FC<TabsProps> = ({
   const styles = tabVariants[variant];
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full flex flex-col">
       <div className={styles.container}>
         <div className="flex justify-between items-center">
           <nav className={styles.nav}>
@@ -141,7 +141,7 @@ export const Tabs: FC<TabsProps> = ({
                       e.stopPropagation();
                       onCloseTab(index);
                     }}
-                    className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 rounded-sm p-0.5 transition-all duration-150"
+                    className="opacity-0 group-hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-sm p-0.5 transition-all duration-150"
                     title="Close tab"
                   >
                     <Icon icon="material-symbols:close" className="w-3 h-3" />
@@ -152,7 +152,7 @@ export const Tabs: FC<TabsProps> = ({
             {onAddTab && (
               <button
                 onClick={onAddTab}
-                className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200"
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors duration-200"
                 title="Add new tab"
               >
                 <Icon icon="material-symbols:add" className="w-4 h-4" />
@@ -166,13 +166,7 @@ export const Tabs: FC<TabsProps> = ({
           )}
         </div>
       </div>
-      <div
-        className={`bg-white p-4 ${
-          variant === "underline"
-            ? ""
-            : "border-x border-b border-gray-300 rounded-b-md"
-        }`}
-      >
+      <div className="flex-1 overflow-hidden">
         {tabs[activeTab]?.props.children}
       </div>
     </div>
