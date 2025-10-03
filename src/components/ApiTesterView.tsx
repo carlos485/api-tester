@@ -756,120 +756,105 @@ const ApiTesterView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-80 flex flex-col">
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 dark:bg-gray-90 dark:border-transparent flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">API Tester</h1>
-            </div>
-            <div className="flex items-center space-x-2">
-              <UserMenu />
-            </div>
-          </div>
+      <header className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 flex-shrink-0 h-14">
+        <div className="h-full px-4 flex items-center justify-between">
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">API Tester</h1>
+          <UserMenu />
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-1 h-[calc(100vh-80px)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="flex gap-6 my-8">
-            {/* Sidebar */}
-            <ProjectsSidebar
-              onEndpointSelect={handleEndpointSelect}
-              onProjectSelect={handleProjectSelect}
-              selectedEndpointId={selectedEndpointId}
-            />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <div className="w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 overflow-y-auto">
+          <ProjectsSidebar
+            onEndpointSelect={handleEndpointSelect}
+            onProjectSelect={handleProjectSelect}
+            selectedEndpointId={selectedEndpointId}
+          />
+        </div>
 
-            {/* Content Area */}
-            <div className="flex-1 overflow-auto">
-              <Tabs
-                defaultActiveTab={activeTabIndex}
-                onAddTab={handleAddTab}
-                onTabChange={setActiveTabIndex}
-                onCloseTab={handleCloseTab}
-                onTabDoubleClick={handleTabDoubleClick}
-                showCloseButton={tabs.length > 1}
-              >
-                {tabs.map((tab, tabIndex) => {
-                  // Create custom header with icon/method indicator
-                  const getMethodColor = (method: string) => {
-                    switch (method.toUpperCase()) {
-                      case "GET":
-                        return "text-green-600 bg-green-50";
-                      case "POST":
-                        return "text-blue-600 bg-blue-50";
-                      case "PUT":
-                        return "text-orange-600 bg-orange-50";
-                      case "DELETE":
-                        return "text-red-600 bg-red-50";
-                      case "PATCH":
-                        return "text-purple-600 bg-purple-50";
-                      default:
-                        return "text-gray-600 bg-gray-50";
-                    }
-                  };
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Tabs
+            defaultActiveTab={activeTabIndex}
+            onAddTab={handleAddTab}
+            onTabChange={setActiveTabIndex}
+            onCloseTab={handleCloseTab}
+            onTabDoubleClick={handleTabDoubleClick}
+            showCloseButton={tabs.length > 1}
+          >
+            {tabs.map((tab, tabIndex) => {
+              // Create custom header with icon/method indicator
+              const getMethodColor = (method: string) => {
+                switch (method.toUpperCase()) {
+                  case "GET":
+                    return "text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900";
+                  case "POST":
+                    return "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900";
+                  case "PUT":
+                    return "text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-900";
+                  case "DELETE":
+                    return "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900";
+                  case "PATCH":
+                    return "text-purple-600 bg-purple-50 dark:text-purple-400 dark:bg-purple-900";
+                  default:
+                    return "text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-700";
+                }
+              };
 
-                  const tabHeader = tab.type === 'request' ? (
-                    <div className="flex items-center gap-2">
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded ${getMethodColor(tab.request.method)} min-w-[45px] text-center`}>
-                        {tab.request.method}
-                      </span>
-                      <span>{tab.name}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Icon icon="bi:collection" className="h-4 w-4 text-gray-600" />
-                      <span>{tab.name}</span>
-                    </div>
-                  );
+              const tabHeader = tab.type === 'request' ? (
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${getMethodColor(tab.request.method)} min-w-[45px] text-center`}>
+                    {tab.request.method}
+                  </span>
+                  <span>{tab.name}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Icon icon="bi:collection" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                  <span>{tab.name}</span>
+                </div>
+              );
 
-                  return (
-                    <Tab key={tab.id} header={tabHeader} isTransient={tab.isTransient}>
-                      {tab.type === 'request' ? (
-                        <>
-                        <div className="flex items-center gap-4">
-                          <Input
-                            type="text"
-                            value={tab.name}
-                            onChange={e =>
-                              handleTabNameChange(tabIndex, e.target.value)
-                            }
-                            onFocus={() => setEditingTabName(tab.id)}
-                            onBlur={() => setEditingTabName(null)}
-                            className={`text-md text-gray-600 w-auto inline-block min-w-[120px] ${
-                              editingTabName === tab.id
-                                ? "border border-gray-300"
-                                : "border-0 hover:border hover:border-gray-200"
-                            }`}
-                            style={{
-                              width: `${Math.max(120, tab.name.length * 8 + 20)}px`,
-                            }}
-                          />
-                          <button
-                            onClick={() => handleSaveEndpoint(tabIndex)}
-                            disabled={savingTab === tab.id}
-                            className={`p-1 transition-colors duration-300 text-2xl border-2 border-transparent focus:outline-none rounded-lg focus:z-10 focus:ring-4 focus:ring-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${
-                              tab.endpointId
-                                ? "text-blue-600 hover:text-blue-700 hover:border-blue-600"
-                                : "text-gray-500 hover:text-gray-600 hover:border-gray-600"
-                            }`}
-                            title={
-                              tab.endpointId
-                                ? "Update endpoint"
-                                : "Save as new endpoint"
-                            }
-                          >
-                            <Icon
-                              icon={
-                                savingTab === tab.id
-                                  ? "line-md:loading-loop"
-                                  : "uil:save"
-                              }
-                            />
-                          </button>
-                        </div>
+              return (
+                <Tab key={tab.id} header={tabHeader} isTransient={tab.isTransient}>
+                  {tab.type === 'request' ? (
+                    <div className="flex flex-col h-full overflow-hidden">
+                      {/* Request Name and Save Button */}
+                      <div className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                        <Input
+                          type="text"
+                          value={tab.name}
+                          onChange={e =>
+                            handleTabNameChange(tabIndex, e.target.value)
+                          }
+                          onFocus={() => setEditingTabName(tab.id)}
+                          onBlur={() => setEditingTabName(null)}
+                          className={`text-sm text-gray-700 dark:text-gray-300 flex-1 ${
+                            editingTabName === tab.id
+                              ? "border border-gray-300 dark:border-gray-600"
+                              : "border-0 hover:border hover:border-gray-200 dark:hover:border-gray-600"
+                          }`}
+                        />
+                        <button
+                          onClick={() => handleSaveEndpoint(tabIndex)}
+                          disabled={savingTab === tab.id}
+                          className={`p-1.5 transition-colors text-xl border-2 border-transparent focus:outline-none rounded focus:ring-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                            tab.endpointId
+                              ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900"
+                              : "text-gray-500 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                          }`}
+                          title={tab.endpointId ? "Update endpoint" : "Save as new endpoint"}
+                        >
+                          <Icon icon={savingTab === tab.id ? "line-md:loading-loop" : "uil:save"} />
+                        </button>
+                      </div>
+
+                      {/* Quick Request Bar */}
+                      <div className="px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                         <QuickRequestBar
                           onSendRequest={handleQuickRequest}
                           environments={[]}
@@ -882,33 +867,40 @@ const ApiTesterView: React.FC = () => {
                             handleRequestChange(tabIndex, parsedRequest)
                           }
                         />
+                      </div>
+
+                      {/* Request Configuration Tabs */}
+                      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                         <RequestTabs
                           request={tab.request}
                           onRequestChange={updatedRequest =>
                             handleRequestChange(tabIndex, updatedRequest)
                           }
                         />
-                        <div className="mt-6">
-                          <ResponseViewer
-                            response={tab.response}
-                            loading={tab.loading}
-                          />
-                        </div>
-                      </>
-                      ) : (
-                        /* Project Tab Content */
-                        <ProjectDetails
-                          project={tab.project}
-                          onProjectUpdate={handleProjectUpdate}
-                          onProjectDelete={handleProjectDelete}
+                      </div>
+
+                      {/* Response Viewer */}
+                      <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
+                        <ResponseViewer
+                          response={tab.response}
+                          loading={tab.loading}
                         />
-                      )}
-                    </Tab>
-                  );
-                })}
-              </Tabs>
-            </div>
-          </div>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Project Tab Content */
+                    <div className="h-full overflow-auto">
+                      <ProjectDetails
+                        project={tab.project}
+                        onProjectUpdate={handleProjectUpdate}
+                        onProjectDelete={handleProjectDelete}
+                      />
+                    </div>
+                  )}
+                </Tab>
+              );
+            })}
+          </Tabs>
         </div>
       </div>
 

@@ -568,107 +568,95 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleBackToHomeWithCleanup}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Back to projects"
-              >
-                <Icon icon="material-symbols:arrow-back" className="h-5 w-5" />
-              </button>
-              <ProjectSelector
-                projects={projects}
-                currentProject={project}
-                onProjectChange={onProjectChange}
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <UserMenu />
-            </div>
+      <header className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 flex-shrink-0 h-14">
+        <div className="h-full px-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleBackToHomeWithCleanup}
+              className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+              title="Back to projects"
+            >
+              <Icon icon="material-symbols:arrow-back" className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+            </button>
+            <ProjectSelector
+              projects={projects}
+              currentProject={project}
+              onProjectChange={onProjectChange}
+            />
           </div>
+          <UserMenu />
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-1 h-[calc(100vh-80px)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="flex gap-6 my-8">
-            {/* Sidebar */}
-            <Sidebar
-              endpoints={endpoints}
-              onEndpointSelect={handleEndpointSelect}
-              onAddEndpoint={handleAddEndpoint}
-              onDeleteEndpoint={handleDeleteEndpoint}
-              selectedEndpointId={selectedEndpointId}
-              loading={endpointsLoading}
-            />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <div className="w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 overflow-y-auto">
+          <Sidebar
+            endpoints={endpoints}
+            onEndpointSelect={handleEndpointSelect}
+            onAddEndpoint={handleAddEndpoint}
+            onDeleteEndpoint={handleDeleteEndpoint}
+            selectedEndpointId={selectedEndpointId}
+            loading={endpointsLoading}
+          />
+        </div>
 
-            {/* Content Area */}
-            <div className="flex-1 overflow-auto">
-              {endpointsError && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-red-700 text-sm">
-                    <Icon icon="material-symbols:error" className="h-4 w-4" />
-                    <span>Error loading endpoints: {endpointsError}</span>
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {endpointsError && (
+            <div className="mx-4 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:border-red-800">
+              <div className="flex items-center gap-2 text-red-700 dark:text-red-400 text-sm">
+                <Icon icon="material-symbols:error" className="h-4 w-4" />
+                <span>Error loading endpoints: {endpointsError}</span>
+              </div>
+            </div>
+          )}
+
+          <Tabs
+            defaultActiveTab={activeTabIndex}
+            onAddTab={handleAddTab}
+            onTabChange={setActiveTabIndex}
+            onCloseTab={handleCloseTab}
+            showCloseButton={requestTabs.length > 1}
+          >
+            {requestTabs.map((tab, tabIndex) => (
+              <Tab key={tab.id} header={tab.name}>
+                <div className="flex flex-col h-full overflow-hidden">
+                  {/* Request Name and Save Button */}
+                  <div className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                    <Input
+                      type="text"
+                      value={tab.name}
+                      onChange={e =>
+                        handleTabNameChange(tabIndex, e.target.value)
+                      }
+                      onFocus={() => setEditingTabName(tab.id)}
+                      onBlur={() => setEditingTabName(null)}
+                      className={`text-sm text-gray-700 dark:text-gray-300 flex-1 ${
+                        editingTabName === tab.id
+                          ? "border border-gray-300 dark:border-gray-600"
+                          : "border-0 hover:border hover:border-gray-200 dark:hover:border-gray-600"
+                      }`}
+                    />
+                    <button
+                      onClick={() => handleSaveEndpoint(tabIndex)}
+                      disabled={savingTab === tab.id}
+                      className={`p-1.5 transition-colors text-xl border-2 border-transparent focus:outline-none rounded focus:ring-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                        tab.endpointId
+                          ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900"
+                          : "text-gray-500 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                      }`}
+                      title={tab.endpointId ? "Update endpoint" : "Save as new endpoint"}
+                    >
+                      <Icon icon={savingTab === tab.id ? "line-md:loading-loop" : "uil:save"} />
+                    </button>
                   </div>
-                </div>
-              )}
 
-              <Tabs
-                defaultActiveTab={activeTabIndex}
-                onAddTab={handleAddTab}
-                onTabChange={setActiveTabIndex}
-                onCloseTab={handleCloseTab}
-                showCloseButton={requestTabs.length > 1}
-              >
-                {requestTabs.map((tab, tabIndex) => (
-                  <Tab key={tab.id} header={tab.name}>
-                    <div className="flex items-center gap-4">
-                      <Input
-                        type="text"
-                        value={tab.name}
-                        onChange={e =>
-                          handleTabNameChange(tabIndex, e.target.value)
-                        }
-                        onFocus={() => setEditingTabName(tab.id)}
-                        onBlur={() => setEditingTabName(null)}
-                        className={`text-md text-gray-600 w-auto inline-block min-w-[120px] ${
-                          editingTabName === tab.id
-                            ? "border border-gray-300"
-                            : "border-0 hover:border hover:border-gray-200"
-                        }`}
-                        style={{
-                          width: `${Math.max(120, tab.name.length * 8 + 20)}px`,
-                        }}
-                      />
-                      <button
-                        onClick={() => handleSaveEndpoint(tabIndex)}
-                        disabled={savingTab === tab.id}
-                        className={`p-1 transition-colors duration-300 text-2xl border-2 border-transparent focus:outline-none rounded-lg focus:z-10 focus:ring-4 focus:ring-gray-100 disabled:opacity-50 disabled:cursor-not-allowed ${
-                          tab.endpointId
-                            ? "text-blue-600 hover:text-blue-700 hover:border-blue-600"
-                            : "text-gray-500 hover:text-gray-600 hover:border-gray-600"
-                        }`}
-                        title={
-                          tab.endpointId
-                            ? "Update endpoint"
-                            : "Save as new endpoint"
-                        }
-                      >
-                        <Icon
-                          icon={
-                            savingTab === tab.id
-                              ? "line-md:loading-loop"
-                              : "uil:save"
-                          }
-                        />
-                      </button>
-                    </div>
+                  {/* Quick Request Bar */}
+                  <div className="px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                     <QuickRequestBar
                       onSendRequest={handleQuickRequest}
                       environments={project.environments}
@@ -681,23 +669,29 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                         handleRequestChange(tabIndex, parsedRequest)
                       }
                     />
+                  </div>
+
+                  {/* Request Configuration Tabs */}
+                  <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                     <RequestTabs
                       request={tab.request}
                       onRequestChange={updatedRequest =>
                         handleRequestChange(tabIndex, updatedRequest)
                       }
                     />
-                    <div className="mt-6">
-                      <ResponseViewer
-                        response={tab.response}
-                        loading={tab.loading}
-                      />
-                    </div>
-                  </Tab>
-                ))}
-              </Tabs>
-            </div>
-          </div>
+                  </div>
+
+                  {/* Response Viewer */}
+                  <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
+                    <ResponseViewer
+                      response={tab.response}
+                      loading={tab.loading}
+                    />
+                  </div>
+                </div>
+              </Tab>
+            ))}
+          </Tabs>
         </div>
       </div>
     </div>
