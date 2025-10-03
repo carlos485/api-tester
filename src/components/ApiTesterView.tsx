@@ -763,16 +763,8 @@ const ApiTesterView: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <h1 className="text-xl font-semibold text-gray-900">API Tester</h1>
-              <EnvironmentSelector
-                selectedEnvironment={selectedEnvironment}
-                onEnvironmentChange={setSelectedEnvironment}
-                environments={[]}
-              />
             </div>
             <div className="flex items-center space-x-2">
-              <button className="cursor-pointer p-2 border-2 rounded-lg hover:bg-gray-50 transition-colors">
-                <Icon icon="material-symbols:settings" />
-              </button>
               <UserMenu />
             </div>
           </div>

@@ -586,16 +586,8 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                 currentProject={project}
                 onProjectChange={onProjectChange}
               />
-              <EnvironmentSelector
-                selectedEnvironment={selectedEnvironment}
-                onEnvironmentChange={setSelectedEnvironment}
-                environments={project.environments}
-              />
             </div>
             <div className="flex items-center space-x-2">
-              <button className="cursor-pointer p-2 border-2 rounded-lg hover:bg-gray-50 transition-colors">
-                <Icon icon="material-symbols:settings" />
-              </button>
               <UserMenu />
             </div>
           </div>
