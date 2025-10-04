@@ -755,7 +755,7 @@ const ApiTesterView: React.FC = () => {
   return (
     <div className="flex flex-col h-screen dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 flex-shrink-0 h-14">
+      <header className="bg-white border-b border-gray-200 dark:bg-gray-90 dark:border-gray-700 flex-shrink-0 h-14">
         <div className="h-full px-4 flex items-center justify-between">
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white">API Tester</h1>
           <UserMenu />
