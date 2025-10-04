@@ -179,9 +179,16 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
     }
   };
 
+  const handleBodyChange = (newBody: string) => {
+    onRequestChange({
+      ...request,
+      body: newBody,
+    });
+  };
+
   return (
-    <div className="bg-white rounded-lg">
-      <Tabs 
+    <div className="bg-white dark:bg-gray-800 rounded-lg">
+      <Tabs
         variant="underline"
         defaultActiveTab={activeTabIndex}
         onTabChange={setActiveTabIndex}
@@ -384,11 +391,27 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
             </div>
           </div>
         </Tab>
-        
+
+        <Tab header="Body">
+          <div className="space-y-4">
+            <div className="flex flex-col h-full">
+              <textarea
+                value={request.body || ""}
+                onChange={(e) => handleBodyChange(e.target.value)}
+                className="w-full h-64 p-3 text-sm font-mono border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-gray-200 resize-none"
+                placeholder='Enter request body (e.g., JSON: {"key": "value"})'
+              />
+              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                <p>Enter the raw request body. For JSON, make sure to add "Content-Type: application/json" in Headers.</p>
+              </div>
+            </div>
+          </div>
+        </Tab>
+
         <Tab header="cURL">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">cURL Command</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">cURL Command</h3>
               <Button
                 onClick={handleCopyCurl}
                 icon={curlCopied ? "material-symbols:check" : "material-symbols:content-copy"}
@@ -398,14 +421,14 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                 {curlCopied ? "Copied!" : "Copy cURL"}
               </Button>
             </div>
-            
+
             <div className="relative">
               <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm font-mono">
                 <code>{generatedCurl}</code>
               </pre>
             </div>
-            
-            <div className="text-xs text-gray-500">
+
+            <div className="text-xs text-gray-500 dark:text-gray-400">
               <p>This cURL command can be used in your terminal or imported into other API testing tools.</p>
             </div>
           </div>
