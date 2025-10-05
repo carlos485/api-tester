@@ -94,13 +94,14 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       onClosing={handleClosing}
-      title="Create New Project"
+      title="Create New Collection"
       maxWidth="max-w-md"
     >
       <div className="space-y-4">
         <Input
-          label="Project Name"
+          label="Collection Name"
           value={newProject.name}
+          variant="full-width"
           onChange={e => setNewProject({ ...newProject, name: e.target.value })}
           placeholder="My API Project"
           required
