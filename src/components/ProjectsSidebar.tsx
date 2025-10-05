@@ -4,6 +4,7 @@ import type { Endpoint, EndpointFolder, Project } from "../types/project";
 import { useAuth } from "../hooks/useAuth";
 import { useProjects } from "../hooks/useProjects";
 import { useEndpoints } from "../hooks/useEndpoints";
+import CreateProjectModal from "./CreateProjectModal";
 
 interface ProjectsSidebarProps {
   onEndpointSelect: (endpoint: Endpoint & { projectId: string }) => void;
@@ -41,6 +42,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   const [projectEndpoints, setProjectEndpoints] = useState<Record<string, { endpoints: Endpoint[], folders: EndpointFolder[] }>>({});
   const [loadingEndpoints, setLoadingEndpoints] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
 
   // Function to organize endpoints and folders
@@ -185,6 +187,16 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
     );
   };
 
+  const handleCreateProject = async (projectData: Omit<Project, "id" | "createdAt" | "updatedAt">) => {
+    try {
+      const { ProjectService } = await import("../services/projectService");
+      await ProjectService.createProject(projectData, user?.uid || "");
+      setShowCreateModal(false);
+    } catch (error) {
+      console.error("Error creating project:", error);
+    }
+  };
+
   const getMethodColor = (method: string) => {
     switch (method.toUpperCase()) {
       case "GET":
@@ -295,6 +307,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
             className="w-full pl-9 pr-9 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-200"
           />
           <button
+            onClick={() => setShowCreateModal(true)}
             className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
             title="New Collection"
           >
@@ -387,6 +400,12 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
         )}
       </div>
 
+      {/* Create Project Modal */}
+      <CreateProjectModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onProjectCreate={handleCreateProject}
+      />
     </div>
   );
 };
