@@ -72,6 +72,8 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   const [editingTabName, setEditingTabName] = useState<string | null>(null);
   const [savingTab, setSavingTab] = useState<string | null>(null);
   const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
+  const [sidebarWidth, setSidebarWidth] = useState(256);
+  const [isResizing, setIsResizing] = useState(false);
 
   // Use the endpoints hook for real Firebase data
   const {
@@ -567,6 +569,37 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     onBackToHome();
   };
 
+  // Handle sidebar resize
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+
+      const newWidth = e.clientX;
+      if (newWidth >= 200 && newWidth <= 600) {
+        setSidebarWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
@@ -593,7 +626,10 @@ const ProjectView: React.FC<ProjectViewProps> = ({
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 overflow-y-auto">
+        <div
+          className="border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 overflow-y-auto relative"
+          style={{ width: `${sidebarWidth}px` }}
+        >
           <Sidebar
             endpoints={endpoints}
             onEndpointSelect={handleEndpointSelect}
@@ -601,6 +637,13 @@ const ProjectView: React.FC<ProjectViewProps> = ({
             onDeleteEndpoint={handleDeleteEndpoint}
             selectedEndpointId={selectedEndpointId}
             loading={endpointsLoading}
+          />
+          {/* Resize handle */}
+          <div
+            onMouseDown={handleMouseDown}
+            className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 transition-colors ${
+              isResizing ? 'bg-blue-500' : ''
+            }`}
           />
         </div>
 

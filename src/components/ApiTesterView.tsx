@@ -77,6 +77,8 @@ const ApiTesterView: React.FC = () => {
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [pendingTabIndex, setPendingTabIndex] = useState<number | null>(null);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(256);
+  const [isResizing, setIsResizing] = useState(false);
 
   // Restore state from sessionStorage on component mount
   useEffect(() => {
@@ -752,6 +754,37 @@ const ApiTesterView: React.FC = () => {
     confirmTab(tabIndex);
   };
 
+  // Handle sidebar resize
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+
+      const newWidth = e.clientX;
+      if (newWidth >= 200 && newWidth <= 600) {
+        setSidebarWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+
   return (
     <div className="flex flex-col h-screen dark:bg-gray-900">
       {/* Header */}
@@ -765,11 +798,21 @@ const ApiTesterView: React.FC = () => {
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 overflow-y-auto">
+        <div
+          className="border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 overflow-y-auto relative"
+          style={{ width: `${sidebarWidth}px` }}
+        >
           <ProjectsSidebar
             onEndpointSelect={handleEndpointSelect}
             onProjectSelect={handleProjectSelect}
             selectedEndpointId={selectedEndpointId}
+          />
+          {/* Resize handle */}
+          <div
+            onMouseDown={handleMouseDown}
+            className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 transition-colors ${
+              isResizing ? 'bg-blue-500' : ''
+            }`}
           />
         </div>
 
