@@ -278,60 +278,60 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                   {endpoint.name}
                 </span>
 
-                {/* Options Menu Button */}
-                {hoveredEndpointId === endpoint.id && (
-                  <div className="relative">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowEndpointMenu(showEndpointMenu === endpoint.id ? null : endpoint.id);
-                      }}
-                      className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                      title="Options"
-                    >
-                      <Icon icon="material-symbols:more-vert" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                    </button>
+                {/* Options Menu Button - Always rendered but invisible when not hovered */}
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowEndpointMenu(showEndpointMenu === endpoint.id ? null : endpoint.id);
+                    }}
+                    className={`p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-opacity ${
+                      hoveredEndpointId === endpoint.id ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    title="Options"
+                  >
+                    <Icon icon="material-symbols:more-vert" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                  </button>
 
-                    {/* Dropdown Menu */}
-                    {showEndpointMenu === endpoint.id && (
-                      <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log("Rename endpoint", endpoint.name);
-                            setShowEndpointMenu(null);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
-                        >
-                          <Icon icon="material-symbols:edit-outline" className="h-4 w-4" />
-                          Rename
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log("Duplicate endpoint", endpoint.name);
-                            setShowEndpointMenu(null);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                          <Icon icon="material-symbols:content-copy" className="h-4 w-4" />
-                          Duplicate
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log("Delete endpoint", endpoint.name);
-                            setShowEndpointMenu(null);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
-                        >
-                          <Icon icon="material-symbols:delete-outline" className="h-4 w-4" />
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  {/* Dropdown Menu */}
+                  {showEndpointMenu === endpoint.id && (
+                    <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log("Rename endpoint", endpoint.name);
+                          setShowEndpointMenu(null);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
+                      >
+                        <Icon icon="mynaui:pencil" className="h-4 w-4" />
+                        Rename
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log("Duplicate endpoint", endpoint.name);
+                          setShowEndpointMenu(null);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <Icon icon="humbleicons:duplicate" className="h-4 w-4" />
+                        Duplicate
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log("Delete endpoint", endpoint.name);
+                          setShowEndpointMenu(null);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
+                      >
+                        <Icon icon="iconamoon:trash" className="h-4 w-4" />
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -429,49 +429,49 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                     {project.name}
                   </span>
 
-                  {/* Options Menu Button */}
-                  {hoveredProjectId === project.id && (
-                    <div className="relative">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowProjectMenu(showProjectMenu === project.id ? null : project.id);
-                        }}
-                        className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                        title="Options"
-                      >
-                        <Icon icon="material-symbols:more-vert" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                      </button>
+                  {/* Options Menu Button - Always rendered but invisible when not hovered */}
+                  <div className="relative">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowProjectMenu(showProjectMenu === project.id ? null : project.id);
+                      }}
+                      className={`p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-opacity ${
+                        hoveredProjectId === project.id ? 'opacity-100' : 'opacity-0'
+                      }`}
+                      title="Options"
+                    >
+                      <Icon icon="material-symbols:more-vert" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    </button>
 
-                      {/* Dropdown Menu */}
-                      {showProjectMenu === project.id && (
-                        <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log("Add endpoint to", project.name);
-                              setShowProjectMenu(null);
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
-                          >
-                            <Icon icon="tabler:plus" className="h-4 w-4" />
-                            Add Endpoint
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log("Add folder to", project.name);
-                              setShowProjectMenu(null);
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-lg"
-                          >
-                            <Icon icon="mdi:folder-plus-outline" className="h-4 w-4" />
-                            Add Folder
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    {/* Dropdown Menu */}
+                    {showProjectMenu === project.id && (
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log("Add endpoint to", project.name);
+                            setShowProjectMenu(null);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
+                        >
+                          <Icon icon="tabler:plus" className="h-4 w-4" />
+                          Add Endpoint
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log("Add folder to", project.name);
+                            setShowProjectMenu(null);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-lg"
+                        >
+                          <Icon icon="mdi:folder-plus-outline" className="h-4 w-4" />
+                          Add Folder
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Project Contents */}
@@ -508,60 +508,60 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                           {endpoint.name}
                         </span>
 
-                        {/* Options Menu Button */}
-                        {hoveredEndpointId === endpoint.id && (
-                          <div className="relative">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setShowEndpointMenu(showEndpointMenu === endpoint.id ? null : endpoint.id);
-                              }}
-                              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                              title="Options"
-                            >
-                              <Icon icon="material-symbols:more-vert" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                            </button>
+                        {/* Options Menu Button - Always rendered but invisible when not hovered */}
+                        <div className="relative">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowEndpointMenu(showEndpointMenu === endpoint.id ? null : endpoint.id);
+                            }}
+                            className={`p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-opacity ${
+                              hoveredEndpointId === endpoint.id ? 'opacity-100' : 'opacity-0'
+                            }`}
+                            title="Options"
+                          >
+                            <Icon icon="material-symbols:more-vert" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                          </button>
 
-                            {/* Dropdown Menu */}
-                            {showEndpointMenu === endpoint.id && (
-                              <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    console.log("Rename endpoint", endpoint.name);
-                                    setShowEndpointMenu(null);
-                                  }}
-                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
-                                >
-                                  <Icon icon="mynaui:pencil" className="h-4 w-4" />
-                                  Rename
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    console.log("Duplicate endpoint", endpoint.name);
-                                    setShowEndpointMenu(null);
-                                  }}
-                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                >
-                                  <Icon icon="humbleicons:duplicate" className="h-4 w-4" />
-                                  Duplicate
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    console.log("Delete endpoint", endpoint.name);
-                                    setShowEndpointMenu(null);
-                                  }}
-                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
-                                >
-                                  <Icon icon="iconamoon:trash" className="h-4 w-4" />
-                                  Delete
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                          {/* Dropdown Menu */}
+                          {showEndpointMenu === endpoint.id && (
+                            <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  console.log("Rename endpoint", endpoint.name);
+                                  setShowEndpointMenu(null);
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
+                              >
+                                <Icon icon="mynaui:pencil" className="h-4 w-4" />
+                                Rename
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  console.log("Duplicate endpoint", endpoint.name);
+                                  setShowEndpointMenu(null);
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              >
+                                <Icon icon="humbleicons:duplicate" className="h-4 w-4" />
+                                Duplicate
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  console.log("Delete endpoint", endpoint.name);
+                                  setShowEndpointMenu(null);
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
+                              >
+                                <Icon icon="iconamoon:trash" className="h-4 w-4" />
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
