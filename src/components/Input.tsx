@@ -9,19 +9,21 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'classN
   error?: string;
 }
 
-const Input: FC<InputProps> = ({ 
-  className = "", 
+const Input: FC<InputProps> = ({
+  className = "",
   variant = 'default',
   leftAddon,
   rightAddon,
   label,
   error,
-  ...props 
+  ...props
 }) => {
   const hasAddons = leftAddon || rightAddon;
-  
-  const baseInputStyles = "bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-gray-500 focus:border-gray-500 p-2.5";
-  
+
+  const baseInputStyles = "bg-gray-50 border text-sm focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors p-2.5 dark:bg-[#303033] dark:text-white";
+  const normalBorderStyles = "border-gray-300 dark:border-gray-500";
+  const errorBorderStyles = "border-red-500 dark:border-red-400 focus:ring-red-500 focus:border-red-500";
+
   const variantStyles = {
     default: "",
     'full-width': "w-full"
@@ -30,9 +32,9 @@ const Input: FC<InputProps> = ({
   const renderInput = () => {
     if (hasAddons) {
       // Input with addons - wrapped in a container
-      const containerClassName = `flex items-center bg-gray-50 border border-gray-300 rounded-lg focus-within:ring-gray-500 focus-within:border-gray-500 ${variantStyles[variant]} ${className}`.trim();
-      
-      const inputClassName = `bg-transparent border-0 text-gray-900 text-sm focus:ring-0 focus:border-0 focus:outline-none flex-1 p-2.5 ${
+      const containerClassName = `flex items-center bg-gray-50 dark:bg-[#303033] border ${error ? errorBorderStyles : normalBorderStyles} rounded-lg focus-within:ring-2 focus-within:ring-gray-500 focus-within:border-gray-500 transition-colors ${variantStyles[variant]} ${className}`.trim();
+
+      const inputClassName = `bg-transparent border-0 text-gray-900 dark:text-white text-sm focus:ring-0 focus:border-0 focus:outline-none flex-1 p-2.5 ${
         leftAddon ? 'rounded-r-lg' : 'rounded-lg'
       } ${
         rightAddon ? 'rounded-l-lg' : 'rounded-lg'
@@ -41,7 +43,7 @@ const Input: FC<InputProps> = ({
       return (
         <div className={containerClassName}>
           {leftAddon && (
-            <div className="flex items-center px-3 border-r border-gray-300 bg-gray-100 rounded-l-lg">
+            <div className="flex items-center px-3 border-r border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-700 rounded-l-lg">
               {leftAddon}
             </div>
           )}
@@ -50,7 +52,7 @@ const Input: FC<InputProps> = ({
             {...props}
           />
           {rightAddon && (
-            <div className="flex items-center px-3 border-l border-gray-300 bg-gray-100 rounded-r-lg">
+            <div className="flex items-center px-3 border-l border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-700 rounded-r-lg">
               {rightAddon}
             </div>
           )}
@@ -59,7 +61,7 @@ const Input: FC<InputProps> = ({
     }
 
     // Regular input without addons
-    const inputClassName = `${baseInputStyles} rounded-lg block ${variantStyles[variant]} ${className}`.trim();
+    const inputClassName = `${baseInputStyles} ${error ? errorBorderStyles : normalBorderStyles} rounded-lg block ${variantStyles[variant]} ${className}`.trim();
 
     return (
       <input
