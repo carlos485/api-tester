@@ -138,6 +138,10 @@ button {
     background-color: #000;
   }
 
+  .dark\:bg-gray-60 {
+    background-color: #262626;
+  }
+
   .dark\:bg-gray-70 {
     background-color: #1e1e1e;
   }

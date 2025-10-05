@@ -20,7 +20,7 @@ const Input: FC<InputProps> = ({
 }) => {
   const hasAddons = leftAddon || rightAddon;
 
-  const baseInputStyles = "bg-gray-50 border text-sm focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors p-2.5 dark:bg-[#303033] dark:text-white";
+  const baseInputStyles = "bg-gray-50 border text-sm focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors p-2.5 dark:bg-gray-60 dark:text-white";
   const normalBorderStyles = "border-gray-300 dark:border-gray-500";
   const errorBorderStyles = "border-red-500 dark:border-red-400 focus:ring-red-500 focus:border-red-500";
 
