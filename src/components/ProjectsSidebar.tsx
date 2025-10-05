@@ -3,7 +3,6 @@ import { Icon } from "@iconify/react";
 import type { Endpoint, EndpointFolder, Project } from "../types/project";
 import { useAuth } from "../hooks/useAuth";
 import { useProjects } from "../hooks/useProjects";
-import { useEndpoints } from "../hooks/useEndpoints";
 import CreateProjectModal from "./CreateProjectModal";
 
 interface ProjectsSidebarProps {
@@ -43,6 +42,10 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   const [loadingEndpoints, setLoadingEndpoints] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [hoveredProjectId, setHoveredProjectId] = useState<string | null>(null);
+  const [showProjectMenu, setShowProjectMenu] = useState<string | null>(null);
+  const [hoveredEndpointId, setHoveredEndpointId] = useState<string | null>(null);
+  const [showEndpointMenu, setShowEndpointMenu] = useState<string | null>(null);
 
 
   // Function to organize endpoints and folders
@@ -250,12 +253,17 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
             {folder.endpoints.map(endpoint => (
               <div
                 key={`${endpoint.projectId}-${endpoint.id}`}
-                className={`flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer ${
+                className={`flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer group relative ${
                   selectedEndpointId === endpoint.id
                     ? "bg-blue-50 dark:bg-blue-900/30"
                     : ""
                 }`}
                 onClick={() => onEndpointSelect(endpoint)}
+                onMouseEnter={() => setHoveredEndpointId(endpoint.id)}
+                onMouseLeave={() => {
+                  setHoveredEndpointId(null);
+                  setShowEndpointMenu(null);
+                }}
                 style={{ marginLeft: `${(depth + 1) * 16}px` }}
               >
                 <div className="w-4" /> {/* Spacer for alignment */}
@@ -266,9 +274,64 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                 >
                   {endpoint.method}
                 </span>
-                <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1">
                   {endpoint.name}
                 </span>
+
+                {/* Options Menu Button */}
+                {hoveredEndpointId === endpoint.id && (
+                  <div className="relative">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowEndpointMenu(showEndpointMenu === endpoint.id ? null : endpoint.id);
+                      }}
+                      className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                      title="Options"
+                    >
+                      <Icon icon="material-symbols:more-vert" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {showEndpointMenu === endpoint.id && (
+                      <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log("Rename endpoint", endpoint.name);
+                            setShowEndpointMenu(null);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
+                        >
+                          <Icon icon="material-symbols:edit-outline" className="h-4 w-4" />
+                          Rename
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log("Duplicate endpoint", endpoint.name);
+                            setShowEndpointMenu(null);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <Icon icon="material-symbols:content-copy" className="h-4 w-4" />
+                          Duplicate
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log("Delete endpoint", endpoint.name);
+                            setShowEndpointMenu(null);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
+                        >
+                          <Icon icon="material-symbols:delete-outline" className="h-4 w-4" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -339,8 +402,13 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
               <div key={project.id}>
                 {/* Project Node */}
                 <div
-                  className="flex items-center gap-1 p-2 hover:bg-gray-100 rounded cursor-pointer"
+                  className="flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer group relative"
                   onClick={() => handleProjectClick(project.id)}
+                  onMouseEnter={() => setHoveredProjectId(project.id)}
+                  onMouseLeave={() => {
+                    setHoveredProjectId(null);
+                    setShowProjectMenu(null);
+                  }}
                 >
                   <Icon
                     icon={
@@ -348,18 +416,62 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                         ? "material-symbols:expand-more"
                         : "material-symbols:chevron-right"
                     }
-                    className="h-4 w-4 text-gray-500"
+                    className="h-4 w-4 text-gray-500 dark:text-gray-400"
                   />
                   <Icon
                     icon={
                       projects.find(p => p.id === project.id)?.icon ||
                       "material-symbols:folder"
                     }
-                    className="h-4 w-4 text-gray-900"
+                    className="h-4 w-4 text-gray-900 dark:text-gray-200"
                   />
-                  <span className="text-sm font-medium text-gray-900 truncate">
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-200 truncate flex-1">
                     {project.name}
                   </span>
+
+                  {/* Options Menu Button */}
+                  {hoveredProjectId === project.id && (
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowProjectMenu(showProjectMenu === project.id ? null : project.id);
+                        }}
+                        className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                        title="Options"
+                      >
+                        <Icon icon="material-symbols:more-vert" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                      </button>
+
+                      {/* Dropdown Menu */}
+                      {showProjectMenu === project.id && (
+                        <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log("Add endpoint to", project.name);
+                              setShowProjectMenu(null);
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
+                          >
+                            <Icon icon="tabler:plus" className="h-4 w-4" />
+                            Add Endpoint
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log("Add folder to", project.name);
+                              setShowProjectMenu(null);
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-lg"
+                          >
+                            <Icon icon="mdi:folder-plus-outline" className="h-4 w-4" />
+                            Add Folder
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Project Contents */}
@@ -372,12 +484,17 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                     {project.endpoints.map(endpoint => (
                       <div
                         key={`${endpoint.projectId}-${endpoint.id}`}
-                        className={`flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer ${
+                        className={`flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer group relative ${
                           selectedEndpointId === endpoint.id
                             ? "bg-blue-50 dark:bg-blue-900/30"
                             : ""
                         }`}
                         onClick={() => onEndpointSelect(endpoint)}
+                        onMouseEnter={() => setHoveredEndpointId(endpoint.id)}
+                        onMouseLeave={() => {
+                          setHoveredEndpointId(null);
+                          setShowEndpointMenu(null);
+                        }}
                       >
                         <div className="w-4" /> {/* Spacer for alignment */}
                         <span
@@ -387,9 +504,64 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                         >
                           {endpoint.method}
                         </span>
-                        <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                        <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1">
                           {endpoint.name}
                         </span>
+
+                        {/* Options Menu Button */}
+                        {hoveredEndpointId === endpoint.id && (
+                          <div className="relative">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowEndpointMenu(showEndpointMenu === endpoint.id ? null : endpoint.id);
+                              }}
+                              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                              title="Options"
+                            >
+                              <Icon icon="material-symbols:more-vert" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {showEndpointMenu === endpoint.id && (
+                              <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log("Rename endpoint", endpoint.name);
+                                    setShowEndpointMenu(null);
+                                  }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
+                                >
+                                  <Icon icon="mynaui:pencil" className="h-4 w-4" />
+                                  Rename
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log("Duplicate endpoint", endpoint.name);
+                                    setShowEndpointMenu(null);
+                                  }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                >
+                                  <Icon icon="humbleicons:duplicate" className="h-4 w-4" />
+                                  Duplicate
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log("Delete endpoint", endpoint.name);
+                                    setShowEndpointMenu(null);
+                                  }}
+                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
+                                >
+                                  <Icon icon="iconamoon:trash" className="h-4 w-4" />
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
