@@ -24,7 +24,7 @@ const Textarea: React.FC<TextareaProps> = ({
   maxLength,
 }) => {
   const baseClasses =
-    "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors resize-vertical";
+    "bg-gray-50 w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors resize-vertical";
   const normalClasses =
     "border-gray-300 dark:border-gray-500 dark:bg-[#303033] dark:text-white";
   const errorClasses =
