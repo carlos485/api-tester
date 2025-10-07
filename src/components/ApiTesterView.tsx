@@ -806,6 +806,7 @@ const ApiTesterView: React.FC = () => {
             onEndpointSelect={handleEndpointSelect}
             onProjectSelect={handleProjectSelect}
             selectedEndpointId={selectedEndpointId}
+            onEndpointCreate={handleEndpointSelect}
           />
           {/* Resize handle */}
           <div

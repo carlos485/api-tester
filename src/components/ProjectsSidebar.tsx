@@ -10,6 +10,7 @@ interface ProjectsSidebarProps {
   onEndpointSelect: (endpoint: Endpoint & { projectId: string }) => void;
   onProjectSelect: (project: Project) => void;
   selectedEndpointId?: string;
+  onEndpointCreate?: (endpoint: Endpoint & { projectId: string }) => void;
 }
 
 interface ProjectNode {
@@ -35,6 +36,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   onEndpointSelect,
   onProjectSelect,
   selectedEndpointId,
+  onEndpointCreate,
 }) => {
   const { user } = useAuth();
   const { projects, loading: projectsLoading } = useProjects(user?.uid || null);
@@ -49,6 +51,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   const [showEndpointMenu, setShowEndpointMenu] = useState<string | null>(null);
   const [endpointToDelete, setEndpointToDelete] = useState<(Endpoint & { projectId: string }) | null>(null);
   const [isDeletingEndpoint, setIsDeletingEndpoint] = useState(false);
+  const [isCreatingEndpoint, setIsCreatingEndpoint] = useState(false);
 
 
   // Function to organize endpoints and folders
@@ -230,6 +233,58 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
       console.error("Error deleting endpoint:", error);
     } finally {
       setIsDeletingEndpoint(false);
+    }
+  };
+
+  const handleAddEndpoint = async (projectId: string) => {
+    setIsCreatingEndpoint(true);
+    setShowProjectMenu(null);
+
+    try {
+      const { EndpointsService } = await import("../services/endpointsService");
+
+      // Create a new endpoint with default values
+      const newEndpointData: Omit<Endpoint, "id" | "createdAt" | "updatedAt"> = {
+        projectId,
+        name: "New Request",
+        method: "GET",
+        url: "",
+        headers: {},
+        queryParams: {},
+        body: "",
+      };
+
+      const endpointId = await EndpointsService.createEndpoint(newEndpointData, projectId);
+
+      // Create the full endpoint object to update local state and open in tab
+      const newEndpoint: Endpoint & { projectId: string } = {
+        ...newEndpointData,
+        id: endpointId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        projectId,
+      };
+
+      // Update local state to include the new endpoint
+      setProjectEndpoints(prev => {
+        const projectData = prev[projectId] || { endpoints: [], folders: [] };
+        return {
+          ...prev,
+          [projectId]: {
+            ...projectData,
+            endpoints: [newEndpoint, ...projectData.endpoints]
+          }
+        };
+      });
+
+      // Open the new endpoint in a tab if callback is provided
+      if (onEndpointCreate) {
+        onEndpointCreate(newEndpoint);
+      }
+    } catch (error) {
+      console.error("Error creating endpoint:", error);
+    } finally {
+      setIsCreatingEndpoint(false);
     }
   };
 
@@ -483,12 +538,16 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            console.log("Add endpoint to", project.name);
-                            setShowProjectMenu(null);
+                            handleAddEndpoint(project.id);
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg"
+                          disabled={isCreatingEndpoint}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <Icon icon="tabler:plus" className="h-4 w-4" />
+                          {isCreatingEndpoint ? (
+                            <Icon icon="line-md:loading-loop" className="h-4 w-4" />
+                          ) : (
+                            <Icon icon="tabler:plus" className="h-4 w-4" />
+                          )}
                           Add Endpoint
                         </button>
                         <button
