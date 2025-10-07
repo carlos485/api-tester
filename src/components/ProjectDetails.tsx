@@ -806,6 +806,132 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
             </div>
           </Tab>
 
+          <Tab header="Environments">
+            <div className="mt-6">
+              {/* Search Input */}
+              <div className="mb-4">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Icon icon="material-symbols:search" className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <input
+                    type="text"
+                    value={environmentSearchQuery}
+                    onChange={(e) => setEnvironmentSearchQuery(e.target.value)}
+                    className="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Search environments..."
+                  />
+                </div>
+              </div>
+
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3">
+                      Environment
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Base URL
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Description
+                    </th>
+                    <th scope="col" className="px-4 py-3 w-12 text-center">
+                      <Icon icon="cil:options-horizontal" className="w-5 h-5 inline-block" />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {environmentRows
+                    .filter((environment) => {
+                      if (!environmentSearchQuery) return true;
+                      const query = environmentSearchQuery.toLowerCase();
+                      return (
+                        environment.name.toLowerCase().includes(query) ||
+                        environment.description.toLowerCase().includes(query) ||
+                        environment.baseUrl.toLowerCase().includes(query)
+                      );
+                    })
+                    .map((environment, index) => (
+                      <tr
+                        key={environment.id}
+                        className="bg-white border-b border-gray-200 hover:bg-gray-50"
+                      >
+                        <td className="py-2 px-2">
+                          <input
+                            type="text"
+                            value={environment.name}
+                            onChange={e =>
+                              handleEnvironmentChange(
+                                environment.id,
+                                "name",
+                                e.target.value
+                              )
+                            }
+                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                            placeholder={
+                              index === environmentRows.length - 1
+                                ? "Add new environment"
+                                : ""
+                            }
+                          />
+                        </td>
+                        <td className="py-2 px-2">
+                          <input
+                            type="text"
+                            value={environment.baseUrl}
+                            onChange={e =>
+                              handleEnvironmentChange(
+                                environment.id,
+                                "baseUrl",
+                                e.target.value
+                              )
+                            }
+                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                            placeholder="https://api.example.com"
+                          />
+                        </td>
+                        <td className="py-2 px-2">
+                          <input
+                            type="text"
+                            value={environment.description}
+                            onChange={e =>
+                              handleEnvironmentChange(
+                                environment.id,
+                                "description",
+                                e.target.value
+                              )
+                            }
+                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                            placeholder="Add description..."
+                          />
+                        </td>
+                        <td className="py-2 px-2 text-center">
+                          {environmentRows.filter(
+                            row => row.name.trim() || row.baseUrl.trim()
+                          ).length >= 2 &&
+                            (environment.name.trim() || environment.baseUrl.trim()) && (
+                              <button
+                                onClick={() =>
+                                  handleDeleteEnvironment(environment.id)
+                                }
+                                className="text-red-600 hover:text-red-700 hover:bg-red-100 rounded p-1 transition-all duration-200 inline-flex items-center justify-center"
+                                title="Delete environment"
+                              >
+                                <Icon
+                                  icon="line-md:trash"
+                                  className="w-4 h-4"
+                                />
+                              </button>
+                            )}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </Tab>
+
           <Tab header="Variables">
             <div className="mt-6">
               {/* Search Input */}
@@ -916,132 +1042,6 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                                 }
                                 className="text-red-600 hover:text-red-700 hover:bg-red-100 rounded p-1 transition-all duration-200 inline-flex items-center justify-center"
                                 title="Delete variable"
-                              >
-                                <Icon
-                                  icon="line-md:trash"
-                                  className="w-4 h-4"
-                                />
-                              </button>
-                            )}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          </Tab>
-
-          <Tab header="Environments">
-            <div className="mt-6">
-              {/* Search Input */}
-              <div className="mb-4">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <Icon icon="material-symbols:search" className="w-5 h-5 text-gray-500" />
-                  </div>
-                  <input
-                    type="text"
-                    value={environmentSearchQuery}
-                    onChange={(e) => setEnvironmentSearchQuery(e.target.value)}
-                    className="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Search environments..."
-                  />
-                </div>
-              </div>
-
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3">
-                      Environment
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Description
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Base URL
-                    </th>
-                    <th scope="col" className="px-4 py-3 w-12 text-center">
-                      <Icon icon="cil:options-horizontal" className="w-5 h-5 inline-block" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {environmentRows
-                    .filter((environment) => {
-                      if (!environmentSearchQuery) return true;
-                      const query = environmentSearchQuery.toLowerCase();
-                      return (
-                        environment.name.toLowerCase().includes(query) ||
-                        environment.description.toLowerCase().includes(query) ||
-                        environment.baseUrl.toLowerCase().includes(query)
-                      );
-                    })
-                    .map((environment, index) => (
-                      <tr
-                        key={environment.id}
-                        className="bg-white border-b border-gray-200 hover:bg-gray-50"
-                      >
-                        <td className="py-2 px-2">
-                          <input
-                            type="text"
-                            value={environment.name}
-                            onChange={e =>
-                              handleEnvironmentChange(
-                                environment.id,
-                                "name",
-                                e.target.value
-                              )
-                            }
-                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                            placeholder={
-                              index === environmentRows.length - 1
-                                ? "Add new environment"
-                                : ""
-                            }
-                          />
-                        </td>
-                        <td className="py-2 px-2">
-                          <input
-                            type="text"
-                            value={environment.description}
-                            onChange={e =>
-                              handleEnvironmentChange(
-                                environment.id,
-                                "description",
-                                e.target.value
-                              )
-                            }
-                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                            placeholder="Add description..."
-                          />
-                        </td>
-                        <td className="py-2 px-2">
-                          <input
-                            type="text"
-                            value={environment.baseUrl}
-                            onChange={e =>
-                              handleEnvironmentChange(
-                                environment.id,
-                                "baseUrl",
-                                e.target.value
-                              )
-                            }
-                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                            placeholder="https://api.example.com"
-                          />
-                        </td>
-                        <td className="py-2 px-2 text-center">
-                          {environmentRows.filter(
-                            row => row.name.trim() || row.baseUrl.trim()
-                          ).length >= 2 &&
-                            (environment.name.trim() || environment.baseUrl.trim()) && (
-                              <button
-                                onClick={() =>
-                                  handleDeleteEnvironment(environment.id)
-                                }
-                                className="text-red-600 hover:text-red-700 hover:bg-red-100 rounded p-1 transition-all duration-200 inline-flex items-center justify-center"
-                                title="Delete environment"
                               >
                                 <Icon
                                   icon="line-md:trash"
