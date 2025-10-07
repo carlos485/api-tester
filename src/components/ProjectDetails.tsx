@@ -82,6 +82,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [environmentSearchQuery, setEnvironmentSearchQuery] = useState("");
+  const [endpointSearchQuery, setEndpointSearchQuery] = useState("");
 
   const { endpoints, folders } = useEndpoints(project.id);
 
@@ -284,6 +285,13 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
 
   const handleDeleteEnvironment = (id: string) => {
     setEnvironmentRows(prev => prev.filter(row => row.id !== id));
+  };
+
+  // Helper function to get folder name by ID
+  const getFolderName = (folderId?: string): string => {
+    if (!folderId) return "-";
+    const folder = folders.find(f => f.id === folderId);
+    return folder?.name || "-";
   };
 
   // Check if there are unsaved changes
@@ -1050,8 +1058,102 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
           </Tab>
 
           <Tab header="Endpoints">
-            <div className="p-4 text-gray-500">
-              Endpoints tab content
+            <div className="mt-6">
+              {/* Search Input */}
+              <div className="mb-4">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Icon icon="material-symbols:search" className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <input
+                    type="text"
+                    value={endpointSearchQuery}
+                    onChange={(e) => setEndpointSearchQuery(e.target.value)}
+                    className="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Search endpoints..."
+                  />
+                </div>
+              </div>
+
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3">
+                      Name
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Method
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Path
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Folder
+                    </th>
+                    <th scope="col" className="px-4 py-3 w-12 text-center">
+                      <Icon icon="cil:options-horizontal" className="w-5 h-5 inline-block" />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {endpoints
+                    .filter((endpoint) => {
+                      if (!endpointSearchQuery) return true;
+                      const query = endpointSearchQuery.toLowerCase();
+                      return (
+                        endpoint.name.toLowerCase().includes(query) ||
+                        endpoint.method.toLowerCase().includes(query) ||
+                        endpoint.url.toLowerCase().includes(query) ||
+                        getFolderName(endpoint.folder).toLowerCase().includes(query)
+                      );
+                    })
+                    .map((endpoint) => (
+                      <tr
+                        key={endpoint.id}
+                        className="bg-white border-b border-gray-200 hover:bg-gray-50"
+                      >
+                        <td className="px-6 py-4 font-medium text-gray-900">
+                          {endpoint.name}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 text-xs font-semibold rounded ${
+                            endpoint.method === 'GET' ? 'bg-green-100 text-green-800' :
+                            endpoint.method === 'POST' ? 'bg-blue-100 text-blue-800' :
+                            endpoint.method === 'PUT' ? 'bg-yellow-100 text-yellow-800' :
+                            endpoint.method === 'PATCH' ? 'bg-orange-100 text-orange-800' :
+                            endpoint.method === 'DELETE' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {endpoint.method}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-gray-700">
+                          {endpoint.url}
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">
+                          {getFolderName(endpoint.folder)}
+                        </td>
+                        <td className="px-4 py-4 text-center">
+                          <button
+                            className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded p-1 transition-all duration-200 inline-flex items-center justify-center"
+                            title="View endpoint details"
+                          >
+                            <Icon
+                              icon="material-symbols:more-vert"
+                              className="w-4 h-4"
+                            />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+
+              {endpoints.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No endpoints found in this collection
+                </div>
+              )}
             </div>
           </Tab>
         </Tabs>
