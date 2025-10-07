@@ -4,6 +4,7 @@ import type { Endpoint, EndpointFolder, Project } from "../types/project";
 import { useAuth } from "../hooks/useAuth";
 import { useProjects } from "../hooks/useProjects";
 import CreateProjectModal from "./CreateProjectModal";
+import ConfirmationModal from "./ConfirmationModal";
 
 interface ProjectsSidebarProps {
   onEndpointSelect: (endpoint: Endpoint & { projectId: string }) => void;
@@ -46,6 +47,8 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   const [showProjectMenu, setShowProjectMenu] = useState<string | null>(null);
   const [hoveredEndpointId, setHoveredEndpointId] = useState<string | null>(null);
   const [showEndpointMenu, setShowEndpointMenu] = useState<string | null>(null);
+  const [endpointToDelete, setEndpointToDelete] = useState<(Endpoint & { projectId: string }) | null>(null);
+  const [isDeletingEndpoint, setIsDeletingEndpoint] = useState(false);
 
 
   // Function to organize endpoints and folders
@@ -200,6 +203,36 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
     }
   };
 
+  const handleDeleteEndpoint = async () => {
+    if (!endpointToDelete) return;
+
+    setIsDeletingEndpoint(true);
+    try {
+      const { EndpointsService } = await import("../services/endpointsService");
+      await EndpointsService.deleteEndpoint(endpointToDelete.id);
+
+      // Update local state to remove the deleted endpoint
+      setProjectEndpoints(prev => {
+        const projectData = prev[endpointToDelete.projectId];
+        if (!projectData) return prev;
+
+        return {
+          ...prev,
+          [endpointToDelete.projectId]: {
+            ...projectData,
+            endpoints: projectData.endpoints.filter(e => e.id !== endpointToDelete.id)
+          }
+        };
+      });
+
+      setEndpointToDelete(null);
+    } catch (error) {
+      console.error("Error deleting endpoint:", error);
+    } finally {
+      setIsDeletingEndpoint(false);
+    }
+  };
+
   const getMethodColor = (method: string) => {
     switch (method.toUpperCase()) {
       case "GET":
@@ -321,7 +354,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log("Delete endpoint", endpoint.name);
+                          setEndpointToDelete(endpoint);
                           setShowEndpointMenu(null);
                         }}
                         className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
@@ -551,7 +584,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  console.log("Delete endpoint", endpoint.name);
+                                  setEndpointToDelete(endpoint);
                                   setShowEndpointMenu(null);
                                 }}
                                 className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-b-lg"
@@ -577,6 +610,19 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onProjectCreate={handleCreateProject}
+      />
+
+      {/* Delete Endpoint Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={endpointToDelete !== null}
+        onClose={() => setEndpointToDelete(null)}
+        onConfirm={handleDeleteEndpoint}
+        title="Delete Endpoint"
+        message={`Are you sure you want to delete "${endpointToDelete?.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        loading={isDeletingEndpoint}
       />
     </div>
   );
