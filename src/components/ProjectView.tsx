@@ -12,7 +12,6 @@ import QuickRequestBar from "./QuickRequestBar";
 import RequestTabs from "./RequestTabs";
 import ResponseViewer from "./ResponseViewer";
 import { Tabs, Tab } from "./Tabs";
-import EnvironmentSelector from "./EnvironmentSelector";
 import Sidebar from "./Sidebar";
 import ProjectSelector from "./ProjectSelector";
 import UserMenu from "./UserMenu";
@@ -703,6 +702,8 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                     <QuickRequestBar
                       onSendRequest={handleQuickRequest}
                       environments={project.environments}
+                      selectedEnvironment={selectedEnvironment}
+                      onEnvironmentChange={setSelectedEnvironment}
                       initialMethod={tab.request.method}
                       initialUrl={tab.request.url}
                       onRequestChange={quickRequest =>

@@ -161,60 +161,6 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
     ];
   });
 
-  // Update project variables when variableRows change
-  const updateProjectVariables = async (rows: VariableRow[]) => {
-    try {
-      setIsUpdating(true);
-
-      // Create a copy of environments to update
-      const updatedEnvironments = project.environments.map(env => ({
-        ...env,
-        variables: {} as Record<string, string>,
-      }));
-
-      // Separate collection variables
-      const collectionVariables: Record<string, string> = {};
-
-      // Group variables by environment
-      rows.forEach(row => {
-        if (row.name.trim() && row.value.trim() && row.enabled) {
-          if (row.environment === "collection") {
-            collectionVariables[row.name.trim()] = row.value.trim();
-          } else {
-            const envIndex = updatedEnvironments.findIndex(
-              env => env.id === row.environment
-            );
-            if (envIndex !== -1) {
-              updatedEnvironments[envIndex].variables![row.name.trim()] =
-                row.value.trim();
-            }
-          }
-        }
-      });
-
-      // Update the project with new variables
-      const updatedProject: Project = {
-        ...project,
-        environments: updatedEnvironments,
-        collectionVariables,
-        updatedAt: new Date(),
-      };
-
-      // Save to database
-      await ProjectService.updateProject(project.id, {
-        environments: updatedEnvironments,
-        collectionVariables,
-      });
-
-      // Update parent component
-      onProjectUpdate?.(updatedProject);
-    } catch (error) {
-      console.error("Error updating project variables:", error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
   const handleVariableChange = (
     id: string,
     field: keyof VariableRow,

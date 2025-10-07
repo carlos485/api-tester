@@ -72,7 +72,7 @@ const ApiTesterView: React.FC = () => {
   const [isRestoredFromSession, setIsRestoredFromSession] = useState(false);
   const [shouldActivateLastTab, setShouldActivateLastTab] = useState(false);
   const [editingTabName, setEditingTabName] = useState<string | null>(null);
-  const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
+  const [selectedEnvironments, setSelectedEnvironments] = useState<Record<string, Environment | null>>({});
   const [savingTab, setSavingTab] = useState<string | null>(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [pendingTabIndex, setPendingTabIndex] = useState<number | null>(null);
@@ -257,8 +257,8 @@ const ApiTesterView: React.FC = () => {
     // Update the current tab's loading state
     setTabs(prev =>
       prev.map((tab, index) =>
-        index === activeTabIndex && tab.type === 'request' 
-          ? { ...tab, loading: true, request } 
+        index === activeTabIndex && tab.type === 'request'
+          ? { ...tab, loading: true, request }
           : tab
       )
     );
@@ -266,16 +266,19 @@ const ApiTesterView: React.FC = () => {
     const startTime = Date.now();
 
     try {
+      // Get the selected environment for the current tab
+      const tabEnvironment = selectedEnvironments[currentTab.id];
+
       // Construct base URL with environment base URL if selected
       let baseUrl = request.url;
-      if (selectedEnvironment && baseUrl) {
+      if (tabEnvironment && baseUrl) {
         // If URL is relative, prepend with environment base URL
         if (baseUrl.startsWith('/')) {
-          baseUrl = selectedEnvironment.baseUrl.replace(/\/$/, '') + baseUrl;
+          baseUrl = tabEnvironment.baseUrl.replace(/\/$/, '') + baseUrl;
         }
         // If URL doesn't start with http, assume it's relative
         else if (!baseUrl.startsWith('http')) {
-          baseUrl = selectedEnvironment.baseUrl.replace(/\/$/, '') + '/' + baseUrl;
+          baseUrl = tabEnvironment.baseUrl.replace(/\/$/, '') + '/' + baseUrl;
         }
       }
 
@@ -512,6 +515,7 @@ const ApiTesterView: React.FC = () => {
       const { EndpointsService } = await import("../services/endpointsService");
 
       const endpointData = {
+        projectId: projectId,
         name: tab.name || "Untitled Request",
         method: tab.request.method as any,
         url: tab.request.url || "",
@@ -754,6 +758,34 @@ const ApiTesterView: React.FC = () => {
     confirmTab(tabIndex);
   };
 
+  // Get project for current tab
+  const getCurrentTabProject = (): Project | null => {
+    const currentTab = tabs[activeTabIndex];
+    if (!currentTab) return null;
+
+    if (currentTab.type === 'project') {
+      return currentTab.project;
+    } else if (currentTab.type === 'request' && currentTab.projectId) {
+      return projects.find(p => p.id === currentTab.projectId) || null;
+    }
+
+    return null;
+  };
+
+  // Get environments for current tab
+  const getCurrentTabEnvironments = (): Environment[] => {
+    const project = getCurrentTabProject();
+    return project?.environments || [];
+  };
+
+  // Handle environment change for a specific tab
+  const handleEnvironmentChange = (tabId: string, environment: Environment | null) => {
+    setSelectedEnvironments(prev => ({
+      ...prev,
+      [tabId]: environment
+    }));
+  };
+
   // Handle sidebar resize
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -898,7 +930,9 @@ const ApiTesterView: React.FC = () => {
                       <div className="px-4 py-3 bg-white dark:bg-gray-800">
                         <QuickRequestBar
                           onSendRequest={handleQuickRequest}
-                          environments={[]}
+                          environments={getCurrentTabEnvironments()}
+                          selectedEnvironment={selectedEnvironments[tab.id] || null}
+                          onEnvironmentChange={(env) => handleEnvironmentChange(tab.id, env)}
                           initialMethod={tab.request.method}
                           initialUrl={tab.request.url}
                           onRequestChange={quickRequest =>

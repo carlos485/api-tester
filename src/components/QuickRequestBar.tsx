@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import type { Environment, ApiRequest } from "../types/project";
 import RequestMethodSelect, { type HttpMethod } from "./RequestMethodSelect";
-import Input from "./Input";
 import { parseCurl, isCurlCommand } from "../utils/curlParser";
+import EnvironmentSelector from "./EnvironmentSelector";
 
 interface QuickRequestBarProps {
   onSendRequest: (request: { method: string; url: string }) => void;
-  environments?: Environment[];
+  environments: Environment[];
+  selectedEnvironment: Environment | null;
+  onEnvironmentChange: (environment: Environment | null) => void;
   initialMethod?: string;
   initialUrl?: string;
   onRequestChange?: (request: { method: string; url: string }) => void;
@@ -16,6 +18,9 @@ interface QuickRequestBarProps {
 
 const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
   onSendRequest,
+  environments,
+  selectedEnvironment,
+  onEnvironmentChange,
   initialMethod = "GET",
   initialUrl = "",
   onRequestChange,
@@ -23,7 +28,6 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
 }) => {
   const [method, setMethod] = useState<HttpMethod>(initialMethod as HttpMethod);
   const [url, setUrl] = useState(initialUrl);
-  const [selectedEnvironment] = useState<Environment | null>(null);
 
   // Sync with props when they change
   useEffect(() => {
@@ -121,31 +125,55 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
 
   return (
     <div className="mb-2">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="space-y-2">
+        {/* Environment Selector */}
+        {environments.length > 0 && (
+          <div className="px-2">
+            <EnvironmentSelector
+              selectedEnvironment={selectedEnvironment}
+              onEnvironmentChange={onEnvironmentChange}
+              environments={environments}
+            />
+          </div>
+        )}
+
+        {/* Request Bar */}
         <div className="flex gap-2 items-center bg-white rounded-lg p-1">
-          <Input
-            type="text"
-            value={url}
-            onChange={e => handleUrlChange(e.target.value)}
-            onPaste={handlePaste}
-            variant="full-width"
-            leftAddon={
-              <RequestMethodSelect
-                value={method}
-                onChange={handleMethodChange}
-                variant="addon"
-              />
-            }
-            placeholder={
-              selectedEnvironment
-                ? "/api/endpoint or paste cURL command"
-                : "https://api.example.com/endpoint or paste cURL command"
-            }
-            required
-          />
+          {/* Method Selector */}
+          <div className="flex-shrink-0">
+            <RequestMethodSelect
+              value={method}
+              onChange={handleMethodChange}
+              variant="addon"
+            />
+          </div>
+
+          {/* URL Input with Base URL prefix */}
+          <div className="flex-1 flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-gray-500 focus-within:border-gray-500">
+            {selectedEnvironment && (
+              <div className="flex-shrink-0 px-3 py-2.5 bg-gray-100 border-r border-gray-300 text-gray-700 text-sm font-mono">
+                {selectedEnvironment.baseUrl}
+              </div>
+            )}
+            <input
+              type="text"
+              value={url}
+              onChange={e => handleUrlChange(e.target.value)}
+              onPaste={handlePaste}
+              className="flex-1 px-3 py-2.5 text-sm border-0 focus:outline-none focus:ring-0"
+              placeholder={
+                selectedEnvironment
+                  ? "/api/endpoint or paste cURL command"
+                  : "https://api.example.com/endpoint or paste cURL command"
+              }
+              required
+            />
+          </div>
+
+          {/* Send Button */}
           <button
             type="submit"
-            className="cursor-pointer mt-2 transition-all duration-300 text-white border border-gray-500 bg-gray-500 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+            className="flex-shrink-0 cursor-pointer mt-2 transition-all duration-300 text-white border border-gray-500 bg-gray-500 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
           >
             <Icon icon="mynaui:send" className="h-4.5 w-4.5" />
           </button>
