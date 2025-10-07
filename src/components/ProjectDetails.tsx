@@ -16,6 +16,7 @@ interface VariableRow {
   id: string;
   name: string;
   value: string;
+  description: string;
   environment: string;
   enabled: boolean;
 }
@@ -72,6 +73,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { endpoints, folders } = useEndpoints(project.id);
 
@@ -86,6 +88,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
           id: `var-collection-${name}`, // Stable ID for collection variables
           name,
           value,
+          description: "",
           environment: "collection",
           enabled: true,
         });
@@ -100,6 +103,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
             id: `var-${env.id}-${name}`, // Stable ID based on environment and name
             name,
             value,
+            description: "",
             environment: env.id,
             enabled: true,
           });
@@ -119,6 +123,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
         id: `new-variable-${Date.now()}`,
         name: "",
         value: "",
+        description: "",
         environment:
           project.environments.length > 0
             ? project.environments[0].id
@@ -203,6 +208,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
           id: `new-variable-${Date.now()}`,
           name: "",
           value: "",
+          description: "",
           environment:
             project.environments.length > 0
               ? project.environments[0].id
@@ -348,6 +354,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
             id: `new-variable-${Date.now()}`,
             name: "",
             value: "",
+            description: "",
             environment:
               project.environments.length > 0
                 ? project.environments[0].id
@@ -684,8 +691,127 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
           </Tab>
 
           <Tab header="Variables">
-            <div className="p-4 text-gray-500">
-              Variables tab content
+            <div className="mt-6">
+              {/* Search Input */}
+              <div className="mb-4">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Icon icon="material-symbols:search" className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Search variables..."
+                  />
+                </div>
+              </div>
+
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3">
+                      Variable
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Value
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Description
+                    </th>
+                    <th scope="col" className="px-4 py-3 w-12 text-center">
+                      <Icon icon="cil:options-horizontal" className="w-5 h-5 inline-block" />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {variableRows
+                    .filter((variable) => {
+                      if (!searchQuery) return true;
+                      const query = searchQuery.toLowerCase();
+                      return (
+                        variable.name.toLowerCase().includes(query) ||
+                        variable.value.toLowerCase().includes(query) ||
+                        variable.description.toLowerCase().includes(query)
+                      );
+                    })
+                    .map((variable, index) => (
+                      <tr
+                        key={variable.id}
+                        className="bg-white border-b border-gray-200 hover:bg-gray-50"
+                      >
+                        <td className="py-2 px-2">
+                          <input
+                            type="text"
+                            value={variable.name}
+                            onChange={e =>
+                              handleVariableChange(
+                                variable.id,
+                                "name",
+                                e.target.value
+                              )
+                            }
+                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                            placeholder={
+                              index === variableRows.length - 1
+                                ? "Add new variable"
+                                : ""
+                            }
+                          />
+                        </td>
+                        <td className="py-2 px-2">
+                          <input
+                            type="text"
+                            value={variable.value}
+                            onChange={e =>
+                              handleVariableChange(
+                                variable.id,
+                                "value",
+                                e.target.value
+                              )
+                            }
+                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                          />
+                        </td>
+                        <td className="py-2 px-2">
+                          <input
+                            type="text"
+                            value={variable.description}
+                            onChange={e =>
+                              handleVariableChange(
+                                variable.id,
+                                "description",
+                                e.target.value
+                              )
+                            }
+                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                            placeholder="Add description..."
+                          />
+                        </td>
+                        <td className="py-2 px-2 text-center">
+                          {variableRows.filter(
+                            row => row.name.trim() || row.value.trim()
+                          ).length >= 2 &&
+                            (variable.name.trim() || variable.value.trim()) && (
+                              <button
+                                onClick={() =>
+                                  handleDeleteVariable(variable.id)
+                                }
+                                className="text-red-600 hover:text-red-700 hover:bg-red-100 rounded p-1 transition-all duration-200 inline-flex items-center justify-center"
+                                title="Delete variable"
+                              >
+                                <Icon
+                                  icon="line-md:trash"
+                                  className="w-4 h-4"
+                                />
+                              </button>
+                            )}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
           </Tab>
 
