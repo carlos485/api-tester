@@ -218,10 +218,19 @@ const ProjectView: React.FC<ProjectViewProps> = ({
         fetchOptions.body = request.body;
       }
 
-      console.log("Making request to:", requestUrl);
-      console.log("Request options:", fetchOptions);
+      // Use proxy for external URLs in development
+      let finalUrl = requestUrl;
+      const finalHeaders = { ...fetchOptions.headers };
 
-      const response = await fetch(requestUrl, fetchOptions);
+      if (import.meta.env.DEV && requestUrl.startsWith('http')) {
+        finalUrl = 'http://localhost:3001/proxy';
+        finalHeaders['x-target-url'] = requestUrl;
+      }
+
+      console.log("Making request to:", finalUrl);
+      console.log("Request options:", { ...fetchOptions, headers: finalHeaders });
+
+      const response = await fetch(finalUrl, { ...fetchOptions, headers: finalHeaders });
       const endTime = Date.now();
 
       console.log("Response received:", response.status, response.statusText);

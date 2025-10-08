@@ -6,7 +6,8 @@
       "Bash(node fix-imports.js)",
       "Bash(node:*)",
       "Bash(cat:*)",
-      "Bash(pnpm dev:*)"
+      "Bash(pnpm dev:*)",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []

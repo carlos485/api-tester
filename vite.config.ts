@@ -17,13 +17,7 @@ export default defineConfig({
     },
   },
   server: {
-    proxy: {
-      '/api': {
-        target: 'https://uat-loyalty-fps-bus-ms-loyalty-gamification-ws.solucionesdigitalfps.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-        secure: false // Para certificados SSL inválidos
-      }
-    }
+    cors: true,
+    proxy: {}
   }
 })
