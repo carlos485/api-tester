@@ -150,26 +150,29 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
             />
           </div>
 
-          {/* URL Input with Base URL prefix */}
-          <div className="flex-1 flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-gray-500 focus-within:border-gray-500">
-            {selectedEnvironment && (
-              <div className="flex-shrink-0 px-3 py-2.5 bg-gray-100 border-r border-gray-300 text-gray-700 text-sm font-mono">
-                {selectedEnvironment.baseUrl}
-              </div>
-            )}
-            <input
-              type="text"
-              value={url}
-              onChange={e => handleUrlChange(e.target.value)}
-              onPaste={handlePaste}
-              className="flex-1 px-3 py-2.5 text-sm border-0 focus:outline-none focus:ring-0"
-              placeholder={
-                selectedEnvironment
-                  ? "/api/endpoint or paste cURL command"
-                  : "https://api.example.com/endpoint or paste cURL command"
-              }
-              required
-            />
+          {/* URL Input with Base URL chip */}
+          <div className="flex-1 relative">
+            <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2.5 focus-within:ring-2 focus-within:ring-gray-500 focus-within:border-gray-500 bg-white">
+              {selectedEnvironment && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-md border border-blue-200 flex-shrink-0">
+                  <Icon icon="material-symbols:cloud" className="h-3.5 w-3.5" />
+                  {selectedEnvironment.baseUrl}
+                </span>
+              )}
+              <input
+                type="text"
+                value={url}
+                onChange={e => handleUrlChange(e.target.value)}
+                onPaste={handlePaste}
+                className="flex-1 text-sm border-0 focus:outline-none focus:ring-0 p-0 min-w-0"
+                placeholder={
+                  selectedEnvironment
+                    ? "/api/endpoint or paste cURL command"
+                    : "https://api.example.com/endpoint or paste cURL command"
+                }
+                required
+              />
+            </div>
           </div>
 
           {/* Send Button */}
