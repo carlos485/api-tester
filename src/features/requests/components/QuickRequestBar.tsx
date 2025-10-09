@@ -55,14 +55,25 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
     if (isCurlCommand(newUrl) && onCurlParsed) {
       const parsedData = parseCurl(newUrl);
       if (parsedData) {
+        let finalUrl = parsedData.url;
+
+        // If environment is selected and URL starts with environment base URL, extract relative path
+        if (selectedEnvironment && finalUrl.startsWith(selectedEnvironment.baseUrl)) {
+          finalUrl = finalUrl.replace(selectedEnvironment.baseUrl, '');
+          // Ensure it starts with /
+          if (!finalUrl.startsWith('/')) {
+            finalUrl = '/' + finalUrl;
+          }
+        }
+
         // Update local state
         setMethod(parsedData.method as HttpMethod);
-        setUrl(parsedData.url);
+        setUrl(finalUrl);
 
         // Create full request object for parent
         const fullRequest: ApiRequest = {
           method: parsedData.method,
-          url: parsedData.url,
+          url: finalUrl,
           headers: parsedData.headers,
           queryParams: parsedData.queryParams,
           body: parsedData.body
@@ -89,14 +100,35 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
 
       const parsedData = parseCurl(pastedText);
       if (parsedData) {
+        let finalUrl = parsedData.url;
+
+        // If environment is selected and URL starts with environment base URL, extract relative path
+        if (selectedEnvironment) {
+          console.log('[QuickRequestBar] Parsed URL:', finalUrl);
+          console.log('[QuickRequestBar] Environment baseUrl:', selectedEnvironment.baseUrl);
+
+          // Normalize both URLs for comparison (remove trailing slashes)
+          const normalizedBaseUrl = selectedEnvironment.baseUrl.replace(/\/$/, '');
+
+          if (finalUrl.startsWith(normalizedBaseUrl)) {
+            console.log('[QuickRequestBar] Extracting relative path...');
+            finalUrl = finalUrl.replace(normalizedBaseUrl, '');
+            // Ensure it starts with /
+            if (!finalUrl.startsWith('/')) {
+              finalUrl = '/' + finalUrl;
+            }
+            console.log('[QuickRequestBar] Final relative URL:', finalUrl);
+          }
+        }
+
         // Update local state
         setMethod(parsedData.method as HttpMethod);
-        setUrl(parsedData.url);
+        setUrl(finalUrl);
 
         // Create full request object for parent
         const fullRequest: ApiRequest = {
           method: parsedData.method,
-          url: parsedData.url,
+          url: finalUrl,
           headers: parsedData.headers,
           queryParams: parsedData.queryParams,
           body: parsedData.body
@@ -111,17 +143,9 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (url.trim()) {
-      let finalUrl = url.trim();
-
-      // If environment is selected and URL is relative, prepend base URL
-      if (selectedEnvironment && !finalUrl.startsWith("http")) {
-        finalUrl =
-          selectedEnvironment.baseUrl.replace(/\/$/, "") +
-          "/" +
-          finalUrl.replace(/^\//, "");
-      }
-
-      onSendRequest({ method, url: finalUrl });
+      // Send the URL exactly as written in the input
+      // The parent component (ProjectView) will handle concatenating baseUrl if needed
+      onSendRequest({ method, url: url.trim() });
     }
   };
 

@@ -167,7 +167,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     const currentTab = requestTabs[activeTabIndex];
     if (!currentTab) return;
 
-    // Update the current tab's loading state
+    // Keep the URL as-is in the tab state (this is what the input will show)
     setRequestTabs(prev =>
       prev.map((tab, index) =>
         index === activeTabIndex ? { ...tab, loading: true, request } : tab
@@ -177,9 +177,8 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     const startTime = Date.now();
 
     try {
-      // Use the selected environment object directly
-
-      // Construct base URL with environment base URL if selected
+      // Construct full URL for making the HTTP request
+      // This concatenation is ONLY for the request, NOT for updating state
       let baseUrl = request.url;
       if (selectedEnvironment && baseUrl) {
         // If URL is relative, prepend with environment base URL
