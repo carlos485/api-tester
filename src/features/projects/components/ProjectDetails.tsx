@@ -98,7 +98,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
           name,
           value,
           description: "",
-          environment: "collection",
+          environment: "GLOBAL",
           enabled: true,
         });
       });
@@ -133,10 +133,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
         name: "",
         value: "",
         description: "",
-        environment:
-          project.environments.length > 0
-            ? project.environments[0].id
-            : "collection",
+        environment: "GLOBAL",
         enabled: true,
       },
     ];
@@ -183,10 +180,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
           name: "",
           value: "",
           description: "",
-          environment:
-            project.environments.length > 0
-              ? project.environments[0].id
-              : "collection",
+          environment: "GLOBAL",
           enabled: true,
         });
       }
@@ -318,7 +312,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
       // Group variables by environment
       variableRows.forEach(row => {
         if (row.name.trim() && row.value.trim() && row.enabled) {
-          if (row.environment === "collection") {
+          if (row.environment === "GLOBAL") {
             collectionVariables[row.name.trim()] = row.value.trim();
           } else {
             const envIndex = updatedEnvironments.findIndex(
@@ -388,10 +382,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
             name: "",
             value: "",
             description: "",
-            environment:
-              project.environments.length > 0
-                ? project.environments[0].id
-                : "collection",
+            environment: "GLOBAL",
             enabled: true,
           },
         ];
@@ -906,6 +897,9 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                       Value
                     </th>
                     <th scope="col" className="px-6 py-3">
+                      Environment
+                    </th>
+                    <th scope="col" className="px-6 py-3">
                       Description
                     </th>
                     <th scope="col" className="px-4 py-3 w-12 text-center">
@@ -961,6 +955,26 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                             }
                             className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
                           />
+                        </td>
+                        <td className="py-2 px-2">
+                          <select
+                            value={variable.environment || "GLOBAL"}
+                            onChange={e =>
+                              handleVariableChange(
+                                variable.id,
+                                "environment",
+                                e.target.value
+                              )
+                            }
+                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
+                          >
+                            <option value="GLOBAL">GLOBAL</option>
+                            {project.environments.map(env => (
+                              <option key={env.id} value={env.id}>
+                                {env.name}
+                              </option>
+                            ))}
+                          </select>
                         </td>
                         <td className="py-2 px-2">
                           <input
