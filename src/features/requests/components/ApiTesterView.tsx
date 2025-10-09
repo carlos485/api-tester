@@ -25,6 +25,8 @@ import {
   getSelectedEndpoint,
   getSelectedEnvironment,
   clearSelectedEnvironment,
+  interpolateVariables,
+  interpolateObjectValues,
 } from '@/shared/utils';
 
 interface RequestTab {
@@ -266,8 +268,17 @@ const ApiTesterView: React.FC = () => {
       // Get the selected environment for the current tab
       const tabEnvironment = selectedEnvironments[currentTab.id];
 
+      // Get global variables from the project (if tab has projectId)
+      const currentProject = currentTab.projectId
+        ? projects.find(p => p.id === currentTab.projectId)
+        : null;
+      const globalVariables = currentProject?.collectionVariables || {};
+
+      // Interpolate variables in URL, headers, query params, and body
+      let interpolatedUrl = interpolateVariables(request.url, tabEnvironment, globalVariables);
+
       // Construct base URL with environment base URL if selected
-      let baseUrl = request.url;
+      let baseUrl = interpolatedUrl;
       if (tabEnvironment && baseUrl) {
         // If URL is relative, prepend with environment base URL
         if (baseUrl.startsWith('/')) {
@@ -279,11 +290,12 @@ const ApiTesterView: React.FC = () => {
         }
       }
 
-      // Construct URL with query parameters
+      // Interpolate query parameters and construct URL
       let requestUrl = baseUrl;
       if (request.queryParams && Object.keys(request.queryParams).length > 0) {
+        const interpolatedQueryParams = interpolateObjectValues(request.queryParams, tabEnvironment, globalVariables);
         const url = new URL(requestUrl);
-        Object.entries(request.queryParams).forEach(([key, value]) => {
+        Object.entries(interpolatedQueryParams).forEach(([key, value]) => {
           if (key.trim() && value.trim()) {
             url.searchParams.set(key.trim(), value.trim());
           }
@@ -291,18 +303,22 @@ const ApiTesterView: React.FC = () => {
         requestUrl = url.toString();
       }
 
+      // Interpolate headers
+      const interpolatedHeaders = interpolateObjectValues(request.headers || {}, tabEnvironment, globalVariables);
+
       const fetchOptions: RequestInit = {
         method: request.method,
-        headers: request.headers,
+        headers: interpolatedHeaders,
         mode: "cors",
       };
 
+      // Interpolate body
       if (
         request.method !== "GET" &&
         request.method !== "HEAD" &&
         request.body
       ) {
-        fetchOptions.body = request.body;
+        fetchOptions.body = interpolateVariables(request.body, tabEnvironment, globalVariables);
       }
 
       // Use proxy for external URLs in development

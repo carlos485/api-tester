@@ -27,6 +27,8 @@ import {
   clearActiveTabIndex,
   clearSelectedEndpoint,
   clearSelectedEnvironment,
+  interpolateVariables,
+  interpolateObjectValues,
 } from '@/shared/utils';
 
 interface ProjectViewProps {
@@ -177,9 +179,15 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     const startTime = Date.now();
 
     try {
+      // Interpolate variables in URL, headers, query params, and body
+      const globalVariables = project.collectionVariables || {};
+
+      // Interpolate URL
+      let interpolatedUrl = interpolateVariables(request.url, selectedEnvironment, globalVariables);
+
       // Construct full URL for making the HTTP request
       // This concatenation is ONLY for the request, NOT for updating state
-      let baseUrl = request.url;
+      let baseUrl = interpolatedUrl;
       if (selectedEnvironment && baseUrl) {
         // If URL is relative, prepend with environment base URL
         if (baseUrl.startsWith('/')) {
@@ -191,11 +199,12 @@ const ProjectView: React.FC<ProjectViewProps> = ({
         }
       }
 
-      // Construct URL with query parameters
+      // Interpolate query parameters and construct URL
       let requestUrl = baseUrl;
       if (request.queryParams && Object.keys(request.queryParams).length > 0) {
+        const interpolatedQueryParams = interpolateObjectValues(request.queryParams, selectedEnvironment, globalVariables);
         const url = new URL(requestUrl);
-        Object.entries(request.queryParams).forEach(([key, value]) => {
+        Object.entries(interpolatedQueryParams).forEach(([key, value]) => {
           if (key.trim() && value.trim()) {
             url.searchParams.set(key.trim(), value.trim());
           }
@@ -203,18 +212,22 @@ const ProjectView: React.FC<ProjectViewProps> = ({
         requestUrl = url.toString();
       }
 
+      // Interpolate headers
+      const interpolatedHeaders = interpolateObjectValues(request.headers || {}, selectedEnvironment, globalVariables);
+
       const fetchOptions: RequestInit = {
         method: request.method,
-        headers: request.headers,
+        headers: interpolatedHeaders,
         mode: "cors",
       };
 
+      // Interpolate body
       if (
         request.method !== "GET" &&
         request.method !== "HEAD" &&
         request.body
       ) {
-        fetchOptions.body = request.body;
+        fetchOptions.body = interpolateVariables(request.body, selectedEnvironment, globalVariables);
       }
 
       // Use proxy for external URLs in development
