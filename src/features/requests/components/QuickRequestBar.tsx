@@ -6,6 +6,7 @@ import { RequestMethodSelect } from '@/features/requests/components';
 import type { HttpMethod } from '@/shared/types';
 import { parseCurl, isCurlCommand } from '@/shared/utils';
 import { EnvironmentSelector } from '@/features/environments/components';
+import { VariableHighlightedInput } from '@/shared/components/ui';
 
 interface QuickRequestBarProps {
   onSendRequest: (request: { method: string; url: string }) => void;
@@ -174,21 +175,19 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
             />
           </div>
 
-          {/* URL Input with Base URL chip */}
+          {/* URL Input with Base URL chip and variable highlighting */}
           <div className="flex-1 relative">
-            <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2.5 focus-within:ring-2 focus-within:ring-gray-500 focus-within:border-gray-500 bg-white">
+            <div className="flex items-center gap-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-gray-500 focus-within:border-gray-500 bg-white">
               {selectedEnvironment && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-md border border-blue-200 flex-shrink-0">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 ml-3 bg-blue-100 text-blue-800 text-xs font-medium rounded-md border border-blue-200 flex-shrink-0">
                   <Icon icon="material-symbols:cloud" className="h-3.5 w-3.5" />
                   {selectedEnvironment.baseUrl}
                 </span>
               )}
-              <input
-                type="text"
+              <VariableHighlightedInput
                 value={url}
-                onChange={e => handleUrlChange(e.target.value)}
+                onChange={handleUrlChange}
                 onPaste={handlePaste}
-                className="flex-1 text-sm border-0 focus:outline-none focus:ring-0 p-0 min-w-0"
                 placeholder={
                   selectedEnvironment
                     ? "/api/endpoint or paste cURL command"

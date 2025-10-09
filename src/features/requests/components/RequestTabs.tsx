@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
-import { Tabs, Tab } from '@/shared/components/ui';
+import { Tabs, Tab, VariableHighlightedInput } from '@/shared/components/ui';
 import { Button } from '@/shared/components/ui';
 import type { ApiRequest } from '@/features/requests/types';
 import { generateCurl, copyCurlToClipboard } from '@/shared/utils';
@@ -259,12 +259,13 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                         />
                       </td>
                       <td className="py-2 px-2">
-                        <input
-                          type="text"
-                          value={param.value}
-                          onChange={(e) => handleParamChange(param.id, 'value', e.target.value)}
-                          className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                        />
+                        <div className="border-0 rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus-within:ring-gray-500 focus-within:border-gray-500">
+                          <VariableHighlightedInput
+                            value={param.value}
+                            onChange={(value) => handleParamChange(param.id, 'value', value)}
+                            className="block w-full"
+                          />
+                        </div>
                       </td>
                       <td className="py-2 px-2">
                         <input
@@ -358,12 +359,13 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                         />
                       </td>
                       <td className="py-2 px-2">
-                        <input
-                          type="text"
-                          value={header.value}
-                          onChange={(e) => handleHeaderChange(header.id, 'value', e.target.value)}
-                          className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                        />
+                        <div className="border-0 rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus-within:ring-gray-500 focus-within:border-gray-500">
+                          <VariableHighlightedInput
+                            value={header.value}
+                            onChange={(value) => handleHeaderChange(header.id, 'value', value)}
+                            className="block w-full"
+                          />
+                        </div>
                       </td>
                       <td className="py-2 px-2">
                         <input
