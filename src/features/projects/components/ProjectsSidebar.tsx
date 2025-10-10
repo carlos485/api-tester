@@ -5,7 +5,7 @@ import type { Endpoint, EndpointFolder } from '@/features/endpoints/types';
 import { useAuth } from '@/features/auth/hooks';
 import { useProjects } from '@/features/projects/hooks';
 import { CreateProjectModal } from '@/features/projects/components';
-import { ConfirmationModal } from '@/shared/components/ui';
+import { ConfirmationModal, Input } from '@/shared/components/ui';
 
 interface ProjectsSidebarProps {
   onEndpointSelect: (endpoint: Endpoint & { projectId: string }) => void;
@@ -446,26 +446,28 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
     <div className="flex flex-col h-full bg-white dark:bg-gray-90">
       {/* Search Bar */}
       <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-        <div className="relative">
-          <Icon
-            icon="material-symbols:search"
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500"
-          />
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-9 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-200"
-          />
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
-            title="New Collection"
-          >
-            <Icon icon="material-symbols:add" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-          </button>
-        </div>
+        <Input
+          type="text"
+          placeholder="Search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          variant="full-width"
+          leftAddon={
+            <Icon
+              icon="material-symbols:search"
+              className="h-4 w-4 text-gray-400 dark:text-gray-500"
+            />
+          }
+          rightAddon={
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+              title="New Collection"
+            >
+              <Icon icon="material-symbols:add" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            </button>
+          }
+        />
       </div>
 
       {/* Project Tree */}

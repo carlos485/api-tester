@@ -20,7 +20,7 @@ const Input: FC<InputProps> = ({
 }) => {
   const hasAddons = leftAddon || rightAddon;
 
-  const baseInputStyles = "bg-gray-50 border text-sm focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors p-2.5 dark:bg-gray-60 dark:text-white";
+  const baseInputStyles = "bg-gray-50 border text-sm focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors p-2.5 dark:bg-gray-70 dark:text-white";
   const normalBorderStyles = "border-gray-300 dark:border-gray-500";
   const errorBorderStyles = "border-red-500 dark:border-red-400 focus:ring-red-500 focus:border-red-500";
 
@@ -32,7 +32,7 @@ const Input: FC<InputProps> = ({
   const renderInput = () => {
     if (hasAddons) {
       // Input with addons - wrapped in a container
-      const containerClassName = `flex items-center bg-gray-50 dark:bg-[#303033] border ${error ? errorBorderStyles : normalBorderStyles} rounded-lg focus-within:ring-2 focus-within:ring-gray-500 focus-within:border-gray-500 transition-colors ${variantStyles[variant]} ${className}`.trim();
+      const containerClassName = `flex items-center bg-gray-50 dark:bg-gray-70 border ${error ? errorBorderStyles : normalBorderStyles} rounded-lg focus-within:ring-2 focus-within:ring-gray-500 focus-within:border-gray-500 transition-colors ${variantStyles[variant]} ${className}`.trim();
 
       const inputClassName = `bg-transparent border-0 text-gray-900 dark:text-white text-sm focus:ring-0 focus:border-0 focus:outline-none flex-1 p-2.5 ${
         leftAddon ? 'rounded-r-lg' : 'rounded-lg'
