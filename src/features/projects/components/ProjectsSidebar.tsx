@@ -443,7 +443,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-800">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-90">
       {/* Search Bar */}
       <div className="p-3 border-b border-gray-200 dark:border-gray-700">
         <div className="relative">
