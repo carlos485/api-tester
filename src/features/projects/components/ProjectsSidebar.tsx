@@ -569,7 +569,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
 
                 {/* Project Contents */}
                 {project.expanded && (
-                  <div className="ml-4 space-y-1">
+                  <div className="ml-2 space-y-1">
                     {/* Folders (using recursive rendering) */}
                     {renderFolders(project.folders, project.id)}
 
@@ -593,7 +593,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                         <span
                           className={`text-xs font-semibold ${getMethodColor(
                             endpoint.method
-                          )} min-w-[42px]`}
+                          )} mr-2`}
                         >
                           {endpoint.method}
                         </span>
