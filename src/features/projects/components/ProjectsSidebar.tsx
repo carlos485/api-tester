@@ -488,6 +488,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
           value={searchQuery}
           onChange={setSearchQuery}
           placeholder="Search"
+          leftIcon="line-md:search"
         />
       </div>
 
