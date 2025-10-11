@@ -5,7 +5,7 @@ import type { Endpoint, EndpointFolder } from '@/features/endpoints/types';
 import { useAuth } from '@/features/auth/hooks';
 import { useProjects } from '@/features/projects/hooks';
 import { CreateProjectModal } from '@/features/projects/components';
-import { ConfirmationModal, Input } from '@/shared/components/ui';
+import { ConfirmationModal, SearchBar } from '@/shared/components/ui';
 
 interface ProjectsSidebarProps {
   onEndpointSelect: (endpoint: Endpoint & { projectId: string }) => void;
@@ -152,6 +152,44 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
       setProjectNodes(nodes);
     }
   }, [projects, projectsLoading, projectEndpoints]);
+
+  // Filter projects and endpoints based on search query
+  const filterEndpoints = (endpoints: (Endpoint & { projectId: string })[]) => {
+    if (!searchQuery.trim()) return endpoints;
+    return endpoints.filter(endpoint =>
+      endpoint.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      endpoint.method.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      endpoint.url.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
+
+  const filterFolders = (folders: FolderNode[]): FolderNode[] => {
+    if (!searchQuery.trim()) return folders;
+
+    return folders
+      .map(folder => ({
+        ...folder,
+        endpoints: filterEndpoints(folder.endpoints),
+        subfolders: filterFolders(folder.subfolders),
+      }))
+      .filter(folder =>
+        folder.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        folder.endpoints.length > 0 ||
+        folder.subfolders.length > 0
+      );
+  };
+
+  const filteredProjectNodes = projectNodes
+    .map(project => ({
+      ...project,
+      folders: filterFolders(project.folders),
+      endpoints: filterEndpoints(project.endpoints),
+    }))
+    .filter(project =>
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.endpoints.length > 0 ||
+      project.folders.length > 0
+    );
 
   const toggleProjectExpansion = (projectId: string) => {
     setProjectNodes(prev =>
@@ -446,50 +484,47 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
     <div className="flex flex-col h-full bg-white dark:bg-gray-90">
       {/* Search Bar */}
       <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-        <Input
-          type="text"
-          placeholder="Search"
+        <SearchBar
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          variant="full-width"
-          leftAddon={
-            <Icon
-              icon="material-symbols:search"
-              className="h-4 w-4 text-gray-400 dark:text-gray-500"
-            />
-          }
-          rightAddon={
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
-              title="New Collection"
-            >
-              <Icon icon="material-symbols:add" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            </button>
-          }
+          onChange={setSearchQuery}
+          placeholder="Search"
         />
+      </div>
+
+      {/* Add Collection Button */}
+      <div className="px-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="w-full flex items-center justify-center gap-2 p-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+          title="New Collection"
+        >
+          <Icon icon="material-symbols:add" className="h-4 w-4" />
+          New Collection
+        </button>
       </div>
 
       {/* Project Tree */}
       <div className="flex-1 overflow-auto p-2">
-        {projectNodes.length === 0 ? (
+        {filteredProjectNodes.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <Icon
               icon="material-symbols:folder-outline"
               className="h-8 w-8 mx-auto mb-2"
             />
             <p className="text-sm">
-              {projects.length === 0 ? "No collections yet" : "Loading endpoints..."}
+              {projectNodes.length === 0
+                ? (projects.length === 0 ? "No collections yet" : "Loading endpoints...")
+                : "No results found"}
             </p>
-            {projects.length > 0 && (
+            {projects.length > 0 && projectNodes.length > 0 && (
               <p className="text-xs mt-1 text-gray-400">
-                Found {projects.length} project(s)
+                Try a different search term
               </p>
             )}
           </div>
         ) : (
           <div className="space-y-1">
-            {projectNodes.map(project => (
+            {filteredProjectNodes.map(project => (
               <div key={project.id}>
                 {/* Project Node */}
                 <div

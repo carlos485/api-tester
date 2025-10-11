@@ -1,10 +1,12 @@
 import { Icon } from "@iconify/react";
+import { useEffect, useRef } from "react";
 
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
   onSearch?: () => void;
   placeholder?: string;
+
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
@@ -13,8 +15,31 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   placeholder = "Search",
 }) => {
+  const debounceTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    if (onSearch) {
+      debounceTimerRef.current = setTimeout(() => {
+        onSearch();
+      }, 1000);
+    }
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [value, onSearch]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
     onSearch?.();
   };
 
@@ -28,7 +53,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           />
         </div>
         <input
-          type="search"
+          type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="block transition-all duration-300 w-full p-2.5 ps-10 pe-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-gray-500  dark:focus:ring-gray-300 focus:border-gray-500 dark:bg-gray-70 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
