@@ -23,7 +23,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       <div className="relative">
         <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
           <Icon
-            icon="material-symbols:search"
+            icon="line-md:search"
             className="w-4 h-4 text-gray-500 dark:text-gray-400"
           />
         </div>
@@ -36,7 +36,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         />
         <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
           <Icon
-            icon="material-symbols:search"
+            icon="line-md:plus"
             className="w-4 h-4 text-gray-500 dark:text-gray-400"
           />
         </div>
