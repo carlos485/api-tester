@@ -61,7 +61,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`block transition-all duration-300 w-full p-2.5 ${leftIcon ? 'ps-10' : 'ps-3'} ${rightIcon ? 'pe-10' : 'pe-3'} text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-gray-500  dark:focus:ring-gray-300 focus:border-gray-500 dark:bg-gray-70 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500`}
+          className={`block transition-all duration-300 w-full p-2.5 ${leftIcon ? 'ps-10' : 'ps-3'} ${rightIcon ? 'pe-10' : 'pe-3'} text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-gray-500  dark:focus:ring-gray-300 focus:border-gray-300 dark:bg-gray-70 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:border-gray-500`}
           placeholder={placeholder}
         />
         {rightIcon && (
