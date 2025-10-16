@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Icon } from "@iconify/react";
+import { Select } from "flowbite-react";
 import type { Environment } from '@/features/environments/types';
 
 interface EnvironmentSelectorProps {
@@ -30,27 +30,20 @@ const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
   }, [environments, selectedEnvironment, onEnvironmentChange]);
 
   return (
-    <div className="flex items-center gap-2">
-      <Icon icon="material-symbols:cloud" className="h-4 w-4 text-gray-600" />
-      <select
-        value={selectedEnvironment?.id || ""}
-        onChange={e => handleEnvironmentSelect(e.target.value)}
-        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block p-2.5 min-w-[150px]"
-        disabled={environments.length === 0}
-      >
-        <option value="">No Environment</option>
-        {environments.map(env => (
-          <option key={env.id} value={env.id}>
-            {env.name}
-          </option>
-        ))}
-      </select>
-      {selectedEnvironment && (
-        <span className="text-xs text-gray-500 truncate max-w-xs" title={selectedEnvironment.baseUrl}>
-          {selectedEnvironment.baseUrl}
-        </span>
-      )}
-    </div>
+    <Select
+      value={selectedEnvironment?.id || ""}
+      onChange={e => handleEnvironmentSelect(e.target.value)}
+      disabled={environments.length === 0}
+      sizing="sm"
+      className="min-w-[150px]"
+    >
+      <option value="">No Environment</option>
+      {environments.map(env => (
+        <option key={env.id} value={env.id}>
+          {env.name}
+        </option>
+      ))}
+    </Select>
   );
 };
 

@@ -153,17 +153,6 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
   return (
     <div className="mb-2">
       <form onSubmit={handleSubmit} className="space-y-2">
-        {/* Environment Selector */}
-        {environments.length > 0 && (
-          <div className="px-2">
-            <EnvironmentSelector
-              selectedEnvironment={selectedEnvironment}
-              onEnvironmentChange={onEnvironmentChange}
-              environments={environments}
-            />
-          </div>
-        )}
-
         {/* Request Bar */}
         <div className="flex gap-2 items-center bg-white rounded-lg p-1">
           {/* Method Selector */}

@@ -21,12 +21,12 @@ export const InputV2: React.FC<InputV2Props> = ({
   rightIcon,
 }) => {
   const debounceTimerRef = useRef<number | null>(null);
-  const baseStylesInput = "block transition-all duration-300 w-full p-2.5 text-sm text-gray-900 border rounded-lg";
+  const baseStylesInput = "block transition-all duration-300 p-2.5 text-sm text-gray-900 border rounded-lg";
 
   const variantStyles: Record<string, string> = {
-    default: "bg-gray-50 border-gray-300 focus:ring-gray-500 dark:focus:ring-gray-300 focus:border-gray-300 dark:bg-gray-70 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:border-gray-500",
+    default: "w-full bg-gray-50 border-gray-300 focus:ring-gray-500 dark:focus:ring-gray-300 focus:border-gray-300 dark:bg-gray-70 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:border-gray-500",
     'full-width': "w-full",
-    ghost: "bg-transparent border-transparent font-semibold hover:bg-gray-50 focus:bg-gray-50 focus:ring-gray-300 focus:border-gray-300 focus:font-normal dark:hover:bg-gray-800 dark:focus:bg-gray-800 dark:focus:ring-gray-300 dark:focus:border-gray-300 dark:text-white",
+    ghost: "w-auto bg-transparent border-transparent font-semibold hover:bg-gray-50 focus:bg-gray-50 focus:ring-gray-300 focus:border-gray-300 focus:font-normal dark:hover:bg-gray-800 dark:focus:bg-gray-800 dark:focus:ring-gray-300 dark:focus:border-gray-300 dark:text-white",
   };
 
   useEffect(() => {

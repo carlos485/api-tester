@@ -12,6 +12,7 @@ import { ProjectsSidebar } from '@/features/projects/components';
 import { UserMenu } from '@/features/auth/components';
 import { InputV2 } from '@/shared/components/ui';
 import { ProjectDetails } from '@/features/projects/components';
+import { EnvironmentSelector } from '@/features/environments/components';
 import { useAuth } from '@/features/auth/hooks';
 import { useProjects } from '@/features/projects/hooks';
 import { ProjectSelectionModal } from '@/features/projects/components';
@@ -917,41 +918,46 @@ const ApiTesterView: React.FC = () => {
                 <Tab key={tab.id} header={tabHeader} isTransient={tab.isTransient}>
                   {tab.type === 'request' ? (
                     <div className="flex flex-col h-full overflow-hidden">
-                      {/* Request Name and Save Button */}
-                      <div className="flex items-center gap-3 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-                        <div className="flex-1 flex flex-col gap-1.5">
-                          {tab.projectId && (() => {
-                            const project = projects.find(p => p.id === tab.projectId);
-                            return project ? (
-                              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                                <Icon icon={project.icon || "material-symbols:folder"} className="h-3 w-3" />
-                                <span>{project.name}</span>
-                              </div>
-                            ) : null;
-                          })()}
-                          <div className="flex items-center gap-2">
-                            <InputV2
-                              value={tab.name}
-                              onChange={value =>
-                                handleTabNameChange(tabIndex, value)
-                              }
-                              placeholder="Request name"
-                              variant="ghost"
-                            />
+                      {/* Collection Name */}
+                      {tab.projectId && (() => {
+                        const project = projects.find(p => p.id === tab.projectId);
+                        return project ? (
+                          <div className="flex items-center mt-3 gap-1 px-4 pt-2 text-xs text-gray-500 dark:text-gray-400">
+                            <Icon icon={project.icon || "material-symbols:folder"} className="h-3 w-3" />
+                            <span>{project.name}</span>
                           </div>
+                        ) : null;
+                      })()}
+
+                      {/* Request Name, Environment Selector and Save Button */}
+                      <div className="flex items-center justify-between gap-3 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                        <InputV2
+                          value={tab.name}
+                          onChange={value =>
+                            handleTabNameChange(tabIndex, value)
+                          }
+                          placeholder="Request name"
+                          variant="ghost"
+                        />
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <EnvironmentSelector
+                            selectedEnvironment={selectedEnvironments[tab.id] || null}
+                            onEnvironmentChange={(env: Environment | null) => handleEnvironmentChange(tab.id, env)}
+                            environments={getCurrentTabEnvironments()}
+                          />
+                          <button
+                            onClick={() => handleSaveEndpoint(tabIndex)}
+                            disabled={savingTab === tab.id}
+                            className={`p-1.5 transition-colors text-xl border-2 border-transparent focus:outline-none rounded focus:ring-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                              tab.endpointId
+                                ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900"
+                                : "text-gray-500 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                            }`}
+                            title={tab.endpointId ? "Update endpoint" : "Save as new endpoint"}
+                          >
+                            <Icon icon={savingTab === tab.id ? "line-md:loading-loop" : "uil:save"} />
+                          </button>
                         </div>
-                        <button
-                          onClick={() => handleSaveEndpoint(tabIndex)}
-                          disabled={savingTab === tab.id}
-                          className={`p-1.5 transition-colors text-xl border-2 border-transparent focus:outline-none rounded focus:ring-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-                            tab.endpointId
-                              ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900"
-                              : "text-gray-500 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
-                          }`}
-                          title={tab.endpointId ? "Update endpoint" : "Save as new endpoint"}
-                        >
-                          <Icon icon={savingTab === tab.id ? "line-md:loading-loop" : "uil:save"} />
-                        </button>
                       </div>
 
                       {/* Quick Request Bar */}
