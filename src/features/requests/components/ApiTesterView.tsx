@@ -918,15 +918,28 @@ const ApiTesterView: React.FC = () => {
                   {tab.type === 'request' ? (
                     <div className="flex flex-col h-full overflow-hidden">
                       {/* Request Name and Save Button */}
-                      <div className="flex items-center gap-3 px-4 py-2">
-                        <InputV2
-                          value={tab.name}
-                          variant="ghost"
-                          onChange={value =>
-                            handleTabNameChange(tabIndex, value)
-                          }
-                          placeholder="Request name"
-                        />
+                      <div className="flex items-center gap-3 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex-1 flex flex-col gap-1.5">
+                          {tab.projectId && (() => {
+                            const project = projects.find(p => p.id === tab.projectId);
+                            return project ? (
+                              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                <Icon icon={project.icon || "material-symbols:folder"} className="h-3 w-3" />
+                                <span>{project.name}</span>
+                              </div>
+                            ) : null;
+                          })()}
+                          <div className="flex items-center gap-2">
+                            <InputV2
+                              value={tab.name}
+                              onChange={value =>
+                                handleTabNameChange(tabIndex, value)
+                              }
+                              placeholder="Request name"
+                              variant="ghost"
+                            />
+                          </div>
+                        </div>
                         <button
                           onClick={() => handleSaveEndpoint(tabIndex)}
                           disabled={savingTab === tab.id}
