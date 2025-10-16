@@ -41,6 +41,7 @@ const availableIcons = [
   "mdi:circle-slice-8",
   "mdi:cloud",
   "streamline-ultimate:crypto-encryption-key-bold",
+  "ep:platform",
 ];
 
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({

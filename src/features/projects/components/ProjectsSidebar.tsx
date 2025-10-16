@@ -493,13 +493,13 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
       </div>
 
       {/* Add Collection Button */}
-      <div className="px-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+      <div className="border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={() => setShowCreateModal(true)}
           className="w-full flex items-center justify-center gap-2 p-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
           title="New Collection"
         >
-          <Icon icon="material-symbols:add" className="h-4 w-4" />
+          <Icon icon="line-md:plus" className="h-4 w-4" />
           New Collection
         </button>
       </div>
