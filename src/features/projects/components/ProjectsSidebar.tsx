@@ -617,7 +617,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                         key={`${endpoint.projectId}-${endpoint.id}`}
                         className={`flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer group relative ${
                           selectedEndpointId === endpoint.id
-                            ? "bg-blue-50 dark:bg-blue-900/30"
+                            ? "bg-blue-50 dark:bg-gray-800"
                             : ""
                         }`}
                         onClick={() => onEndpointSelect(endpoint)}
