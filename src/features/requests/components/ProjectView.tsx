@@ -618,7 +618,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   }, [isResizing]);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 flex-shrink-0 h-14">
         <div className="h-full px-4 flex items-center justify-between">

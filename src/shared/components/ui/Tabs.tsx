@@ -38,7 +38,7 @@ const tabVariants = {
     container: "border-b border-gray-300 dark:border-gray-700",
     nav: "-mb-px flex space-x-8",
     tab: "relative py-2.5 px-3 border-b-2 font-medium text-sm transition-colors duration-200 mr-0 before:content-[''] before:absolute before:left-0 before:top-1 before:bottom-1 before:w-px after:content-[''] after:absolute after:right-0 after:top-1 after:bottom-1 after:w-px",
-    activeTab: "before:bg-gray-300 after:bg-gray-300 dark:before:bg-gray-700 dark:after:bg-gray-700 border-b-blue-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800",
+    activeTab: "before:bg-gray-300 after:bg-gray-300 dark:before:bg-gray-700 dark:after:bg-gray-700 border-b-blue-500 text-gray-900 dark:text-white bg-white dark:bg-gray-50",
     inactiveTab:
       "before:bg-transparent after:bg-transparent border-transparent text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400",
   },
