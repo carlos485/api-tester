@@ -5,7 +5,6 @@ import type { ApiRequest } from '@/features/requests/types';
 import { RequestMethodSelect } from '@/features/requests/components';
 import type { HttpMethod } from '@/shared/types';
 import { parseCurl, isCurlCommand } from '@/shared/utils';
-import { EnvironmentSelector } from '@/features/environments/components';
 import { VariableHighlightedInput } from '@/shared/components/ui';
 
 interface QuickRequestBarProps {
@@ -21,9 +20,7 @@ interface QuickRequestBarProps {
 
 const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
   onSendRequest,
-  environments,
   selectedEnvironment,
-  onEnvironmentChange,
   initialMethod = "GET",
   initialUrl = "",
   onRequestChange,

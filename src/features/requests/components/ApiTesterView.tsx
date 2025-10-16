@@ -95,7 +95,7 @@ const ApiTesterView: React.FC = () => {
             id: tab.id,
             name: tab.name,
             type: 'project' as const,
-            project: null as any, // Will be resolved later when projects are loaded
+            project: null as unknown as Project, // Will be resolved later when projects are loaded
             projectId: tab.projectId,
             isTransient: tab.isTransient || false,
           };
@@ -137,7 +137,7 @@ const ApiTesterView: React.FC = () => {
       setTabs(prevTabs =>
         prevTabs.map(tab => {
           if (tab.type === 'project' && !tab.project) {
-            const projectId = (tab as any).projectId;
+            const projectId = (tab as ProjectTab & { projectId?: string }).projectId;
             const project = projects.find(p => p.id === projectId);
             if (project) {
               return {
@@ -163,7 +163,7 @@ const ApiTesterView: React.FC = () => {
             id: tab.id,
             name: tab.name,
             type: 'project' as const,
-            projectId: tab.project?.id || (tab as any).projectId, // Handle case where project might not be loaded yet
+            projectId: tab.project?.id || (tab as ProjectTab & { projectId?: string }).projectId || '', // Handle case where project might not be loaded yet
             isTransient: tab.isTransient || false,
           };
         } else {
@@ -275,7 +275,7 @@ const ApiTesterView: React.FC = () => {
       const globalVariables = currentProject?.collectionVariables || {};
 
       // Interpolate variables in URL, headers, query params, and body
-      let interpolatedUrl = interpolateVariables(request.url, tabEnvironment, globalVariables);
+      const interpolatedUrl = interpolateVariables(request.url, tabEnvironment, globalVariables);
 
       // Construct base URL with environment base URL if selected
       let baseUrl = interpolatedUrl;
@@ -539,7 +539,7 @@ const ApiTesterView: React.FC = () => {
       const endpointData = {
         projectId: projectId,
         name: tab.name || "Untitled Request",
-        method: tab.request.method as any,
+        method: tab.request.method as "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
         url: tab.request.url || "",
         description: tab.endpointId
           ? `Updated from ${tab.name || "Untitled Request"}`

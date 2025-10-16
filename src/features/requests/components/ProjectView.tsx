@@ -183,7 +183,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
       const globalVariables = project.collectionVariables || {};
 
       // Interpolate URL
-      let interpolatedUrl = interpolateVariables(request.url, selectedEnvironment, globalVariables);
+      const interpolatedUrl = interpolateVariables(request.url, selectedEnvironment, globalVariables);
 
       // Construct full URL for making the HTTP request
       // This concatenation is ONLY for the request, NOT for updating state

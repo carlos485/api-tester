@@ -8,7 +8,8 @@
       "Bash(cat:*)",
       "Bash(pnpm dev:*)",
       "Bash(pnpm add:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(pnpm lint:*)"
     ],
     "deny": [],
     "ask": []

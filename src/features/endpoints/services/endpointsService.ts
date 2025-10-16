@@ -28,7 +28,7 @@ const convertToTimestamp = (date: Date): Timestamp => {
 
 export class EndpointsService {
   // Debug method to get all endpoints
-  static async getAllEndpoints(): Promise<any[]> {
+  static async getAllEndpoints(): Promise<Record<string, unknown>[]> {
     try {
       const querySnapshot = await getDocs(collection(db, ENDPOINTS_COLLECTION));
       return querySnapshot.docs.map((doc) => ({

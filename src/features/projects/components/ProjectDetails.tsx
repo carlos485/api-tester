@@ -56,24 +56,13 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
   onProjectUpdate,
   onProjectDelete,
 }) => {
-  // Early return if project is not loaded yet
-  if (!project) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-500">Loading project...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Initialize all hooks before any conditional returns
   const [editingName, setEditingName] = useState(false);
   const [editingDescription, setEditingDescription] = useState(false);
   const [showIconSelector, setShowIconSelector] = useState(false);
-  const [localName, setLocalName] = useState(project.name);
+  const [localName, setLocalName] = useState(project?.name || "");
   const [localDescription, setLocalDescription] = useState(
-    project.description || ""
+    project?.description || ""
   );
   const [isUpdating, setIsUpdating] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
@@ -84,10 +73,11 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
   const [environmentSearchQuery, setEnvironmentSearchQuery] = useState("");
   const [endpointSearchQuery, setEndpointSearchQuery] = useState("");
 
-  const { endpoints, folders } = useEndpoints(project.id);
+  const { endpoints, folders } = useEndpoints(project?.id || "");
 
   // Convert project variables to array format for table display
   const variablesToArray = (): VariableRow[] => {
+    if (!project) return [];
     const variables: VariableRow[] = [];
 
     // Add collection variables first
@@ -140,6 +130,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
   });
 
   const [environmentRows, setEnvironmentRows] = useState<EnvironmentRow[]>(() => {
+    if (!project) return [];
     const existingEnvironments = project.environments.map(env => ({
       id: env.id,
       name: env.name,
@@ -157,6 +148,75 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
       },
     ];
   });
+
+  // Update variable rows when project changes (only on initial load)
+  useEffect(() => {
+    if (!project) return;
+    const newVariables = variablesToArray();
+    setVariableRows(current => {
+      // Only update if we don't have any variables yet (initial load)
+      if (
+        current.length <= 1 &&
+        current[0]?.name === "" &&
+        current[0]?.value === ""
+      ) {
+        return [
+          ...newVariables,
+          {
+            id: `new-variable-${Date.now()}`,
+            name: "",
+            value: "",
+            description: "",
+            environment: "GLOBAL",
+            enabled: true,
+          },
+        ];
+      }
+      return current;
+    });
+  }, [project?.id, variablesToArray]); // Only run when project ID changes, not on every environment update
+
+  // Update environment rows when project changes (only on initial load)
+  useEffect(() => {
+    if (!project) return;
+    const newEnvironments = project.environments.map(env => ({
+      id: env.id,
+      name: env.name,
+      description: "",
+      baseUrl: env.baseUrl,
+    }));
+    setEnvironmentRows(current => {
+      // Only update if we don't have any environments yet (initial load)
+      if (
+        current.length <= 1 &&
+        current[0]?.name === "" &&
+        current[0]?.baseUrl === ""
+      ) {
+        return [
+          ...newEnvironments,
+          {
+            id: `new-environment-${Date.now()}`,
+            name: "",
+            description: "",
+            baseUrl: "",
+          },
+        ];
+      }
+      return current;
+    });
+  }, [project?.id, project?.environments]); // Only run when project ID changes
+
+  // Early return if project is not loaded yet - AFTER all hooks
+  if (!project) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading project...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleVariableChange = (
     id: string,
@@ -285,7 +345,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
     setIsSaving(true);
     try {
       // Prepare all updates
-      const updates: any = {};
+      const updates: Partial<Project> = {};
 
       // Check if name changed
       if (localName.trim() !== project.name) {
@@ -364,61 +424,6 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
       setIsDeleting(false);
     }
   };
-
-  // Update variable rows when project changes (only on initial load)
-  useEffect(() => {
-    const newVariables = variablesToArray();
-    setVariableRows(current => {
-      // Only update if we don't have any variables yet (initial load)
-      if (
-        current.length <= 1 &&
-        current[0]?.name === "" &&
-        current[0]?.value === ""
-      ) {
-        return [
-          ...newVariables,
-          {
-            id: `new-variable-${Date.now()}`,
-            name: "",
-            value: "",
-            description: "",
-            environment: "GLOBAL",
-            enabled: true,
-          },
-        ];
-      }
-      return current;
-    });
-  }, [project.id]); // Only run when project ID changes, not on every environment update
-
-  // Update environment rows when project changes (only on initial load)
-  useEffect(() => {
-    const newEnvironments = project.environments.map(env => ({
-      id: env.id,
-      name: env.name,
-      description: "",
-      baseUrl: env.baseUrl,
-    }));
-    setEnvironmentRows(current => {
-      // Only update if we don't have any environments yet (initial load)
-      if (
-        current.length <= 1 &&
-        current[0]?.name === "" &&
-        current[0]?.baseUrl === ""
-      ) {
-        return [
-          ...newEnvironments,
-          {
-            id: `new-environment-${Date.now()}`,
-            name: "",
-            description: "",
-            baseUrl: "",
-          },
-        ];
-      }
-      return current;
-    });
-  }, [project.id]); // Only run when project ID changes
 
   const handleNameSave = () => {
     // Just stop editing, changes will be saved with the save button
