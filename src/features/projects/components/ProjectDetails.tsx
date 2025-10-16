@@ -174,7 +174,8 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
       }
       return current;
     });
-  }, [project?.id, variablesToArray]); // Only run when project ID changes, not on every environment update
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id]); // Only run when project ID changes, not on every environment update
 
   // Update environment rows when project changes (only on initial load)
   useEffect(() => {
@@ -186,11 +187,12 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
       baseUrl: env.baseUrl,
     }));
     setEnvironmentRows(current => {
-      // Only update if we don't have any environments yet (initial load)
+      // Only update if we don't have any environments yet (initial load or empty)
       if (
-        current.length <= 1 &&
+        current.length === 0 ||
+        (current.length <= 1 &&
         current[0]?.name === "" &&
-        current[0]?.baseUrl === ""
+        current[0]?.baseUrl === "")
       ) {
         return [
           ...newEnvironments,
@@ -204,7 +206,8 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
       }
       return current;
     });
-  }, [project?.id, project?.environments]); // Only run when project ID changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id]); // Only run when project ID changes
 
   // Early return if project is not loaded yet - AFTER all hooks
   if (!project) {
