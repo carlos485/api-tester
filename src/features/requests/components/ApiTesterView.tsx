@@ -10,7 +10,7 @@ import { ResponseViewer } from '@/features/requests/components';
 import { Tabs, Tab } from '@/shared/components/ui';
 import { ProjectsSidebar } from '@/features/projects/components';
 import { UserMenu } from '@/features/auth/components';
-import { Input } from '@/shared/components/ui';
+import { InputV2 } from '@/shared/components/ui';
 import { ProjectDetails } from '@/features/projects/components';
 import { useAuth } from '@/features/auth/hooks';
 import { useProjects } from '@/features/projects/hooks';
@@ -70,7 +70,6 @@ const ApiTesterView: React.FC = () => {
   const [selectedEndpointId, setSelectedEndpointId] = useState<string>();
   const [isRestoredFromSession, setIsRestoredFromSession] = useState(false);
   const [shouldActivateLastTab, setShouldActivateLastTab] = useState(false);
-  const [editingTabName, setEditingTabName] = useState<string | null>(null);
   const [selectedEnvironments, setSelectedEnvironments] = useState<Record<string, Environment | null>>({});
   const [savingTab, setSavingTab] = useState<string | null>(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
@@ -919,20 +918,14 @@ const ApiTesterView: React.FC = () => {
                   {tab.type === 'request' ? (
                     <div className="flex flex-col h-full overflow-hidden">
                       {/* Request Name and Save Button */}
-                      <div className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-gray-800">
-                        <Input
-                          type="text"
+                      <div className="flex items-center gap-3 px-4 py-2">
+                        <InputV2
                           value={tab.name}
-                          onChange={e =>
-                            handleTabNameChange(tabIndex, e.target.value)
+                          variant="ghost"
+                          onChange={value =>
+                            handleTabNameChange(tabIndex, value)
                           }
-                          onFocus={() => setEditingTabName(tab.id)}
-                          onBlur={() => setEditingTabName(null)}
-                          className={`text-sm text-gray-700 dark:text-gray-300 flex-1 ${
-                            editingTabName === tab.id
-                              ? "border border-gray-300 dark:border-gray-600"
-                              : "border-transparent hover:border hover:border-gray-200 dark:hover:border-gray-600"
-                          }`}
+                          placeholder="Request name"
                         />
                         <button
                           onClick={() => handleSaveEndpoint(tabIndex)}
@@ -949,7 +942,7 @@ const ApiTesterView: React.FC = () => {
                       </div>
 
                       {/* Quick Request Bar */}
-                      <div className="px-4 py-3 bg-white dark:bg-gray-800">
+                      <div className="px-4 py-3">
                         <QuickRequestBar
                           onSendRequest={handleQuickRequest}
                           environments={getCurrentTabEnvironments()}
@@ -967,7 +960,7 @@ const ApiTesterView: React.FC = () => {
                       </div>
 
                       {/* Request Configuration Tabs */}
-                      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                      <div className="border-b border-gray-200 dark:border-gray-700">
                         <RequestTabs
                           request={tab.request}
                           onRequestChange={updatedRequest =>

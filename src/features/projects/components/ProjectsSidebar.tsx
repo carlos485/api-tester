@@ -5,7 +5,7 @@ import type { Endpoint, EndpointFolder } from '@/features/endpoints/types';
 import { useAuth } from '@/features/auth/hooks';
 import { useProjects } from '@/features/projects/hooks';
 import { CreateProjectModal } from '@/features/projects/components';
-import { ConfirmationModal, SearchBar } from '@/shared/components/ui';
+import { ConfirmationModal, InputV2 } from '@/shared/components/ui';
 
 interface ProjectsSidebarProps {
   onEndpointSelect: (endpoint: Endpoint & { projectId: string }) => void;
@@ -484,7 +484,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
     <div className="flex flex-col h-full bg-white dark:bg-gray-90">
       {/* Search Bar */}
       <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-        <SearchBar
+        <InputV2
           value={searchQuery}
           onChange={setSearchQuery}
           placeholder="Search"

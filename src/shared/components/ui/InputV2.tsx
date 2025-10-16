@@ -1,17 +1,19 @@
 import { Icon } from "@iconify/react";
 import { useEffect, useRef } from "react";
 
-interface SearchBarProps {
+interface InputV2Props {
   value: string;
   onChange: (value: string) => void;
   onSearch?: () => void;
+  variant?: string;
   placeholder?: string;
   leftIcon?: string;
   rightIcon?: string;
 }
 
-export const SearchBar: React.FC<SearchBarProps> = ({
+export const InputV2: React.FC<InputV2Props> = ({
   value,
+  variant = 'default',
   onChange,
   onSearch,
   placeholder = "Search",
@@ -19,6 +21,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   rightIcon,
 }) => {
   const debounceTimerRef = useRef<number | null>(null);
+  const baseStylesInput = "block transition-all duration-300 w-full p-2.5 text-sm text-gray-900 border rounded-lg";
+
+  const variantStyles: Record<string, string> = {
+    default: "bg-gray-50 border-gray-300 focus:ring-gray-500 dark:focus:ring-gray-300 focus:border-gray-300 dark:bg-gray-70 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:border-gray-500",
+    'full-width': "w-full",
+    ghost: "bg-transparent border-transparent font-semibold hover:bg-gray-50 focus:bg-gray-50 focus:ring-gray-300 focus:border-gray-300 focus:font-normal dark:hover:bg-gray-800 dark:focus:bg-gray-800 dark:focus:ring-gray-300 dark:focus:border-gray-300 dark:text-white",
+  };
 
   useEffect(() => {
     if (debounceTimerRef.current) {
@@ -61,7 +70,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`block transition-all duration-300 w-full p-2.5 ${leftIcon ? 'ps-10' : 'ps-3'} ${rightIcon ? 'pe-10' : 'pe-3'} text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-gray-500  dark:focus:ring-gray-300 focus:border-gray-300 dark:bg-gray-70 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:border-gray-500`}
+          className={`${baseStylesInput} ${variantStyles[variant]} ${leftIcon ? 'ps-10' : 'ps-3'} ${rightIcon ? 'pe-10' : 'pe-3'}`}
           placeholder={placeholder}
         />
         {rightIcon && (
