@@ -7,6 +7,7 @@ import type { Project } from '@/features/projects/types';
 import { QuickRequestBar } from '@/features/requests/components';
 import { RequestTabs } from '@/features/requests/components';
 import { ResponseViewer } from '@/features/requests/components';
+import { SaveEndpointButton } from '@/features/requests/components';
 import { Tabs, Tab } from '@/shared/components/ui';
 import { ProjectsSidebar } from '@/features/projects/components';
 import { UserMenu } from '@/features/auth/components';
@@ -945,18 +946,12 @@ const ApiTesterView: React.FC = () => {
                             onEnvironmentChange={(env: Environment | null) => handleEnvironmentChange(tab.id, env)}
                             environments={getCurrentTabEnvironments()}
                           />
-                          <button
+                          <SaveEndpointButton
                             onClick={() => handleSaveEndpoint(tabIndex)}
                             disabled={savingTab === tab.id}
-                            className={`p-1.5 transition-colors text-xl border-2 border-transparent focus:outline-none rounded focus:ring-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-                              tab.endpointId
-                                ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900"
-                                : "text-gray-500 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
-                            }`}
-                            title={tab.endpointId ? "Update endpoint" : "Save as new endpoint"}
-                          >
-                            <Icon icon={savingTab === tab.id ? "line-md:loading-loop" : "uil:save"} />
-                          </button>
+                            isSaving={savingTab === tab.id}
+                            hasEndpoint={!!tab.endpointId}
+                          />
                         </div>
                       </div>
 

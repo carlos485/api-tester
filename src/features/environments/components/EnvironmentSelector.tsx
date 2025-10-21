@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { Select } from "flowbite-react";
 import type { Environment } from '@/features/environments/types';
 
 interface EnvironmentSelectorProps {
