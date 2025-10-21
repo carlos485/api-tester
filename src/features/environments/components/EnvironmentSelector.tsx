@@ -30,20 +30,22 @@ const EnvironmentSelector: React.FC<EnvironmentSelectorProps> = ({
   }, [environments, selectedEnvironment, onEnvironmentChange]);
 
   return (
-    <Select
-      value={selectedEnvironment?.id || ""}
-      onChange={e => handleEnvironmentSelect(e.target.value)}
-      disabled={environments.length === 0}
-      sizing="sm"
-      className="min-w-[150px]"
-    >
-      <option value="">No Environment</option>
-      {environments.map(env => (
-        <option key={env.id} value={env.id}>
-          {env.name}
-        </option>
-      ))}
-    </Select>
+    <div className="relative min-w-0 flex-shrink-0">
+      <select
+        id="environment-select"
+        value={selectedEnvironment?.id || ""}
+        onChange={(e) => handleEnvironmentSelect(e.target.value)}
+        className="block min-w-[150px] max-w-[300px] w-auto p-2 pr-8 text-sm text-gray-900 border border-transparent rounded-lg bg-transparent hover:bg-gray-50 focus:ring-gray-300 focus:border-gray-300 dark:hover:bg-gray-50 dark:placeholder-gray-400 dark:text-white dark:focus:bg-gray-50 dark:focus:ring-gray-300 dark:focus:border-gray-300 cursor-pointer transition-all duration-300 appearance-none truncate"
+        title={selectedEnvironment?.name || "No environment"}
+      >
+        <option value="">No environment</option>
+        {environments.map(env => (
+          <option key={env.id} value={env.id}>
+            {env.name}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 };
 
