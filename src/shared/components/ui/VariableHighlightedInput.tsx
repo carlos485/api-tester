@@ -63,11 +63,11 @@ const VariableHighlightedInput: React.FC<VariableHighlightedInputProps> = ({
   };
 
   return (
-    <div className="relative flex-1">
+    <div className="relative flex-1 min-w-0">
       {/* Highlight layer (positioned behind input) */}
       <div
         ref={highlightRef}
-        className="absolute inset-0 pointer-events-none overflow-hidden text-sm px-3 py-2.5 whitespace-nowrap"
+        className="absolute inset-0 pointer-events-none overflow-hidden text-sm pr-3 py-2.5 whitespace-nowrap"
         style={{
           color: value && value.match(/(\{\{[^}]+\}\}|\$\{[^}]+\})/) ? 'transparent' : '#111827'
         }}
@@ -82,7 +82,7 @@ const VariableHighlightedInput: React.FC<VariableHighlightedInputProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onPaste={onPaste}
-        className={`relative text-sm border-0 focus:outline-none focus:ring-0 p-0 min-w-0 px-3 py-2.5 ${className}`}
+        className={`relative w-full text-sm border-0 focus:outline-none focus:ring-0 p-0 min-w-0 pr-3 py-2.5 ${className}`}
         style={{
           background: 'transparent',
           color: value && value.match(/(\{\{[^}]+\}\}|\$\{[^}]+\})/) ? 'transparent' : '#111827',

@@ -138,20 +138,8 @@ button {
     background-color: #000;
   }
 
-  .dark\:bg-gray-50 {
-    background-color: #333333;
-  }
-
-  .dark\:hover\:bg-gray-50:hover {
-    background-color: #333333;
-  }
-
-  .dark\:focus\:bg-gray-50:focus {
-    background-color: #333333;
-  }
-
   .dark\:bg-gray-60 {
-    background-color: #262626;
+    background-color: #333333;
   }
 
   .dark\:bg-gray-70 {
