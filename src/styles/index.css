@@ -126,8 +126,9 @@ button {
     background-color: #292f3b;
   }
 
-  .dark\:hover\:bg-gray-60:hover {
-    background-color: #4f5965;
+  .dark\:hover\:bg-gray-60:hover,
+  .dark\:focus\:bg-gray-60:focus {
+    background-color: #353b43;
   }
 
   .bg-gray-90 {

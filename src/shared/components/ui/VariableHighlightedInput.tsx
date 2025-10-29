@@ -67,9 +67,9 @@ const VariableHighlightedInput: React.FC<VariableHighlightedInputProps> = ({
       {/* Highlight layer (positioned behind input) */}
       <div
         ref={highlightRef}
-        className="absolute inset-0 pointer-events-none overflow-hidden text-sm pr-3 py-2.5 whitespace-nowrap"
+        className="absolute inset-0 pointer-events-none overflow-hidden text-sm pr-3 py-2.5 whitespace-nowrap text-gray-900 dark:text-white"
         style={{
-          color: value && value.match(/(\{\{[^}]+\}\}|\$\{[^}]+\})/) ? 'transparent' : '#111827'
+          color: value && value.match(/(\{\{[^}]+\}\}|\$\{[^}]+\})/) ? 'transparent' : undefined
         }}
       >
         {highlightText(value)}
@@ -82,11 +82,10 @@ const VariableHighlightedInput: React.FC<VariableHighlightedInputProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onPaste={onPaste}
-        className={`relative w-full text-sm border-0 focus:outline-none focus:ring-0 p-0 min-w-0 pr-3 py-2.5 ${className}`}
+        className={`relative w-full text-sm border-0 focus:outline-none focus:ring-0 p-0 min-w-0 pr-3 py-2.5 text-gray-900 dark:text-white caret-gray-900 dark:caret-white ${className}`}
         style={{
           background: 'transparent',
-          color: value && value.match(/(\{\{[^}]+\}\}|\$\{[^}]+\})/) ? 'transparent' : '#111827',
-          caretColor: '#111827',
+          color: value && value.match(/(\{\{[^}]+\}\}|\$\{[^}]+\})/) ? 'transparent' : undefined,
         }}
         placeholder={placeholder}
         required={required}
