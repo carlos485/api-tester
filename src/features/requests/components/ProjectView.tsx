@@ -379,7 +379,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
       setActiveTabIndex(existingTabIndex);
     } else {
       // Check if there's only one tab that is empty and not associated with any endpoint
-      const shouldReplaceEmptyTab = 
+      const shouldReplaceEmptyTab =
         requestTabs.length === 1 &&
         !requestTabs[0].endpointId &&
         !requestTabs[0].request.url &&
@@ -481,11 +481,11 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   const handleDeleteEndpoint = async (endpointId: string) => {
     try {
       await deleteEndpoint(endpointId);
-      
+
       // Close any tabs that were using this deleted endpoint
       setRequestTabs(prev => {
         const filteredTabs = prev.filter(tab => tab.endpointId !== endpointId);
-        
+
         // If we removed tabs and the active index is now invalid, adjust it
         if (filteredTabs.length > 0 && activeTabIndex >= filteredTabs.length) {
           setActiveTabIndex(filteredTabs.length - 1);
@@ -501,10 +501,10 @@ const ProjectView: React.FC<ProjectViewProps> = ({
           setActiveTabIndex(0);
           return [defaultTab];
         }
-        
+
         return filteredTabs;
       });
-      
+
       console.log("Endpoint deleted successfully!");
     } catch (error) {
       console.error("Failed to delete endpoint:", error);
@@ -620,7 +620,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 flex-shrink-0 h-14">
+      <header className="border-b border-gray-200 dark:border-gray-700 flex-shrink-0 h-14">
         <div className="h-full px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -644,7 +644,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div
-          className="border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 overflow-y-auto relative"
+          className="border-r border-gray-200 dark:border-gray-700 flex-shrink-0 overflow-y-auto relative"
           style={{ width: `${sidebarWidth}px` }}
         >
           <Sidebar
@@ -658,9 +658,8 @@ const ProjectView: React.FC<ProjectViewProps> = ({
           {/* Resize handle */}
           <div
             onMouseDown={handleMouseDown}
-            className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 transition-colors ${
-              isResizing ? 'bg-blue-500' : ''
-            }`}
+            className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 transition-colors ${isResizing ? 'bg-blue-500' : ''
+              }`}
           />
         </div>
 
@@ -686,7 +685,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
               <Tab key={tab.id} header={tab.name}>
                 <div className="flex flex-col h-full overflow-hidden">
                   {/* Request Name and Save Button */}
-                  <div className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-3 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
                     <Input
                       type="text"
                       value={tab.name}
@@ -695,20 +694,18 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                       }
                       onFocus={() => setEditingTabName(tab.id)}
                       onBlur={() => setEditingTabName(null)}
-                      className={`text-sm text-gray-700 dark:text-gray-300 flex-1 ${
-                        editingTabName === tab.id
-                          ? "border border-gray-300 dark:border-gray-600"
-                          : "border-0 hover:border hover:border-gray-200 dark:hover:border-gray-600"
-                      }`}
+                      className={`text-sm text-gray-700 dark:text-gray-300 flex-1 ${editingTabName === tab.id
+                        ? "border border-gray-300 dark:border-gray-600"
+                        : "border-0 hover:border hover:border-gray-200 dark:hover:border-gray-600"
+                        }`}
                     />
                     <button
                       onClick={() => handleSaveEndpoint(tabIndex)}
                       disabled={savingTab === tab.id}
-                      className={`p-1.5 transition-colors text-xl border-2 border-transparent focus:outline-none rounded focus:ring-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-                        tab.endpointId
-                          ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900"
-                          : "text-gray-500 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
-                      }`}
+                      className={`p-1.5 transition-colors text-xl border-2 border-transparent focus:outline-none rounded focus:ring-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed ${tab.endpointId
+                        ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900"
+                        : "text-gray-500 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                        }`}
                       title={tab.endpointId ? "Update endpoint" : "Save as new endpoint"}
                     >
                       <Icon icon={savingTab === tab.id ? "line-md:loading-loop" : "uil:save"} />
@@ -716,7 +713,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                   </div>
 
                   {/* Quick Request Bar */}
-                  <div className="px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                  <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                     <QuickRequestBar
                       onSendRequest={handleQuickRequest}
                       environments={project.environments}
@@ -734,7 +731,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                   </div>
 
                   {/* Request Configuration Tabs */}
-                  <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                  <div className="border-b border-gray-200 dark:border-gray-700">
                     <RequestTabs
                       request={tab.request}
                       onRequestChange={updatedRequest =>

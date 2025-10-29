@@ -227,10 +227,10 @@ const ApiTesterView: React.FC = () => {
   // Helper function to replace transient tab or add new tab
   const addOrReplaceTab = (newTab: Tab) => {
     const transientIndex = findTransientTabIndex();
-    
+
     if (transientIndex !== -1) {
       // Replace the transient tab
-      setTabs(prev => 
+      setTabs(prev =>
         prev.map((tab, index) => index === transientIndex ? newTab : tab)
       );
       setActiveTabIndex(transientIndex);
@@ -661,7 +661,7 @@ const ApiTesterView: React.FC = () => {
       setActiveTabIndex(existingTabIndex);
     } else {
       // Check if there's only one tab that is empty and not associated with any endpoint
-      const shouldReplaceEmptyTab = 
+      const shouldReplaceEmptyTab =
         tabs.length === 1 &&
         tabs[0].type === 'request' &&
         !tabs[0].endpointId &&
@@ -755,11 +755,11 @@ const ApiTesterView: React.FC = () => {
   ) => {
     // Confirm the tab when changes are made
     confirmTab(tabIndex);
-    
+
     setTabs(prev =>
       prev.map((tab, index) =>
-        index === tabIndex && tab.type === 'request' 
-          ? { ...tab, request: updatedRequest, isTransient: false } 
+        index === tabIndex && tab.type === 'request'
+          ? { ...tab, request: updatedRequest, isTransient: false }
           : tab
       )
     );
@@ -768,7 +768,7 @@ const ApiTesterView: React.FC = () => {
   const handleTabNameChange = (tabIndex: number, newName: string) => {
     // Confirm the tab when name is changed
     confirmTab(tabIndex);
-    
+
     setTabs(prev =>
       prev.map((tab, index) =>
         index === tabIndex ? { ...tab, name: newName, isTransient: false } : tab
@@ -843,7 +843,7 @@ const ApiTesterView: React.FC = () => {
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 dark:bg-gray-90 dark:border-gray-700 flex-shrink-0 h-14">
+      <header className="border-b border-gray-200 dark:border-gray-700 flex-shrink-0 h-14">
         <div className="h-full px-4 flex items-center justify-between">
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white">API Tester</h1>
           <UserMenu />
@@ -854,7 +854,7 @@ const ApiTesterView: React.FC = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div
-          className="border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 overflow-y-auto relative"
+          className="border-r border-gray-200 dark:border-gray-700 flex-shrink-0 overflow-y-auto relative"
           style={{ width: `${sidebarWidth}px` }}
         >
           <ProjectsSidebar
@@ -866,9 +866,8 @@ const ApiTesterView: React.FC = () => {
           {/* Resize handle */}
           <div
             onMouseDown={handleMouseDown}
-            className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 transition-colors ${
-              isResizing ? 'bg-blue-500' : ''
-            }`}
+            className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 transition-colors ${isResizing ? 'bg-blue-500' : ''
+              }`}
           />
         </div>
 

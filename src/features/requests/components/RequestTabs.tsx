@@ -84,7 +84,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
         headers[row.key.trim()] = row.value.trim();
       }
     });
-    
+
     onRequestChange({
       ...request,
       headers,
@@ -99,7 +99,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
         queryParams[row.key.trim()] = row.value.trim();
       }
     });
-    
+
     onRequestChange({
       ...request,
       queryParams,
@@ -108,10 +108,10 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
 
   const handleHeaderChange = (id: string, field: keyof HeaderRow, value: string | boolean) => {
     setHeaderRows(prev => {
-      const newRows = prev.map(row => 
+      const newRows = prev.map(row =>
         row.id === id ? { ...row, [field]: value } : row
       );
-      
+
       // If the last row (empty row) is being edited, add a new empty row
       const lastRow = newRows[newRows.length - 1];
       if (lastRow && (lastRow.key || lastRow.value) && lastRow.id.startsWith('new-header')) {
@@ -123,7 +123,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
           enabled: true,
         });
       }
-      
+
       updateRequestHeaders(newRows);
       return newRows;
     });
@@ -131,10 +131,10 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
 
   const handleParamChange = (id: string, field: keyof ParamRow, value: string | boolean) => {
     setParamRows(prev => {
-      const newRows = prev.map(row => 
+      const newRows = prev.map(row =>
         row.id === id ? { ...row, [field]: value } : row
       );
-      
+
       // If the last row (empty row) is being edited, add a new empty row
       const lastRow = newRows[newRows.length - 1];
       if (lastRow && (lastRow.key || lastRow.value) && lastRow.id.startsWith('new-param')) {
@@ -146,7 +146,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
           enabled: true,
         });
       }
-      
+
       updateRequestParams(newRows);
       return newRows;
     });
@@ -187,7 +187,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg">
+    <div className="rounded-lg">
       <Tabs
         variant="underline"
         defaultActiveTab={activeTabIndex}
@@ -225,7 +225,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                       Description
                     </th>
                     <th scope="col" className="px-4 py-3 w-12">
-                      
+
                     </th>
                   </tr>
                 </thead>
@@ -325,7 +325,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                       Description
                     </th>
                     <th scope="col" className="px-4 py-3 w-12">
-                      
+
                     </th>
                   </tr>
                 </thead>

@@ -205,7 +205,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
     if (project) {
       onProjectSelect(project);
     }
-    
+
     // También expandir/colapsar el proyecto
     toggleProjectExpansion(projectId);
   };
@@ -380,11 +380,10 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
             {folder.endpoints.map(endpoint => (
               <div
                 key={`${endpoint.projectId}-${endpoint.id}`}
-                className={`flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer group relative ${
-                  selectedEndpointId === endpoint.id
-                    ? "bg-blue-50 dark:bg-blue-900/30"
-                    : ""
-                }`}
+                className={`flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer group relative ${selectedEndpointId === endpoint.id
+                  ? "bg-blue-50 dark:bg-blue-900/30"
+                  : ""
+                  }`}
                 onClick={() => onEndpointSelect(endpoint)}
                 onMouseEnter={() => setHoveredEndpointId(endpoint.id)}
                 onMouseLeave={() => {
@@ -412,9 +411,8 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                       e.stopPropagation();
                       setShowEndpointMenu(showEndpointMenu === endpoint.id ? null : endpoint.id);
                     }}
-                    className={`p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-opacity ${
-                      hoveredEndpointId === endpoint.id ? 'opacity-100' : 'opacity-0'
-                    }`}
+                    className={`p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-opacity ${hoveredEndpointId === endpoint.id ? 'opacity-100' : 'opacity-0'
+                      }`}
                     title="Options"
                   >
                     <Icon icon="material-symbols:more-vert" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
@@ -422,7 +420,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
 
                   {/* Dropdown Menu */}
                   {showEndpointMenu === endpoint.id && (
-                    <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                    <div className="absolute right-0 top-full mt-1 w-40 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -481,7 +479,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-90">
+    <div className="flex flex-col h-full">
       {/* Search Bar */}
       <div className="p-3 border-b border-gray-200 dark:border-gray-700">
         <InputV2
@@ -563,9 +561,8 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                         e.stopPropagation();
                         setShowProjectMenu(showProjectMenu === project.id ? null : project.id);
                       }}
-                      className={`p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-opacity ${
-                        hoveredProjectId === project.id ? 'opacity-100' : 'opacity-0'
-                      }`}
+                      className={`p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-opacity ${hoveredProjectId === project.id ? 'opacity-100' : 'opacity-0'
+                        }`}
                       title="Options"
                     >
                       <Icon icon="material-symbols:more-vert" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
@@ -573,7 +570,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
 
                     {/* Dropdown Menu */}
                     {showProjectMenu === project.id && (
-                      <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                      <div className="absolute right-0 top-full mt-1 w-48 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -615,11 +612,10 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                     {project.endpoints.map(endpoint => (
                       <div
                         key={`${endpoint.projectId}-${endpoint.id}`}
-                        className={`flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer group relative ${
-                          selectedEndpointId === endpoint.id
-                            ? "bg-blue-50 dark:bg-gray-800"
-                            : ""
-                        }`}
+                        className={`flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer group relative ${selectedEndpointId === endpoint.id
+                          ? "bg-blue-50 dark:bg-gray-800"
+                          : ""
+                          }`}
                         onClick={() => onEndpointSelect(endpoint)}
                         onMouseEnter={() => setHoveredEndpointId(endpoint.id)}
                         onMouseLeave={() => {
@@ -646,9 +642,8 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
                               e.stopPropagation();
                               setShowEndpointMenu(showEndpointMenu === endpoint.id ? null : endpoint.id);
                             }}
-                            className={`p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-opacity ${
-                              hoveredEndpointId === endpoint.id ? 'opacity-100' : 'opacity-0'
-                            }`}
+                            className={`p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-opacity ${hoveredEndpointId === endpoint.id ? 'opacity-100' : 'opacity-0'
+                              }`}
                             title="Options"
                           >
                             <Icon icon="material-symbols:more-vert" className="h-4 w-4 text-gray-600 dark:text-gray-400" />
@@ -656,7 +651,7 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
 
                           {/* Dropdown Menu */}
                           {showEndpointMenu === endpoint.id && (
-                            <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                            <div className="absolute right-0 top-full mt-1 w-40 Xborder border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
