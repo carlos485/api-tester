@@ -180,6 +180,7 @@ const QuickRequestBar: React.FC<QuickRequestBarProps> = ({
                     : "https://api.example.com/endpoint or paste cURL command"
                 }
                 required
+                hasEnvironment={!!selectedEnvironment}
               />
             </div>
           </div>

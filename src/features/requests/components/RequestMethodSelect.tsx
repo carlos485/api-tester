@@ -42,7 +42,7 @@ const RequestMethodSelect: FC<RequestMethodSelectProps> = ({
         value={value}
         onChange={(e) => handleChange(e.target.value)}
         disabled={disabled}
-        className={`block min-w-[100px] max-w-[150px] w-auto p-2 pr-8 text-sm font-semibold border border-transparent rounded-lg bg-transparent hover:bg-gray-50 focus:ring-gray-300 focus:border-gray-300 dark:hover:bg-gray-50 dark:focus:bg-gray-50 dark:focus:ring-gray-300 dark:focus:border-gray-300 cursor-pointer transition-all duration-300 appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${getMethodColor(value)} ${className}`}
+        className={`block min-w-[100px] max-w-[150px] w-auto p-2 pr-8 text-sm font-semibold border border-transparent rounded-lg bg-transparent hover:bg-gray-50 focus:ring-gray-300 focus:border-gray-300 dark:hover:bg-gray-60 dark:focus:bg-gray-60 dark:focus:ring-gray-300 dark:focus:border-gray-300 cursor-pointer transition-all duration-300 appearance-none disabled:opacity-50 disabled:cursor-not-allowed ${getMethodColor(value)} ${className}`}
       >
         <option value="GET" className="text-green-600 font-semibold">GET</option>
         <option value="POST" className="text-blue-600 font-semibold">POST</option>
