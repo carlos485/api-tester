@@ -983,7 +983,7 @@ const ApiTesterView: React.FC = () => {
                       </div>
 
                       {/* Response Viewer */}
-                      <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
+                      <div className="flex-1 overflow-auto">
                         <ResponseViewer
                           response={tab.response}
                           loading={tab.loading}

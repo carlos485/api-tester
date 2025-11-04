@@ -198,7 +198,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
             {/* Parameters content will be added here */}
             <div className="text-gray-500 text-sm">
               <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                <thead className="text-xs text-gray-700 uppercase">
                   <tr>
                     <th scope="col" className="p-4">
                       <div className="flex items-center">
@@ -231,7 +231,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                 </thead>
                 <tbody>
                   {paramRows.map((param, index) => (
-                    <tr key={param.id} className="bg-white border-b border-gray-200 hover:bg-gray-50">
+                    <tr key={param.id} className="border-b border-gray-200 hover:bg-gray-50">
                       <td className="w-4 p-4">
                         <div className="flex items-center">
                           <input
