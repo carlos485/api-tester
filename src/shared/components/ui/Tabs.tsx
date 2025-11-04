@@ -1,4 +1,4 @@
-import { useState, useEffect, Children, isValidElement } from "react";
+import { useState, useEffect, useMemo, Children, isValidElement } from "react";
 import type { ReactElement, ReactNode, FC } from "react";
 import { Icon } from "@iconify/react";
 
@@ -68,9 +68,9 @@ const tabVariants = {
     container: "border-b border-gray-200",
     nav: "flex space-x-8 px-4",
     tab: "py-2 px-1 border-b-2 font-medium text-sm cursor-pointer transition-colors duration-200",
-    activeTab: "border-gray-900 text-gray-900",
+    activeTab: "border-gray-900 dark:border-white text-gray-900 dark:text-white",
     inactiveTab:
-      "border-transparent text-gray-400 hover:text-gray-500 hover:border-gray-500",
+      "border-transparent text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 hover:border-gray-500",
   },
 };
 
@@ -86,27 +86,26 @@ export const Tabs: FC<TabsProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
 
-  // Sync with external defaultActiveTab changes
-  useEffect(() => {
-    const tabsCount = Children.toArray(children).filter(
+  const tabs = useMemo(() =>
+    Children.toArray(children).filter(
       (child): child is ReactElement<TabProps> =>
         isValidElement(child) && child.type === Tab
-    ).length;
+    ), [children]
+  );
 
+  const rightElement = useMemo(() =>
+    Children.toArray(children).find(
+      (child): child is ReactElement<TabsRightProps> =>
+        isValidElement(child) && child.type === TabsRight
+    ), [children]
+  );
+
+  // Sync with external defaultActiveTab changes
+  useEffect(() => {
     // Ensure the active tab index is valid
-    const validIndex = Math.max(0, Math.min(defaultActiveTab, tabsCount - 1));
+    const validIndex = Math.max(0, Math.min(defaultActiveTab, tabs.length - 1));
     setActiveTab(validIndex);
-  }, [defaultActiveTab, children]);
-
-  const tabs = Children.toArray(children).filter(
-    (child): child is ReactElement<TabProps> =>
-      isValidElement(child) && child.type === Tab
-  );
-
-  const rightElement = Children.toArray(children).find(
-    (child): child is ReactElement<TabsRightProps> =>
-      isValidElement(child) && child.type === TabsRight
-  );
+  }, [defaultActiveTab, tabs.length]);
 
   const styles = tabVariants[variant];
 
