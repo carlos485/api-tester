@@ -467,12 +467,39 @@ const ProjectsSidebar: React.FC<ProjectsSidebarProps> = ({
 
   if (projectsLoading || loadingEndpoints) {
     return (
-      <div className="w-64 bg-white border-r border-gray-200 p-4">
-        <div className="flex items-center justify-center h-32">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
-          <p className="ml-2 text-sm text-gray-600">
-            {projectsLoading ? "Loading projects..." : "Loading endpoints..."}
-          </p>
+      <div className="flex flex-col h-full">
+        {/* Search Bar Skeleton */}
+        <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+          <div className="h-9 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+        </div>
+
+        {/* New Collection Button Skeleton */}
+        <div className="border-b border-gray-200 dark:border-gray-700">
+          <div className="p-2 m-2 h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+        </div>
+
+        {/* Project Tree Skeleton */}
+        <div className="flex-1 overflow-auto p-2 space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="space-y-2">
+              {/* Project Skeleton */}
+              <div className="flex items-center gap-2 p-2">
+                <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              </div>
+
+              {/* Endpoints Skeleton */}
+              <div className="ml-6 space-y-1">
+                {[1, 2].map((j) => (
+                  <div key={j} className="flex items-center gap-2 p-2">
+                    <div className="w-12 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    <div className="flex-1 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
