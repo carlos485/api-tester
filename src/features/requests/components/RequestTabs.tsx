@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Tabs, Tab } from '@/shared/components/ui';
+import { Tabs, Tab, VariableHighlightedInput } from '@/shared/components/ui';
 import { Button } from '@/shared/components/ui';
 import type { ApiRequest } from '@/features/requests/types';
 import { generateCurl, copyCurlToClipboard } from '@/shared/utils';
@@ -9,9 +9,85 @@ interface RequestTabsProps {
   onRequestChange: (request: ApiRequest) => void;
 }
 
+interface ParamRow {
+  id: string;
+  enabled: boolean;
+  name: string;
+  value: string;
+  description: string;
+}
+
 const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [curlCopied, setCurlCopied] = useState(false);
+
+  // Convert query params to array for table display
+  const paramsToArray = (params: Record<string, string>): ParamRow[] => {
+    return Object.entries(params).map(([name, value]) => ({
+      id: `param-${Date.now()}-${Math.random()}`,
+      enabled: true,
+      name,
+      value,
+      description: '',
+    }));
+  };
+
+  const [paramRows, setParamRows] = useState<ParamRow[]>(() => {
+    const existingParams = paramsToArray(request.queryParams || {});
+    return [...existingParams, {
+      id: `new-param-${Date.now()}`,
+      enabled: true,
+      name: '',
+      value: '',
+      description: '',
+    }];
+  });
+
+  const updateRequestParams = (rows: ParamRow[]) => {
+    const queryParams: Record<string, string> = {};
+    rows.forEach(row => {
+      if (row.name.trim() && row.enabled) {
+        queryParams[row.name.trim()] = row.value;
+      }
+    });
+
+    onRequestChange({
+      ...request,
+      queryParams,
+    });
+  };
+
+  const handleParamChange = (id: string, field: keyof ParamRow, value: string | boolean) => {
+    setParamRows(prev => {
+      const newRows = prev.map(row =>
+        row.id === id ? { ...row, [field]: value } : row
+      );
+
+      // If the last row is being edited, add a new empty row
+      const lastRow = newRows[newRows.length - 1];
+      if (lastRow && (lastRow.name || lastRow.value) && lastRow.id.startsWith('new-param')) {
+        newRows.push({
+          id: `new-param-${Date.now()}`,
+          enabled: true,
+          name: '',
+          value: '',
+          type: 'text',
+          description: '',
+        });
+      }
+
+      updateRequestParams(newRows);
+      return newRows;
+    });
+  };
+
+  const handleDeleteParam = (id: string) => {
+    setParamRows(prev => {
+      const newRows = prev.filter(row => row.id !== id);
+      updateRequestParams(newRows);
+      return newRows;
+    });
+  };
 
   // Generate cURL command
   const generatedCurl = generateCurl(request);
@@ -39,8 +115,85 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
         onTabChange={setActiveTabIndex}
       >
         <Tab header="Parameters">
-          <div className="space-y-4">
-            {/* Parameters table will be implemented here */}
+          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                  <th scope="col" className="px-6 py-3">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      title="Toggle all"
+                    />
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Name
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Value
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    Description
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {paramRows.map((param, index) => (
+                  <tr
+                    key={param.id}
+                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  >
+                    <td className="px-6 py-4">
+                      <input
+                        type="checkbox"
+                        checked={param.enabled}
+                        onChange={(e) => handleParamChange(param.id, 'enabled', e.target.checked)}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <input
+                        type="text"
+                        value={param.name}
+                        onChange={(e) => handleParamChange(param.id, 'name', e.target.value)}
+                        placeholder={index === paramRows.length - 1 ? "Name" : ""}
+                        className="block transition-all duration-300 p-2.5 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-500 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-gray-500 dark:focus:ring-gray-300 focus:border-gray-300 dark:focus:border-gray-500 w-full"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <VariableHighlightedInput
+                        value={param.value}
+                        onChange={(value) => handleParamChange(param.id, 'value', value)}
+                        placeholder={index === paramRows.length - 1 ? "Value" : ""}
+                        className="block w-full"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <input
+                        type="text"
+                        value={param.description}
+                        onChange={(e) => handleParamChange(param.id, 'description', e.target.value)}
+                        placeholder={index === paramRows.length - 1 ? "Description" : ""}
+                        className="block transition-all duration-300 p-2.5 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-500 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-gray-500 dark:focus:ring-gray-300 focus:border-gray-300 dark:focus:border-gray-500 w-full"
+                      />
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      {paramRows.filter(row => row.name.trim() || row.value.trim()).length >= 2 && (param.name.trim() || param.value.trim()) && (
+                        <button
+                          onClick={() => handleDeleteParam(param.id)}
+                          className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </Tab>
         <Tab header="Headers">
