@@ -65,7 +65,7 @@ const tabVariants = {
       "bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100",
   },
   underline: {
-    container: "border-b border-gray-200",
+    container: "border-b border-gray-200 dark:border-gray-600",
     nav: "flex space-x-8 px-4",
     tab: "py-2 px-1 border-b-2 font-medium text-sm cursor-pointer transition-colors duration-200",
     activeTab: "border-gray-900 dark:border-white text-gray-900 dark:text-white",
