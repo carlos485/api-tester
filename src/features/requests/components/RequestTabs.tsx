@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Tabs, Tab, VariableHighlightedInput } from '@/shared/components/ui';
+import { Tabs, Tab, VariableHighlightedInput, InputV2 } from '@/shared/components/ui';
 import { Button } from '@/shared/components/ui';
 import type { ApiRequest } from '@/features/requests/types';
 import { generateCurl, copyCurlToClipboard } from '@/shared/utils';
@@ -117,7 +117,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
         <Tab header="Parameters">
           <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
             <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-70 dark:text-gray-400">
                 <tr>
                   <th scope="col" className="px-6 py-3">
                     <input
@@ -144,23 +144,23 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                 {paramRows.map((param, index) => (
                   <tr
                     key={param.id}
-                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                    className="bg-white border-b dark:bg-gray-80 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                   >
                     <td className="px-6 py-4">
                       <input
                         type="checkbox"
                         checked={param.enabled}
                         onChange={(e) => handleParamChange(param.id, 'enabled', e.target.checked)}
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500 dark:focus:ring-green-600"
+                        style={{ accentColor: '#16a34a' }}
                       />
                     </td>
                     <td className="px-6 py-4">
-                      <input
-                        type="text"
+                      <InputV2
+                        variant="ghost"
                         value={param.name}
                         onChange={(e) => handleParamChange(param.id, 'name', e.target.value)}
                         placeholder={index === paramRows.length - 1 ? "Name" : ""}
-                        className="block transition-all duration-300 p-2.5 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-500 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-gray-500 dark:focus:ring-gray-300 focus:border-gray-300 dark:focus:border-gray-500 w-full"
                       />
                     </td>
                     <td className="px-6 py-4">
@@ -172,12 +172,11 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                       />
                     </td>
                     <td className="px-6 py-4">
-                      <input
-                        type="text"
+                      <InputV2
+                        variant="ghost"
                         value={param.description}
                         onChange={(e) => handleParamChange(param.id, 'description', e.target.value)}
                         placeholder={index === paramRows.length - 1 ? "Description" : ""}
-                        className="block transition-all duration-300 p-2.5 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-500 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-gray-500 dark:focus:ring-gray-300 focus:border-gray-300 dark:focus:border-gray-500 w-full"
                       />
                     </td>
                     <td className="px-6 py-4 text-right">
