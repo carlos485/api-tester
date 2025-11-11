@@ -35,6 +35,7 @@ app.all('/proxy', async (req, res) => {
     delete headers['x-target-url'];
     delete headers['content-length'];
     delete headers.connection;
+    delete headers['accept-encoding']; // Don't request compressed responses
 
     // Make the request
     const response = await fetch(targetUrl, {
@@ -54,9 +55,12 @@ app.all('/proxy', async (req, res) => {
       data = await response.text();
     }
 
-    // Forward response headers
+    // Forward response headers (exclude encoding headers since we're sending uncompressed)
     response.headers.forEach((value, key) => {
-      res.setHeader(key, value);
+      // Skip content-encoding header since node-fetch automatically decompresses
+      if (key.toLowerCase() !== 'content-encoding' && key.toLowerCase() !== 'transfer-encoding') {
+        res.setHeader(key, value);
+      }
     });
 
     // Send response

@@ -21,12 +21,9 @@ import {
   getActiveTabIndex,
   saveSelectedEndpoint,
   getSelectedEndpoint,
-  saveSelectedEnvironment,
-  getSelectedEnvironment,
   clearRequestTabs,
   clearActiveTabIndex,
   clearSelectedEndpoint,
-  clearSelectedEnvironment,
   interpolateVariables,
   interpolateObjectValues,
 } from '@/shared/utils';
@@ -45,6 +42,7 @@ interface RequestTab {
   response: ApiResponse | null;
   loading: boolean;
   endpointId?: string; // ID of the original endpoint if this tab was created from one
+  selectedEnvironmentId?: string; // ID of the selected environment for this tab
 }
 
 const ProjectView: React.FC<ProjectViewProps> = ({
@@ -69,7 +67,6 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   const [shouldActivateLastTab, setShouldActivateLastTab] = useState(false);
   const [editingTabName, setEditingTabName] = useState<string | null>(null);
   const [savingTab, setSavingTab] = useState<string | null>(null);
-  const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
   const [sidebarWidth, setSidebarWidth] = useState(256);
   const [isResizing, setIsResizing] = useState(false);
 
@@ -156,14 +153,14 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     }
   }, [activeTabIndex, requestTabs]);
 
-  // Save selected environment to sessionStorage when it changes
-  useEffect(() => {
-    const currentSavedId = getSelectedEnvironment();
-    const newId = selectedEnvironment?.id || "";
-    if (newId !== currentSavedId) {
-      saveSelectedEnvironment(newId);
-    }
-  }, [selectedEnvironment]);
+  // Get selected environment for the active tab
+  const getSelectedEnvironmentForTab = (tabIndex: number): Environment | null => {
+    const tab = requestTabs[tabIndex];
+    if (!tab?.selectedEnvironmentId) return null;
+    return project.environments.find(env => env.id === tab.selectedEnvironmentId) || null;
+  };
+
+  const selectedEnvironment = getSelectedEnvironmentForTab(activeTabIndex);
 
   const handleSendRequest = async (request: ApiRequest) => {
     const currentTab = requestTabs[activeTabIndex];
@@ -250,10 +247,21 @@ const ProjectView: React.FC<ProjectViewProps> = ({
       let data;
       const contentType = response.headers.get("content-type");
 
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        data = await response.text();
+      try {
+        if (contentType && contentType.includes("application/json")) {
+          data = await response.json();
+        } else {
+          data = await response.text();
+        }
+      } catch (decodeError) {
+        console.error("Failed to decode response:", decodeError);
+        // If decoding fails, try to get the raw response
+        try {
+          const blob = await response.blob();
+          data = `[Binary data - ${blob.size} bytes, type: ${blob.type || 'unknown'}]`;
+        } catch {
+          data = "[Failed to decode response - possibly compressed or binary data]";
+        }
       }
 
       const headers: Record<string, string> = {};
@@ -531,6 +539,16 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     );
   };
 
+  const handleEnvironmentChange = (environment: Environment | null) => {
+    setRequestTabs(prev =>
+      prev.map((tab, index) =>
+        index === activeTabIndex
+          ? { ...tab, selectedEnvironmentId: environment?.id || undefined }
+          : tab
+      )
+    );
+  };
+
   const handleSaveEndpoint = async (tabIndex: number) => {
     const tab = requestTabs[tabIndex];
     if (!tab) return;
@@ -582,7 +600,6 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     clearRequestTabs();
     clearActiveTabIndex();
     clearSelectedEndpoint();
-    clearSelectedEnvironment();
     onBackToHome();
   };
 
@@ -685,7 +702,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
               <Tab key={tab.id} header={tab.name}>
                 <div className="flex flex-col h-full overflow-hidden">
                   {/* Request Name and Save Button */}
-                  <div className="flex items-center gap-3 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-3 px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                     <Input
                       type="text"
                       value={tab.name}
@@ -713,12 +730,12 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                   </div>
 
                   {/* Quick Request Bar */}
-                  <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                  <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                     <QuickRequestBar
                       onSendRequest={handleQuickRequest}
                       environments={project.environments}
                       selectedEnvironment={selectedEnvironment}
-                      onEnvironmentChange={setSelectedEnvironment}
+                      onEnvironmentChange={handleEnvironmentChange}
                       initialMethod={tab.request.method}
                       initialUrl={tab.request.url}
                       onRequestChange={quickRequest =>
@@ -731,7 +748,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                   </div>
 
                   {/* Request Configuration Tabs */}
-                  <div className="border-b border-gray-200 dark:border-gray-700">
+                  <div className="overflow-auto" style={{ height: '50%' }}>
                     <RequestTabs
                       request={tab.request}
                       onRequestChange={updatedRequest =>
@@ -742,7 +759,10 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                   </div>
 
                   {/* Response Viewer */}
-                  <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
+                  <div
+                    className="overflow-auto bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
+                    style={{ height: '50%' }}
+                  >
                     <ResponseViewer
                       response={tab.response}
                       loading={tab.loading}
