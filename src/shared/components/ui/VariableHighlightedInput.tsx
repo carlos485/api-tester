@@ -8,6 +8,7 @@ interface VariableHighlightedInputProps {
   className?: string;
   required?: boolean;
   hasEnvironment?: boolean;
+  availableVariables?: Record<string, string>;
 }
 
 /**
@@ -22,6 +23,7 @@ const VariableHighlightedInput: React.FC<VariableHighlightedInputProps> = ({
   className = '',
   required = false,
   hasEnvironment = false,
+  availableVariables = {},
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
@@ -51,16 +53,26 @@ const VariableHighlightedInput: React.FC<VariableHighlightedInputProps> = ({
     return parts.map((part, index) => {
       // Check if this part is a variable
       if (part.match(/^(\{\{[^}]+\}\}|\$\{[^}]+\})$/)) {
+        // Extract variable name (remove {{ }} or ${ })
+        const varName = part.replace(/^\{\{|\}\}$/g, '').replace(/^\$\{|\}$/g, '');
+
+        // Check if variable exists in availableVariables
+        const variableExists = varName in availableVariables;
+        const colorClass = variableExists ? 'text-blue-500' : 'text-red-500 bg-red-700/20 rounded';
+
         return (
           <span
             key={index}
-            className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-gray-700 text-red-500 font-medium text-xs mx-0.5"
+            className={colorClass}
+            style={{
+              textShadow: '0 0 0.5px currentColor, 0 0 0.5px currentColor'
+            }}
           >
             {part}
           </span>
         );
       }
-      return <span key={index}>{part}</span>;
+      return <span key={index} className="text-gray-900 dark:text-white">{part}</span>;
     });
   };
 
@@ -69,10 +81,7 @@ const VariableHighlightedInput: React.FC<VariableHighlightedInputProps> = ({
       {/* Highlight layer (positioned behind input) */}
       <div
         ref={highlightRef}
-        className={`absolute inset-0 pointer-events-none overflow-hidden text-sm py-2.5 whitespace-nowrap text-gray-900 dark:text-white ${hasEnvironment ? 'pr-3' : 'px-3'}`}
-        style={{
-          color: value && value.match(/(\{\{[^}]+\}\}|\$\{[^}]+\})/) ? 'transparent' : undefined
-        }}
+        className={`absolute inset-0 pointer-events-none overflow-hidden text-sm py-2.5 whitespace-nowrap ${hasEnvironment ? 'pr-3' : 'px-3'}`}
       >
         {highlightText(value)}
       </div>
@@ -84,10 +93,10 @@ const VariableHighlightedInput: React.FC<VariableHighlightedInputProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onPaste={onPaste}
-        className={`relative w-full text-sm border-0 focus:outline-none focus:ring-0 p-0 min-w-0 py-2.5 text-gray-900 dark:text-white caret-gray-900 dark:caret-white ${hasEnvironment ? 'pr-3' : 'px-3'} ${className}`}
+        className={`relative w-full text-sm border-0 focus:outline-none focus:ring-0 p-0 min-w-0 py-2.5 caret-gray-900 dark:caret-white ${hasEnvironment ? 'pr-3' : 'px-3'} ${className}`}
         style={{
           background: 'transparent',
-          color: value && value.match(/(\{\{[^}]+\}\}|\$\{[^}]+\})/) ? 'transparent' : undefined,
+          color: 'transparent',
         }}
         placeholder={placeholder}
         required={required}

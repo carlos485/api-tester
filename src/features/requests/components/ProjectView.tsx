@@ -737,6 +737,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                       onRequestChange={updatedRequest =>
                         handleRequestChange(tabIndex, updatedRequest)
                       }
+                      availableVariables={selectedEnvironment?.variables || {}}
                     />
                   </div>
 

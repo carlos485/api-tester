@@ -7,6 +7,7 @@ import { generateCurl, copyCurlToClipboard } from '@/shared/utils';
 interface RequestTabsProps {
   request: ApiRequest;
   onRequestChange: (request: ApiRequest) => void;
+  availableVariables?: Record<string, string>;
 }
 
 interface ParamRow {
@@ -17,7 +18,7 @@ interface ParamRow {
   description: string;
 }
 
-const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) => {
+const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange, availableVariables = {} }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [curlCopied, setCurlCopied] = useState(false);
 
@@ -147,13 +148,9 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                     className="bg-white border-b dark:bg-gray-80 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                   >
                     <td className="px-6 py-4">
-                      <input
-                        type="checkbox"
-                        checked={param.enabled}
-                        onChange={(e) => handleParamChange(param.id, 'enabled', e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500 dark:focus:ring-green-600"
-                        style={{ accentColor: '#16a34a' }}
-                      />
+                      <div className="flex items-center me-4">
+                        <input id="green-checkbox" type="checkbox" value="" className="w-4 h-4 text-green-500 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" onChange={(e) => handleParamChange(param.id, 'enabled', e.target.checked)} />
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <InputV2
@@ -169,6 +166,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange }) =
                         onChange={(value) => handleParamChange(param.id, 'value', value)}
                         placeholder={index === paramRows.length - 1 ? "Value" : ""}
                         className="block w-full"
+                        availableVariables={availableVariables}
                       />
                     </td>
                     <td className="px-6 py-4">
