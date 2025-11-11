@@ -11,3 +11,6 @@ export { InputV2 } from './InputV2';
 export { TextareaV2 } from './TextareaV2';
 export { Table, type TableColumn, type TableRow } from './Table';
 export { EditableTable, type EditableRow } from './EditableTable';
+export { EnvironmentsTable, type EnvironmentRow } from './EnvironmentsTable';
+export { VariablesTable, type VariableRow } from './VariablesTable';
+export { EndpointsTable, type EndpointRow } from './EndpointsTable';

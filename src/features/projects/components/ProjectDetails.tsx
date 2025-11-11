@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import type { Project } from '@/features/projects/types';
-import { Input, InputV2, TextareaV2 } from '@/shared/components/ui';
+import { Input, InputV2, TextareaV2, EnvironmentsTable, VariablesTable, EndpointsTable, type NativeSelectOption } from '@/shared/components/ui';
 import { ProjectService } from '@/features/projects/services';
 import { useEndpoints } from '@/features/endpoints/hooks';
 import { Tabs, Tab } from '@/shared/components/ui';
@@ -190,6 +190,14 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project?.id]); // Run when project ID changes to load correct project's environments
+
+  // Sync local name and description when project changes
+  useEffect(() => {
+    if (project) {
+      setLocalName(project.name || "");
+      setLocalDescription(project.description || "");
+    }
+  }, [project]);
 
   // Early return if project is not loaded yet - AFTER all hooks
   if (!project) {
@@ -714,126 +722,27 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
             <div className="mt-6">
               {/* Search Input */}
               <div className="mb-4">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <Icon icon="material-symbols:search" className="w-5 h-5 text-gray-500" />
-                  </div>
-                  <InputV2 value={environmentSearchQuery} onChange={(e) => setEndpointSearchQuery(e.target.value)} placeholder="Search environments..." />
-                  <input
-                    type="text"
-                    value={environmentSearchQuery}
-                    onChange={(e) => setEnvironmentSearchQuery(e.target.value)}
-                    className="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Search environments..."
-                  />
-                </div>
+                <InputV2
+                  value={environmentSearchQuery}
+                  onChange={(value) => setEnvironmentSearchQuery(typeof value === 'string' ? value : value.target.value)}
+                  placeholder="Search environments..."
+                  leftIcon="material-symbols:search"
+                />
               </div>
 
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3">
-                      Environment
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Base URL
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Description
-                    </th>
-                    <th scope="col" className="px-4 py-3 w-12 text-center">
-                      <Icon icon="cil:options-horizontal" className="w-5 h-5 inline-block" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {environmentRows
-                    .filter((environment) => {
-                      if (!environmentSearchQuery) return true;
-                      const query = environmentSearchQuery.toLowerCase();
-                      return (
-                        environment.name.toLowerCase().includes(query) ||
-                        environment.description.toLowerCase().includes(query) ||
-                        environment.baseUrl.toLowerCase().includes(query)
-                      );
-                    })
-                    .map((environment, index) => (
-                      <tr
-                        key={environment.id}
-                        className="bg-white border-b border-gray-200 hover:bg-gray-50"
-                      >
-                        <td className="py-2 px-2">
-                          <input
-                            type="text"
-                            value={environment.name}
-                            onChange={e =>
-                              handleEnvironmentChange(
-                                environment.id,
-                                "name",
-                                e.target.value
-                              )
-                            }
-                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                            placeholder={
-                              index === environmentRows.length - 1
-                                ? "Add new environment"
-                                : ""
-                            }
-                          />
-                        </td>
-                        <td className="py-2 px-2">
-                          <input
-                            type="text"
-                            value={environment.baseUrl}
-                            onChange={e =>
-                              handleEnvironmentChange(
-                                environment.id,
-                                "baseUrl",
-                                e.target.value
-                              )
-                            }
-                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                            placeholder="https://api.example.com"
-                          />
-                        </td>
-                        <td className="py-2 px-2">
-                          <input
-                            type="text"
-                            value={environment.description}
-                            onChange={e =>
-                              handleEnvironmentChange(
-                                environment.id,
-                                "description",
-                                e.target.value
-                              )
-                            }
-                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                            placeholder="Add description..."
-                          />
-                        </td>
-                        <td className="py-2 px-2 text-center">
-                          {environmentRows.filter(
-                            row => row.name.trim() || row.baseUrl.trim()
-                          ).length >= 2 &&
-                            (environment.name.trim() || environment.baseUrl.trim()) && (
-                              <button
-                                onClick={() =>
-                                  handleDeleteEnvironment(environment.id)
-                                }
-                                className="text-red-600 hover:text-red-700 hover:bg-red-100 rounded p-1 transition-all duration-200 inline-flex items-center justify-center"
-                                title="Delete environment"
-                              >
-                                <Icon
-                                  icon="line-md:trash"
-                                  className="w-4 h-4"
-                                />
-                              </button>
-                            )}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
+              <EnvironmentsTable
+                rows={environmentRows.filter((environment) => {
+                  if (!environmentSearchQuery) return true;
+                  const query = environmentSearchQuery.toLowerCase();
+                  return (
+                    environment.name.toLowerCase().includes(query) ||
+                    environment.description.toLowerCase().includes(query) ||
+                    environment.baseUrl.toLowerCase().includes(query)
+                  );
+                })}
+                onRowChange={handleEnvironmentChange}
+                onDeleteRow={handleDeleteEnvironment}
+              />
             </div>
           </Tab>
 
@@ -841,147 +750,34 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
             <div className="mt-6">
               {/* Search Input */}
               <div className="mb-4">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <Icon icon="material-symbols:search" className="w-5 h-5 text-gray-500" />
-                  </div>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Search variables..."
-                  />
-                </div>
+                <InputV2
+                  value={searchQuery}
+                  onChange={(value) => setSearchQuery(typeof value === 'string' ? value : value.target.value)}
+                  placeholder="Search variables..."
+                  leftIcon="material-symbols:search"
+                />
               </div>
 
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3">
-                      Variable
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Value
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Environment
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Description
-                    </th>
-                    <th scope="col" className="px-4 py-3 w-12 text-center">
-                      <Icon icon="cil:options-horizontal" className="w-5 h-5 inline-block" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {variableRows
-                    .filter((variable) => {
-                      if (!searchQuery) return true;
-                      const query = searchQuery.toLowerCase();
-                      return (
-                        variable.name.toLowerCase().includes(query) ||
-                        variable.value.toLowerCase().includes(query) ||
-                        variable.description.toLowerCase().includes(query)
-                      );
-                    })
-                    .map((variable, index) => (
-                      <tr
-                        key={variable.id}
-                        className="bg-white border-b border-gray-200 hover:bg-gray-50"
-                      >
-                        <td className="py-2 px-2">
-                          <input
-                            type="text"
-                            value={variable.name}
-                            onChange={e =>
-                              handleVariableChange(
-                                variable.id,
-                                "name",
-                                e.target.value
-                              )
-                            }
-                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                            placeholder={
-                              index === variableRows.length - 1
-                                ? "Add new variable"
-                                : ""
-                            }
-                          />
-                        </td>
-                        <td className="py-2 px-2">
-                          <input
-                            type="text"
-                            value={variable.value}
-                            onChange={e =>
-                              handleVariableChange(
-                                variable.id,
-                                "value",
-                                e.target.value
-                              )
-                            }
-                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                          />
-                        </td>
-                        <td className="py-2 px-2">
-                          <select
-                            value={variable.environment || "GLOBAL"}
-                            onChange={e =>
-                              handleVariableChange(
-                                variable.id,
-                                "environment",
-                                e.target.value
-                              )
-                            }
-                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                          >
-                            <option value="GLOBAL">GLOBAL</option>
-                            {project.environments.map(env => (
-                              <option key={env.id} value={env.id}>
-                                {env.name}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="py-2 px-2">
-                          <input
-                            type="text"
-                            value={variable.description}
-                            onChange={e =>
-                              handleVariableChange(
-                                variable.id,
-                                "description",
-                                e.target.value
-                              )
-                            }
-                            className="border-0 text-gray-900 text-sm rounded-lg hover:bg-gray-50 hover:border hover:border-gray-300 focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5"
-                            placeholder="Add description..."
-                          />
-                        </td>
-                        <td className="py-2 px-2 text-center">
-                          {variableRows.filter(
-                            row => row.name.trim() || row.value.trim()
-                          ).length >= 2 &&
-                            (variable.name.trim() || variable.value.trim()) && (
-                              <button
-                                onClick={() =>
-                                  handleDeleteVariable(variable.id)
-                                }
-                                className="text-red-600 hover:text-red-700 hover:bg-red-100 rounded p-1 transition-all duration-200 inline-flex items-center justify-center"
-                                title="Delete variable"
-                              >
-                                <Icon
-                                  icon="line-md:trash"
-                                  className="w-4 h-4"
-                                />
-                              </button>
-                            )}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
+              <VariablesTable
+                rows={variableRows.filter((variable) => {
+                  if (!searchQuery) return true;
+                  const query = searchQuery.toLowerCase();
+                  return (
+                    variable.name.toLowerCase().includes(query) ||
+                    variable.value.toLowerCase().includes(query) ||
+                    variable.description.toLowerCase().includes(query)
+                  );
+                })}
+                onRowChange={handleVariableChange}
+                onDeleteRow={handleDeleteVariable}
+                environmentOptions={[
+                  { value: "GLOBAL", label: "GLOBAL" },
+                  ...project.environments.map(env => ({
+                    value: env.id,
+                    label: env.name
+                  }))
+                ]}
+              />
             </div>
           </Tab>
 
@@ -989,98 +785,27 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
             <div className="mt-6">
               {/* Search Input */}
               <div className="mb-4">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <Icon icon="material-symbols:search" className="w-5 h-5 text-gray-500" />
-                  </div>
-                  <input
-                    type="text"
-                    value={endpointSearchQuery}
-                    onChange={(e) => setEndpointSearchQuery(e.target.value)}
-                    className="block w-full p-2.5 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Search endpoints..."
-                  />
-                </div>
+                <InputV2
+                  value={endpointSearchQuery}
+                  onChange={(value) => setEndpointSearchQuery(typeof value === 'string' ? value : value.target.value)}
+                  placeholder="Search endpoints..."
+                  leftIcon="material-symbols:search"
+                />
               </div>
 
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3">
-                      Name
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Method
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Path
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Folder
-                    </th>
-                    <th scope="col" className="px-4 py-3 w-12 text-center">
-                      <Icon icon="cil:options-horizontal" className="w-5 h-5 inline-block" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {endpoints
-                    .filter((endpoint) => {
-                      if (!endpointSearchQuery) return true;
-                      const query = endpointSearchQuery.toLowerCase();
-                      return (
-                        endpoint.name.toLowerCase().includes(query) ||
-                        endpoint.method.toLowerCase().includes(query) ||
-                        endpoint.url.toLowerCase().includes(query) ||
-                        getFolderName(endpoint.folder).toLowerCase().includes(query)
-                      );
-                    })
-                    .map((endpoint) => (
-                      <tr
-                        key={endpoint.id}
-                        className="bg-white border-b border-gray-200 hover:bg-gray-50"
-                      >
-                        <td className="px-6 py-4 font-medium text-gray-900">
-                          {endpoint.name}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-1 text-xs font-semibold rounded ${endpoint.method === 'GET' ? 'bg-green-100 text-green-800' :
-                            endpoint.method === 'POST' ? 'bg-blue-100 text-blue-800' :
-                              endpoint.method === 'PUT' ? 'bg-yellow-100 text-yellow-800' :
-                                endpoint.method === 'PATCH' ? 'bg-orange-100 text-orange-800' :
-                                  endpoint.method === 'DELETE' ? 'bg-red-100 text-red-800' :
-                                    'bg-gray-100 text-gray-800'
-                            }`}>
-                            {endpoint.method}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-gray-700">
-                          {endpoint.url}
-                        </td>
-                        <td className="px-6 py-4 text-gray-600">
-                          {getFolderName(endpoint.folder)}
-                        </td>
-                        <td className="px-4 py-4 text-center">
-                          <button
-                            className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded p-1 transition-all duration-200 inline-flex items-center justify-center"
-                            title="View endpoint details"
-                          >
-                            <Icon
-                              icon="material-symbols:more-vert"
-                              className="w-4 h-4"
-                            />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-
-              {endpoints.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  No endpoints found in this collection
-                </div>
-              )}
+              <EndpointsTable
+                rows={endpoints.filter((endpoint) => {
+                  if (!endpointSearchQuery) return true;
+                  const query = endpointSearchQuery.toLowerCase();
+                  return (
+                    endpoint.name.toLowerCase().includes(query) ||
+                    endpoint.method.toLowerCase().includes(query) ||
+                    endpoint.url.toLowerCase().includes(query) ||
+                    getFolderName(endpoint.folder).toLowerCase().includes(query)
+                  );
+                })}
+                getFolderName={getFolderName}
+              />
             </div>
           </Tab>
         </Tabs>

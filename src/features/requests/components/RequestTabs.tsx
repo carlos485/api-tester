@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Tabs, Tab, EditableTable, type EditableRow, Button } from '@/shared/components/ui';
 import type { ApiRequest } from '@/features/requests/types';
 import { generateCurl, copyCurlToClipboard } from '@/shared/utils';
@@ -12,6 +12,7 @@ interface RequestTabsProps {
 const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange, availableVariables = {} }) => {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [curlCopied, setCurlCopied] = useState(false);
+  const prevRequestRef = useRef<ApiRequest | null>(null);
 
   // Convert query params to array for table display
   const paramsToArray = (params: Record<string, string>): EditableRow[] => {
@@ -56,6 +57,32 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange, ava
       description: '',
     }];
   });
+
+  // Sync rows when the request object reference changes (when switching tabs)
+  useEffect(() => {
+    // Only update if the request reference changed (different tab)
+    if (prevRequestRef.current !== request) {
+      const existingParams = paramsToArray(request.queryParams || {});
+      setParamRows([...existingParams, {
+        id: `new-param-${Date.now()}`,
+        enabled: true,
+        name: '',
+        value: '',
+        description: '',
+      }]);
+
+      const existingHeaders = headersToArray(request.headers || {});
+      setHeaderRows([...existingHeaders, {
+        id: `new-header-${Date.now()}`,
+        enabled: true,
+        name: '',
+        value: '',
+        description: '',
+      }]);
+
+      prevRequestRef.current = request;
+    }
+  }, [request]);
 
   const updateRequestParams = (rows: EditableRow[]) => {
     const queryParams: Record<string, string> = {};

@@ -11,18 +11,20 @@ interface InputV2Props {
   leftIcon?: string;
   rightIcon?: string;
   className?: string;
+  widthClass?: string
 }
 
 export const InputV2: React.FC<InputV2Props> = ({
   value,
   variant = 'default',
-  size = 'md',
+  size = 'sm',
   onChange,
   onSearch,
   placeholder = "Search",
   leftIcon,
   rightIcon,
   className = "",
+  widthClass = "",
 }) => {
   const debounceTimerRef = useRef<number | null>(null);
   const spanRef = useRef<HTMLSpanElement | null>(null);
@@ -104,8 +106,8 @@ export const InputV2: React.FC<InputV2Props> = ({
             // Support both direct value and event object
             onChange(e.target.value);
           }}
-          className={`${sizeStyles[size]} ${baseStylesInput} ${variantStyles[variant]} ${leftIcon ? 'ps-10' : 'ps-3'} ${rightIcon ? 'pe-10' : 'pe-3'} ${className}`}
-          style={variant === 'ghost' ? { width: `${inputWidth}px` } : undefined}
+          className={`${sizeStyles[size]} ${baseStylesInput} ${variantStyles[variant]} ${leftIcon ? 'ps-10' : 'ps-3'} ${rightIcon ? 'pe-10' : 'pe-3'} ${className} ${widthClass}`}
+          style={(variant === 'ghost' && widthClass === "") ? { width: `${inputWidth}px` } : undefined}
           placeholder={placeholder}
         />
         {rightIcon && (

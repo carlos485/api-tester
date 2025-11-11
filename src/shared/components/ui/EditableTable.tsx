@@ -70,6 +70,7 @@ export const EditableTable: React.FC<EditableTableProps> = ({
                   value={row.name}
                   onChange={(value) => onRowChange(row.id, 'name', value)}
                   placeholder={index === rows.length - 1 ? "Name" : ""}
+                  widthClass='w-full'
                 />
               </td>
               <td className="px-6 py-4">
@@ -87,6 +88,7 @@ export const EditableTable: React.FC<EditableTableProps> = ({
                   value={row.description}
                   onChange={(value) => onRowChange(row.id, 'description', value)}
                   placeholder={index === rows.length - 1 ? "Description" : ""}
+                  widthClass='w-full'
                 />
               </td>
               <td className="px-6 py-4 text-right">
