@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import type { Project } from '@/features/projects/types';
-import { Input } from '@/shared/components/ui';
+import { Input, InputV2 } from '@/shared/components/ui';
 import { ProjectService } from '@/features/projects/services';
 import { useEndpoints } from '@/features/endpoints/hooks';
 import { Tabs, Tab } from '@/shared/components/ui';
@@ -57,7 +57,6 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
   onProjectDelete,
 }) => {
   // Initialize all hooks before any conditional returns
-  const [editingName, setEditingName] = useState(false);
   const [editingDescription, setEditingDescription] = useState(false);
   const [showIconSelector, setShowIconSelector] = useState(false);
   const [localName, setLocalName] = useState(project?.name || "");
@@ -149,35 +148,27 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
     ];
   });
 
-  // Update variable rows when project changes (only on initial load)
+  // Update variable rows when project changes or when switching between projects
   useEffect(() => {
     if (!project) return;
     const newVariables = variablesToArray();
-    setVariableRows(current => {
-      // Only update if we don't have any variables yet (initial load)
-      if (
-        current.length <= 1 &&
-        current[0]?.name === "" &&
-        current[0]?.value === ""
-      ) {
-        return [
-          ...newVariables,
-          {
-            id: `new-variable-${Date.now()}`,
-            name: "",
-            value: "",
-            description: "",
-            environment: "GLOBAL",
-            enabled: true,
-          },
-        ];
-      }
-      return current;
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [project?.id]); // Only run when project ID changes, not on every environment update
 
-  // Update environment rows when project changes (only on initial load)
+    // Always update when project.id changes to ensure we show the correct project's variables
+    setVariableRows([
+      ...newVariables,
+      {
+        id: `new-variable-${Date.now()}`,
+        name: "",
+        value: "",
+        description: "",
+        environment: "GLOBAL",
+        enabled: true,
+      },
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id]); // Run when project ID changes to load correct project's variables
+
+  // Update environment rows when project changes or when switching between projects
   useEffect(() => {
     if (!project) return;
     const newEnvironments = project.environments.map(env => ({
@@ -186,28 +177,19 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
       description: "",
       baseUrl: env.baseUrl,
     }));
-    setEnvironmentRows(current => {
-      // Only update if we don't have any environments yet (initial load or empty)
-      if (
-        current.length === 0 ||
-        (current.length <= 1 &&
-        current[0]?.name === "" &&
-        current[0]?.baseUrl === "")
-      ) {
-        return [
-          ...newEnvironments,
-          {
-            id: `new-environment-${Date.now()}`,
-            name: "",
-            description: "",
-            baseUrl: "",
-          },
-        ];
-      }
-      return current;
-    });
+
+    // Always update when project.id changes to ensure we show the correct project's environments
+    setEnvironmentRows([
+      ...newEnvironments,
+      {
+        id: `new-environment-${Date.now()}`,
+        name: "",
+        description: "",
+        baseUrl: "",
+      },
+    ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [project?.id]); // Only run when project ID changes
+  }, [project?.id]); // Run when project ID changes to load correct project's environments
 
   // Early return if project is not loaded yet - AFTER all hooks
   if (!project) {
@@ -428,11 +410,6 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
     }
   };
 
-  const handleNameSave = () => {
-    // Just stop editing, changes will be saved with the save button
-    setEditingName(false);
-  };
-
   const handleDescriptionSave = () => {
     // Just stop editing, changes will be saved with the save button
     setEditingDescription(false);
@@ -470,7 +447,6 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
       saveFunction();
     } else if (event.key === "Escape") {
       event.preventDefault();
-      setEditingName(false);
       setEditingDescription(false);
       setLocalName(project.name);
       setLocalDescription(project.description || "");
@@ -499,7 +475,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                       disabled={isUpdating}
                       title="Change icon"
                     >
-                      <Icon icon={project.icon} className="h-12 w-12 text-gray-900" />
+                      <Icon icon={project.icon} className="h-12 w-12 text-gray-900 dark:text-gray-200" />
                     </button>
 
                     {showIconSelector && (
@@ -510,16 +486,15 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                               <button
                                 key={iconName}
                                 onClick={() => handleIconChange(iconName)}
-                                className={`p-3 rounded-lg border-2 transition-colors flex items-center justify-center ${
-                                  project.icon === iconName
-                                    ? "border-gray-500 bg-gray-100"
-                                    : "border-gray-200 hover:border-gray-300"
-                                }`}
+                                className={`p-3 rounded-lg border-2 transition-colors flex items-center justify-center ${project.icon === iconName
+                                  ? "border-gray-500 bg-gray-100"
+                                  : "border-gray-200 hover:border-gray-300"
+                                  }`}
                                 disabled={isUpdating}
                               >
                                 <Icon
                                   icon={iconName}
-                                  className="h-6 w-6 text-gray-900"
+                                  className="h-6 w-6 text-gray-900 dark:text-gray-200"
                                 />
                               </button>
                             ))}
@@ -538,26 +513,13 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                   </div>
 
                   <div className="flex-1">
-                    {editingName ? (
-                      <Input
-                        type="text"
-                        value={localName}
-                        onChange={e => setLocalName(e.target.value)}
-                        onBlur={handleNameSave}
-                        onKeyDown={e => handleKeyDown(e, handleNameSave)}
-                        className="text-3xl font-bold text-gray-900 w-full"
-                        autoFocus
-                        disabled={isUpdating}
-                      />
-                    ) : (
-                      <h1
-                        className="text-3xl font-bold text-gray-900 cursor-pointer hover:bg-gray-50 rounded px-3 py-2 -mx-3 -my-2 transition-colors"
-                        onClick={() => setEditingName(true)}
-                        title="Click to edit name"
-                      >
-                        {project.name}
-                      </h1>
-                    )}
+                    <InputV2
+                      variant="ghost"
+                      size="xl"
+                      value={localName}
+                      onChange={(value) => setLocalName(value)}
+                      placeholder="Project name"
+                    />
 
                     {editingDescription ? (
                       <Input
@@ -598,11 +560,10 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                     <button
                       onClick={handleSaveAll}
                       disabled={isSaving || isUpdating || !hasUnsavedChanges()}
-                      className={`w-full px-4 py-3 text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2 ${
-                        hasUnsavedChanges()
-                          ? 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-100'
-                          : 'bg-gray-400'
-                      }`}
+                      className={`w-full px-4 py-3 text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2 ${hasUnsavedChanges()
+                        ? 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-100'
+                        : 'bg-gray-400'
+                        }`}
                     >
                       {isSaving ? (
                         <>
@@ -656,7 +617,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                             Are you sure you want to delete <strong>"{project.name}"</strong>?
                             This action cannot be undone and will permanently delete:
                           </p>
-                          <ul className="mt-2 text-sm text-gray-600 list-disc list-inside">
+                          <ul className="mt-2 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
                             <li>All endpoints ({endpoints.length})</li>
                             <li>All folders ({folders.length})</li>
                             <li>All variables ({project.environments.reduce((total, env) => total + (env.variables ? Object.keys(env.variables).length : 0), 0) + (project.collectionVariables ? Object.keys(project.collectionVariables).length : 0)})</li>
@@ -699,11 +660,11 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                       <div className="flex items-center gap-2">
                         <Icon
                           icon="material-symbols:folder"
-                          className="h-4 w-4 text-gray-600"
+                          className="h-4 w-4 text-gray-600 dark:text-gray-300"
                         />
-                        <span className="text-sm text-gray-700">Folders</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Folders</span>
                       </div>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-200">
                         {folders.length}
                       </span>
                     </div>
@@ -712,11 +673,11 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                       <div className="flex items-center gap-2">
                         <Icon
                           icon="material-symbols:api"
-                          className="h-4 w-4 text-gray-600"
+                          className="h-4 w-4 text-gray-600 dark:text-gray-300"
                         />
-                        <span className="text-sm text-gray-700">Endpoints</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Endpoints</span>
                       </div>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-200">
                         {endpoints.length}
                       </span>
                     </div>
@@ -725,11 +686,11 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                       <div className="flex items-center gap-2">
                         <Icon
                           icon="material-symbols:variable"
-                          className="h-4 w-4 text-gray-600"
+                          className="h-4 w-4 text-gray-600 dark:text-gray-300"
                         />
-                        <span className="text-sm text-gray-700">Variables</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Variables</span>
                       </div>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-200">
                         {project.environments.reduce(
                           (total, env) =>
                             total +
@@ -741,7 +702,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="text-xs text-gray-500 space-y-1">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
                       <div>Created: {project.createdAt.toLocaleDateString()}</div>
                       <div>Updated: {project.updatedAt.toLocaleDateString()}</div>
                     </div>
@@ -1084,14 +1045,13 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                           {endpoint.name}
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 text-xs font-semibold rounded ${
-                            endpoint.method === 'GET' ? 'bg-green-100 text-green-800' :
+                          <span className={`px-2 py-1 text-xs font-semibold rounded ${endpoint.method === 'GET' ? 'bg-green-100 text-green-800' :
                             endpoint.method === 'POST' ? 'bg-blue-100 text-blue-800' :
-                            endpoint.method === 'PUT' ? 'bg-yellow-100 text-yellow-800' :
-                            endpoint.method === 'PATCH' ? 'bg-orange-100 text-orange-800' :
-                            endpoint.method === 'DELETE' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
+                              endpoint.method === 'PUT' ? 'bg-yellow-100 text-yellow-800' :
+                                endpoint.method === 'PATCH' ? 'bg-orange-100 text-orange-800' :
+                                  endpoint.method === 'DELETE' ? 'bg-red-100 text-red-800' :
+                                    'bg-gray-100 text-gray-800'
+                            }`}>
                             {endpoint.method}
                           </span>
                         </td>
