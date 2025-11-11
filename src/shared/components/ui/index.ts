@@ -8,5 +8,6 @@ export { default as ConfirmationModal } from './ConfirmationModal';
 export { Tabs, Tab } from './Tabs';
 export { default as VariableHighlightedInput } from './VariableHighlightedInput';
 export { InputV2 } from './InputV2';
+export { TextareaV2 } from './TextareaV2';
 export { Table, type TableColumn, type TableRow } from './Table';
 export { EditableTable, type EditableRow } from './EditableTable';

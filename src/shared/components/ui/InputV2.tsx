@@ -3,13 +3,14 @@ import { useEffect, useRef, useState } from "react";
 
 interface InputV2Props {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string | React.ChangeEvent<HTMLInputElement>) => void;
   onSearch?: () => void;
   variant?: string;
   size?: string;
   placeholder?: string;
   leftIcon?: string;
   rightIcon?: string;
+  className?: string;
 }
 
 export const InputV2: React.FC<InputV2Props> = ({
@@ -21,6 +22,7 @@ export const InputV2: React.FC<InputV2Props> = ({
   placeholder = "Search",
   leftIcon,
   rightIcon,
+  className = "",
 }) => {
   const debounceTimerRef = useRef<number | null>(null);
   const spanRef = useRef<HTMLSpanElement | null>(null);
@@ -98,8 +100,11 @@ export const InputV2: React.FC<InputV2Props> = ({
         <input
           type="text"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={`${sizeStyles[size]} ${baseStylesInput} ${variantStyles[variant]} ${leftIcon ? 'ps-10' : 'ps-3'} ${rightIcon ? 'pe-10' : 'pe-3'}`}
+          onChange={(e) => {
+            // Support both direct value and event object
+            onChange(e.target.value);
+          }}
+          className={`${sizeStyles[size]} ${baseStylesInput} ${variantStyles[variant]} ${leftIcon ? 'ps-10' : 'ps-3'} ${rightIcon ? 'pe-10' : 'pe-3'} ${className}`}
           style={variant === 'ghost' ? { width: `${inputWidth}px` } : undefined}
           placeholder={placeholder}
         />

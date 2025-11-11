@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import type { Project } from '@/features/projects/types';
-import { Input, InputV2 } from '@/shared/components/ui';
+import { Input, InputV2, TextareaV2 } from '@/shared/components/ui';
 import { ProjectService } from '@/features/projects/services';
 import { useEndpoints } from '@/features/endpoints/hooks';
 import { Tabs, Tab } from '@/shared/components/ui';
@@ -522,20 +522,18 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                     />
 
                     {editingDescription ? (
-                      <Input
-                        type="text"
+                      <TextareaV2
                         value={localDescription}
-                        onChange={e => setLocalDescription(e.target.value)}
+                        placeholder="Add a description..."
                         onBlur={handleDescriptionSave}
                         onKeyDown={e => handleKeyDown(e, handleDescriptionSave)}
-                        className="text-gray-600 w-full mt-3 text-lg"
-                        placeholder="Add a description..."
-                        autoFocus
+                        onChange={(value) => setLocalDescription(value)}
                         disabled={isUpdating}
+                        className="mt-3"
                       />
                     ) : (
                       <p
-                        className="text-gray-600 cursor-pointer hover:bg-gray-50 rounded px-3 py-2 -mx-3 -my-2 transition-colors mt-3 text-lg"
+                        className="text-gray-600 dark:text-gray-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-60 rounded-lg px-3 py-2 -mx-3 -my-2 transition-colors mt-3 text-lg"
                         onClick={() => setEditingDescription(true)}
                         title="Click to edit description"
                       >
@@ -720,6 +718,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <Icon icon="material-symbols:search" className="w-5 h-5 text-gray-500" />
                   </div>
+                  <InputV2 value={environmentSearchQuery} onChange={(e) => setEndpointSearchQuery(e.target.value)} placeholder="Search environments..." />
                   <input
                     type="text"
                     value={environmentSearchQuery}
