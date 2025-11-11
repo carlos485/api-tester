@@ -73,7 +73,7 @@ export const EnvironmentsTable: React.FC<EnvironmentsTableProps> = ({
                 />
               </td>
               <td className="px-6 py-4 text-right">
-                {rows.filter(r => r.name.trim() || r.baseUrl.trim()).length >= 2 && (row.name.trim() || row.baseUrl.trim()) && (
+                {rows.filter(r => r.name?.trim() || r.baseUrl?.trim()).length >= 2 && (row.name?.trim() || row.baseUrl?.trim()) && (
                   <button
                     onClick={() => onDeleteRow(row.id)}
                     className="text-red-600 hover:text-red-700 hover:bg-red-100 rounded p-1 transition-all duration-200 inline-flex items-center justify-center"

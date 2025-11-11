@@ -318,7 +318,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({
 
     // Check environment changes
     const currentEnvironments = project.environments;
-    const editedEnvironments = environmentRows.filter(row => row.name.trim() && row.baseUrl.trim());
+    const editedEnvironments = environmentRows.filter(row => row.name?.trim() && row.baseUrl?.trim());
 
     if (currentEnvironments.length !== editedEnvironments.length) return true;
 
