@@ -52,10 +52,10 @@ const ResponseViewer: React.FC<ResponseViewerProps> = ({
     <div className="h-full bg-white dark:bg-gray-800 flex flex-col">
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <span className={`inline-block px-3 py-1 rounded text-sm font-medium ${response.status >= 200 && response.status < 300
-            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-            : response.status >= 400
-              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-              : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+          : response.status >= 400
+            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
           }`}>
           {response.status} {response.statusText}
         </span>
@@ -68,13 +68,13 @@ const ResponseViewer: React.FC<ResponseViewerProps> = ({
         <Tabs variant="underline">
           <Tab header="Body">
             <div className="p-4 h-full overflow-auto">
-              <pre className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-auto text-sm">
-                <code className="text-gray-800 dark:text-gray-200">
-                  {typeof response.data === 'string'
-                    ? response.data
-                    : JSON.stringify(response.data, null, 2)}
-                </code>
-              </pre>
+              <textarea
+                readOnly
+                value={typeof response.data === 'string'
+                  ? response.data
+                  : JSON.stringify(response.data, null, 2)}
+                className="w-full h-full min-h-[400px] p-3 text-sm font-mono bg-white dark:bg-gray-70 text-gray-900 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none resize-none"
+              />
             </div>
           </Tab>
           <Tab header="Headers">

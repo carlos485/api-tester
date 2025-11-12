@@ -223,7 +223,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({ request, onRequestChange, ava
               <textarea
                 value={request.body || ""}
                 onChange={(e) => handleBodyChange(e.target.value)}
-                className="w-full h-64 p-3 text-sm font-mono border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-gray-200 resize-none"
+                className="w-full h-96 p-3 text-sm font-mono bg-white dark:bg-gray-70 text-gray-900 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 resize-none"
                 placeholder='Enter request body (e.g., JSON: {"key": "value"})'
               />
               <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">

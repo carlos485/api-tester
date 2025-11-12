@@ -79,6 +79,8 @@ const ApiTesterView: React.FC = () => {
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(256);
   const [isResizing, setIsResizing] = useState(false);
+  const [requestHeight, setRequestHeight] = useState(50); // Percentage
+  const [isResizingPanel, setIsResizingPanel] = useState(false);
 
   // Restore state from sessionStorage on component mount
   useEffect(() => {
@@ -840,6 +842,42 @@ const ApiTesterView: React.FC = () => {
     };
   }, [isResizing]);
 
+  // Handle panel resize (request/response split)
+  const handlePanelMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizingPanel(true);
+  };
+
+  useEffect(() => {
+    const handlePanelMouseMove = (e: MouseEvent) => {
+      if (!isResizingPanel) return;
+
+      // Get the main content area height (excluding header)
+      const headerHeight = 56; // Approximate header height
+      const mainContentHeight = window.innerHeight - headerHeight;
+      const newHeightPercentage = ((e.clientY - headerHeight) / mainContentHeight) * 100;
+
+      // Limit between 20% and 80%
+      if (newHeightPercentage >= 20 && newHeightPercentage <= 80) {
+        setRequestHeight(newHeightPercentage);
+      }
+    };
+
+    const handlePanelMouseUp = () => {
+      setIsResizingPanel(false);
+    };
+
+    if (isResizingPanel) {
+      document.addEventListener('mousemove', handlePanelMouseMove);
+      document.addEventListener('mouseup', handlePanelMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handlePanelMouseMove);
+      document.removeEventListener('mouseup', handlePanelMouseUp);
+    };
+  }, [isResizingPanel]);
+
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
@@ -972,22 +1010,37 @@ const ApiTesterView: React.FC = () => {
                         />
                       </div>
 
-                      {/* Request Configuration Tabs */}
-                      <div className="border-b border-gray-200 dark:border-gray-700">
-                        <RequestTabs
-                          request={tab.request}
-                          onRequestChange={updatedRequest =>
-                            handleRequestChange(tabIndex, updatedRequest)
-                          }
-                        />
-                      </div>
+                      {/* Resizable Container */}
+                      <div className="flex-1 flex flex-col overflow-hidden">
+                        {/* Request Configuration Tabs */}
+                        <div className="overflow-auto" style={{ height: `${requestHeight}%` }}>
+                          <RequestTabs
+                            request={tab.request}
+                            onRequestChange={updatedRequest =>
+                              handleRequestChange(tabIndex, updatedRequest)
+                            }
+                          />
+                        </div>
 
-                      {/* Response Viewer */}
-                      <div className="flex-1 overflow-auto">
-                        <ResponseViewer
-                          response={tab.response}
-                          loading={tab.loading}
+                        {/* Resize Handle */}
+                        <div
+                          onMouseDown={handlePanelMouseDown}
+                          className={`h-2 flex-shrink-0 cursor-row-resize hover:bg-blue-500 active:bg-blue-500 transition-colors ${
+                            isResizingPanel ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                          }`}
+                          style={{ minHeight: '8px' }}
                         />
+
+                        {/* Response Viewer */}
+                        <div
+                          className="overflow-auto"
+                          style={{ height: `${100 - requestHeight}%` }}
+                        >
+                          <ResponseViewer
+                            response={tab.response}
+                            loading={tab.loading}
+                          />
+                        </div>
                       </div>
                     </div>
                   ) : (

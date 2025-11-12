@@ -69,6 +69,8 @@ const ProjectView: React.FC<ProjectViewProps> = ({
   const [savingTab, setSavingTab] = useState<string | null>(null);
   const [sidebarWidth, setSidebarWidth] = useState(256);
   const [isResizing, setIsResizing] = useState(false);
+  const [requestHeight, setRequestHeight] = useState(50); // Percentage
+  const [isResizingPanel, setIsResizingPanel] = useState(false);
 
   // Use the endpoints hook for real Firebase data
   const {
@@ -634,6 +636,42 @@ const ProjectView: React.FC<ProjectViewProps> = ({
     };
   }, [isResizing]);
 
+  // Handle panel resize (request/response split)
+  const handlePanelMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizingPanel(true);
+  };
+
+  useEffect(() => {
+    const handlePanelMouseMove = (e: MouseEvent) => {
+      if (!isResizingPanel) return;
+
+      // Get the main content area height (excluding header)
+      const headerHeight = 56; // Approximate header height
+      const mainContentHeight = window.innerHeight - headerHeight;
+      const newHeightPercentage = ((e.clientY - headerHeight) / mainContentHeight) * 100;
+
+      // Limit between 20% and 80%
+      if (newHeightPercentage >= 20 && newHeightPercentage <= 80) {
+        setRequestHeight(newHeightPercentage);
+      }
+    };
+
+    const handlePanelMouseUp = () => {
+      setIsResizingPanel(false);
+    };
+
+    if (isResizingPanel) {
+      document.addEventListener('mousemove', handlePanelMouseMove);
+      document.addEventListener('mouseup', handlePanelMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handlePanelMouseMove);
+      document.removeEventListener('mouseup', handlePanelMouseUp);
+    };
+  }, [isResizingPanel]);
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
@@ -700,7 +738,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({
           >
             {requestTabs.map((tab, tabIndex) => (
               <Tab key={tab.id} header={tab.name}>
-                <div className="flex flex-col h-full overflow-hidden">
+                <div className="flex flex-col h-full">
                   {/* Request Name and Save Button */}
                   <div className="flex items-center gap-3 px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                     <Input
@@ -747,26 +785,39 @@ const ProjectView: React.FC<ProjectViewProps> = ({
                     />
                   </div>
 
-                  {/* Request Configuration Tabs */}
-                  <div className="overflow-auto" style={{ height: '50%' }}>
-                    <RequestTabs
-                      request={tab.request}
-                      onRequestChange={updatedRequest =>
-                        handleRequestChange(tabIndex, updatedRequest)
-                      }
-                      availableVariables={selectedEnvironment?.variables || {}}
-                    />
-                  </div>
+                  <h1>Hola Mundo</h1>
 
-                  {/* Response Viewer */}
-                  <div
-                    className="overflow-auto bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
-                    style={{ height: '50%' }}
-                  >
-                    <ResponseViewer
-                      response={tab.response}
-                      loading={tab.loading}
+                  {/* Resizable Container */}
+                  <div className="flex-1 flex flex-col overflow-hidden">
+                    {/* Request Configuration Tabs */}
+                    <div className="overflow-auto" style={{ height: `${requestHeight}%` }}>
+                      <RequestTabs
+                        request={tab.request}
+                        onRequestChange={updatedRequest =>
+                          handleRequestChange(tabIndex, updatedRequest)
+                        }
+                        availableVariables={selectedEnvironment?.variables || {}}
+                      />
+                    </div>
+
+                    {/* Resize Handle */}
+                    <div
+                      onMouseDown={handlePanelMouseDown}
+                      className={`h-2 flex-shrink-0 cursor-row-resize hover:bg-blue-500 active:bg-blue-500 transition-colors ${isResizingPanel ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                        }`}
+                      style={{ minHeight: '8px' }}
                     />
+
+                    {/* Response Viewer */}
+                    <div
+                      className="overflow-auto bg-gray-50 dark:bg-gray-70"
+                      style={{ height: `${100 - requestHeight}%` }}
+                    >
+                      <ResponseViewer
+                        response={tab.response}
+                        loading={tab.loading}
+                      />
+                    </div>
                   </div>
                 </div>
               </Tab>
